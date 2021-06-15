@@ -8,25 +8,78 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 # Descripción datos
 
-## Compuestos fenólicos
+## Compuestos fenólicos (Procesado?)
 
-Medimos cuatro compuestos: derivados del Naringenin hexosido,	Eriodictiol hexosa,	Naringenin rutinosido y Hespertin rutinosido.
+Primero, se mide el efecto de agregar un endulzante determinado al zumo y se van haciendo medidas de metabolitos en diferentes tiempos y condiciones. 
 
-Área del cromatógrafo 
+Medimos cuatro compuestos: 
+
+* Derivados del Naringenin hexosido
+- Eriodictiol hexosa
+- Naringenin rutinosido 
+- Hespertin rutinosido.
+
+En primer lugar se extrae el área del cromatógrafo y se transforma en mg/100 ml de zumo, con la fórmula siguiente:
+
+$$((AREA-221,08)/18129)*610,19*(0,1)$$
+
+Se repite la medición cada 15 días, en condiciones de luz y oscuridad, a 5º y a 25º celsius de temperatura.        
+
+#### Compuestos fenolicos SA VidaUtil Cronico
+
+```{r procesado, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+#library("dplyr")
+
+fenSA <- read.csv("data/resultadosmetabolitos/Compuestos fenolicos SA VidaUtil Cronico_1.csv", sep = ";", dec = ",")
+
+fenSA_num <- fenSA[-1]
+summary(fenSA)
+
+# Se obtienen las medias de cada medida
+
+fenSA_mean <- do.call(rbind, 
+                      lapply(seq(1, nrow(fenSA_num), 2), function(i){
+                      x <- fenSA_num[ i:(i + 1), , drop = FALSE]
+                      # res <- rbind(colSums(x)/2)
+                      res <- rbind(colSums(x)/2)
+                      res
+                      }))
+
+rownames(fenSA_mean) <- unique(fenSA$Condiciones)
+
+fenSA_sd <- do.call(rbind, 
+                      lapply(seq(1, nrow(fenSA_num), 2), function(i){
+                      x <- fenSA_num[ i:(i + 1), , drop = FALSE]
+                      # res <- rbind(colSums(x)/2)
+                      res <- rbind(apply(x, 2, sd))
+                      res
+                      }))
+
+# La desviación típica
 
 
 
-### Compuestos fenolicos SA VidaUtil Cronico
+```
 
-### Compuestos fenolicos ST VidaUtil Cronico
+#### Compuestos fenolicos ST VidaUtil Cronico
 
-### Compuestos fenolicos SU VidaUtil Cronico
+
+
+#### Compuestos fenolicos SU VidaUtil Cronico
+
+
+#### Dudas
+
+Hesperidina?
 
 ## Muestras bio
 
 ### Cronico Orina Atipicos
 
 ### Cronico plasma Atipicos
+
+
 
 
 ```{r cars}
