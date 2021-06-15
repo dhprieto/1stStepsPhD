@@ -1,0 +1,35 @@
+---
+title: "descripionTablas.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Descripción datos
+
+## Compuestos fenólicos
+
+Medimos cuatro compuestos: derivados del Naringenin hexosido,	Eriodictiol hexosa,	Naringenin rutinosido y Hespertin rutinosido.
+
+Área del cromatógrafo 
+
+
+
+### Compuestos fenolicos SA VidaUtil Cronico
+
+### Compuestos fenolicos ST VidaUtil Cronico
+
+### Compuestos fenolicos SU VidaUtil Cronico
+
+## Muestras bio
+
+### Cronico Orina Atipicos
+
+### Cronico plasma Atipicos
+
+
+```{r cars}
+```
+
+
