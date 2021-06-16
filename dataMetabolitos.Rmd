@@ -1,16 +1,15 @@
 ---
 title: "descripionTablas.Rmd"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 # Descripción datos
 
 ## Compuestos fenólicos (Procesado?)
 
-Primero, se mide el efecto de agregar un endulzante determinado al zumo y se van haciendo medidas de metabolitos en diferentes tiempos y condiciones. 
+Primero, se mide el efecto de agregar un endulzante determinado al zumo y se van haciendo medidas de metabolitos en diferentes tiempos y condiciones.Tenemos entonces dos factores que determinan el valor de los mg/100 ml de zumo, que serían las condiciones de toma de la muestra y el tipo de compuesto que se está midiendo.  
 
 Medimos cuatro compuestos: 
 
@@ -23,53 +22,132 @@ En primer lugar se extrae el área del cromatógrafo y se transforma en mg/100 m
 
 $$((AREA-221,08)/18129)*610,19*(0,1)$$
 
-Se repite la medición cada 15 días, en condiciones de luz y oscuridad, a 5º y a 25º celsius de temperatura.        
+Se repite la medición cada 15 días, en condiciones de luz y oscuridad, a 5º y a 25º celsius de temperatura.
 
-#### Compuestos fenolicos SA VidaUtil Cronico
+El procesado estadístico realizado en el excel adjuntado consiste en hacer la media y la desviación estándar de cada repetición hecha en las mismas condiciones. Después se calculan los mg totales de compuestos detectados por cada repetición, se hace la media y la SD, además de un porcentaje de pérdida respecto a la primera medida. Se replica en R (faltan los totales y la pérdida)
 
-```{r procesado, echo=TRUE}
-knitr::opts_chunk$set(echo = TRUE)
-#library("dplyr")
+## Procesado y ordenamiento:
 
-fenSA <- read.csv("data/resultadosmetabolitos/Compuestos fenolicos SA VidaUtil Cronico_1.csv", sep = ";", dec = ",")
+```{r Procesado, echo=TRUE}
 
-fenSA_num <- fenSA[-1]
-summary(fenSA)
+# Funcion de procesado de tablas
 
-# Se obtienen las medias de cada medida
-
-fenSA_mean <- do.call(rbind, 
-                      lapply(seq(1, nrow(fenSA_num), 2), function(i){
-                      x <- fenSA_num[ i:(i + 1), , drop = FALSE]
-                      # res <- rbind(colSums(x)/2)
-                      res <- rbind(colSums(x)/2)
-                      res
+procesado <- function(tabla, endulzante){
+  
+  tabla_num <- tabla[-1]
+  
+  # Se obtienen las medias de cada medida
+  
+  tabla_mean <- do.call(rbind, 
+                        lapply(seq(1, nrow(tabla_num), 2), function(i){
+                          x <- tabla_num[ i:(i + 1), , drop = FALSE]
+                          res <- rbind(colSums(x)/2)
+                          res
+                        }))
+  
+  rownames(tabla_mean) <- unique(tabla$Condiciones)
+  
+  # La desviación estándar
+  
+  tabla_sd <- do.call(rbind, 
+                      lapply(seq(1, nrow(tabla_num), 2), function(i){
+                        x <- tabla_num[ i:(i + 1), , drop = FALSE]
+                        res <- rbind(apply(x, 2, sd))
+                        res
                       }))
+  
+  # Apilamos datos
+  
+  tabla_1 <- stack(as.data.frame(tabla_mean))
+  tabla_1$Condiciones <- rep(unique(tabla$Condiciones),4)
+  
+  tabla_2 <- stack(as.data.frame(tabla_sd))
+  tabla_2$Condiciones <- rep(unique(tabla$Condiciones),4)
+  
+  tabla_total <- merge(tabla_1, tabla_2, by = c("Condiciones", "ind"))
+  
+  tabla_total$Endulzante <- rep(endulzante, nrow(tabla_total))
+  
+  dplyr::rename(tabla_total, mean = values.x , SD = values.y, Compuesto = ind)
+  
+}
 
-rownames(fenSA_mean) <- unique(fenSA$Condiciones)
+# ---- Lectura y procesado de las tablas
 
-fenSA_sd <- do.call(rbind, 
-                      lapply(seq(1, nrow(fenSA_num), 2), function(i){
-                      x <- fenSA_num[ i:(i + 1), , drop = FALSE]
-                      # res <- rbind(colSums(x)/2)
-                      res <- rbind(apply(x, 2, sd))
-                      res
-                      }))
+fenSU <- read.csv("data/Compuestos fenolicos SU VidaUtil Cronico_1.csv", sep = ";", dec = ",")
+fenSA <- read.csv("data/Compuestos fenolicos SA VidaUtil Cronico_1.csv", sep = ";", dec = ",")
+fenST <- read.csv("data/Compuestos fenolicos ST VidaUtil Cronico_1.csv", sep = ";", dec = ",")
 
-# La desviación típica
 
+fenSU_total <- procesado(fenSU, "SU")
+fenSA_total <- procesado(fenSA, "SA")
+fenST_total <- procesado(fenST, "ST")
+
+fenFlavTotal <- rbind(fenSU_total, fenSA_total, fenST_total)
+
+skimr::skim(fenFlavTotal)
+
+
+```
+## Pruebas adicionales
+
+#### Normalidad
+
+``` {r normalidad, echo = TRUE }
+
+
+shapiro.test(fenFlavTotal$mean)
 
 
 ```
 
-#### Compuestos fenolicos ST VidaUtil Cronico
+### Homocedasticidad
+
+``` {r homocedasticidad, echo = TRUE }
+
+var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"],
+         y = fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"] )
+
+var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"],
+         y = fenFlavTotal[fenFlavTotal$Endulzante == "ST", "mean"] )
+
+var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "ST", "mean"],
+         y = fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"] )
+
+```
+
+
+### 2WAY-ANOVA
+
+Dado que comparamos dos variables independientes cualitativas y una variable
+dependiente cuantitativa
+
+#### Box-plot
+
+```{r box-plot, echo=TRUE}
+
+library("ggplot2")
+library("gridExtra")
+
+ggplot(data = as.data.frame(fenFlavTotal), aes(x = Endulzante, y = mean, color = Endulzante)) +
+  geom_boxplot() +
+  theme_bw()
+
+p1 <- ggplot(data = as.data.frame(fenFlavTotal), aes(x = Endulzante, y = mean)) + 
+  geom_boxplot() + theme_bw()
+p2 <- ggplot(data = as.data.frame(fenFlavTotal), aes(x = Condiciones, y = mean)) +
+  geom_boxplot() + theme_bw()
+p3 <- ggplot(data = as.data.frame(fenFlavTotal), aes(x = Endulzante, y = mean, colour = Condiciones)) +
+  geom_boxplot() + theme_bw()
+
+grid.arrange(p1, p2, ncol = 2)
+p3
+
+```
 
 
 
-#### Compuestos fenolicos SU VidaUtil Cronico
-
-
-#### Dudas
+### Dudas
 
 Hesperidina?
 
@@ -78,11 +156,5 @@ Hesperidina?
 ### Cronico Orina Atipicos
 
 ### Cronico plasma Atipicos
-
-
-
-
-```{r cars}
-```
 
 
