@@ -74,8 +74,10 @@ fenST_total <- procesado(fenST, "ST")
 fenFlavTotal <- rbind(fenSU_total, fenSA_total, fenST_total)
 
 #----
-shapiro.test(fenFlavTotal$SD)
 
+
+shapiro.test(fenFlavTotal$mean)
+shapiro.test(scale(fenFlavTotal$mean, center = T, scale = T))
 
 
 library("ggplot2")
@@ -99,3 +101,19 @@ p3
 var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"],
          y = fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"] )
     
+
+#---- gráficos de interacción
+
+library(ggplot2)
+
+ggplot(data = fenFlavTotal, aes(x = Compuesto, y = mean, colour = Endulzante,
+                         group = Endulzante)) +
+  stat_summary(fun = mean, geom = "point") +
+  stat_summary(fun = mean, geom = "line") +
+  labs(y  =  'mean (mg/100mlzumo)') +
+  theme_bw()
+anova <- aov(mean ~ Compuesto * Endulzante, data = fenFlavTotal)
+summary(anova)
+par(mfrow=c(1,2))
+plot(anova, which=1:4)
+

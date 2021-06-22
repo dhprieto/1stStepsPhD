@@ -1,15 +1,20 @@
 ---
-title: "descripionTablas.Rmd"
+title: "descripcionTablas"
 output:
-  html_document: default
-  pdf_document: default
+  pdf_document:
+    latex_engine: xelatex
 ---
 
-# Descripción datos
+```{r librerias, echo=FALSE}
+library("ggplot2")
+library("gridExtra")
+
+```
+# Trabajo con los datos de Vicente
 
 ## Compuestos fenólicos (Procesado?)
 
-Primero, se mide el efecto de agregar un endulzante determinado al zumo y se van haciendo medidas de metabolitos en diferentes tiempos y condiciones.Tenemos entonces dos factores que determinan el valor de los mg/100 ml de zumo, que serían las condiciones de toma de la muestra y el tipo de compuesto que se está midiendo.  
+Primero, se mide el efecto de agregar un endulzante determinado al zumo y se van haciendo medidas de metabolitos en diferentes tiempos y condiciones.Tenemos entonces dos factores que determinan el valor de los mg/100 ml de zumo, que serían las condiciones de toma de la muestra y el tipo de endulzante que se está añadiendo.  
 
 Medimos cuatro compuestos: 
 
@@ -98,8 +103,19 @@ skimr::skim(fenFlavTotal)
 
 shapiro.test(fenFlavTotal$mean)
 
+par(mfrow = c(2,2))
+qqnorm(fenFlavTotal[fenFlavTotal$Endulzante == "SA","mean"], main = "SA")
+qqline(fenFlavTotal[fenFlavTotal$Endulzante == "SA","mean"])
+qqnorm(fenFlavTotal[fenFlavTotal$Endulzante == "ST","mean"], main =  "ST")
+qqline(fenFlavTotal[fenFlavTotal$Endulzante == "ST","mean"])
+qqnorm(fenFlavTotal[fenFlavTotal$Endulzante == "SA","mean"], main = "SU")
+qqline(fenFlavTotal[fenFlavTotal$Endulzante == "SU","mean"])
+
+
 
 ```
+
+La media de las medidas no presenta una distribución normal.
 
 ### Homocedasticidad
 
@@ -114,20 +130,10 @@ var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"],
 var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "ST", "mean"],
          y = fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"] )
 
-```
-
-
-### 2WAY-ANOVA
-
-Dado que comparamos dos variables independientes cualitativas y una variable
-dependiente cuantitativa
-
 #### Box-plot
 
 ```{r box-plot, echo=TRUE}
 
-library("ggplot2")
-library("gridExtra")
 
 ggplot(data = as.data.frame(fenFlavTotal), aes(x = Endulzante, y = mean, color = Endulzante)) +
   geom_boxplot() +
@@ -144,6 +150,44 @@ grid.arrange(p1, p2, ncol = 2)
 p3
 
 ```
+
+
+Se cumple la condición de homogeneidad de varianzas. 
+
+### 2WAY-ANOVA
+
+Dado que comparamos dos variables independientes cualitativas y una variable
+dependiente cuantitativa, la condición de normalidad no se cumple pero existe
+cierto margen al aproximarse la distribución de la variable dependiente a la 
+normal. Por tanto, realizaremos el estudio con el test paramétrico:
+
+```{r 2way-ANOVA, echo=TRUE}
+# Con interacción entre factores
+
+anova <- aov(mean ~ Compuesto * Endulzante, data = fenFlavTotal)
+summary(anova)
+par(mfrow=c(1,2))
+plot(anova, which=1:4)
+par(mfrow = c(1,1))
+lsr::etaSquared(anova)
+
+# Sin interacción entre factores
+
+anova2 <- aov(mean ~ Compuesto + Endulzante, data = fenFlavTotal)
+summary(anova2)
+par(mfrow=c(1,2))
+plot(anova2, which=1:4)
+par(mfrow = c(1,1))
+lsr::etaSquared(anova2)
+
+
+```
+
+Se observa que se cumplen las condiciones para la ANOVA, y que existe un efecto
+significativo sobre la media de la medida por parte del compuesto y del 
+endulzante, así como del efecto de la interacción de ambos factores. Vemos que
+el efecto es mucho más fuerte en el compuesto que en el endulzante
+
 
 
 
