@@ -1,0 +1,547 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={descripcionTablas},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{descripcionTablas}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{trabajo-con-los-datos-de-vicente}{%
+\section{Trabajo con los datos de
+Vicente}\label{trabajo-con-los-datos-de-vicente}}
+
+\hypertarget{compuestos-fenuxf3licos-procesado}{%
+\subsection{Compuestos fenólicos
+(Procesado?)}\label{compuestos-fenuxf3licos-procesado}}
+
+Primero, se mide el efecto de agregar un endulzante determinado al zumo
+y se van haciendo medidas de metabolitos en diferentes tiempos y
+condiciones.Tenemos entonces dos factores que determinan el valor de los
+mg/100 ml de zumo, que serían las condiciones de toma de la muestra y el
+tipo de endulzante que se está añadiendo.
+
+Medimos cuatro compuestos:
+
+\begin{itemize}
+\tightlist
+\item
+  Derivados del Naringenin hexosido
+\item
+  Eriodictiol hexosa
+\item
+  Naringenin rutinosido
+\item
+  Hespertin rutinosido.
+\end{itemize}
+
+En primer lugar se extrae el área del cromatógrafo y se transforma en
+mg/100 ml de zumo, con la fórmula siguiente:
+
+\[((AREA-221,08)/18129)*610,19*(0,1)\]
+
+Se repite la medición cada 15 días, en condiciones de luz y oscuridad, a
+5º y a 25º celsius de temperatura.
+
+El procesado estadístico realizado en el excel adjuntado consiste en
+hacer la media y la desviación estándar de cada repetición hecha en las
+mismas condiciones. Después se calculan los mg totales de compuestos
+detectados por cada repetición, se hace la media y la SD, además de un
+porcentaje de pérdida respecto a la primera medida. Se replica en R
+(faltan los totales y la pérdida)
+
+\hypertarget{procesado-y-ordenamiento}{%
+\subsection{Procesado y ordenamiento:}\label{procesado-y-ordenamiento}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Funcion de procesado de tablas}
+
+\NormalTok{procesado }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(tabla, endulzante)\{}
+  
+\NormalTok{  tabla\_num }\OtherTok{\textless{}{-}}\NormalTok{ tabla[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{]}
+  
+  \CommentTok{\# Se obtienen las medias de cada medida}
+  
+\NormalTok{  tabla\_mean }\OtherTok{\textless{}{-}} \FunctionTok{do.call}\NormalTok{(rbind, }
+                        \FunctionTok{lapply}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(tabla\_num), }\DecValTok{2}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(i)\{}
+\NormalTok{                          x }\OtherTok{\textless{}{-}}\NormalTok{ tabla\_num[ i}\SpecialCharTok{:}\NormalTok{(i }\SpecialCharTok{+} \DecValTok{1}\NormalTok{), , drop }\OtherTok{=} \ConstantTok{FALSE}\NormalTok{]}
+\NormalTok{                          res }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(}\FunctionTok{colSums}\NormalTok{(x)}\SpecialCharTok{/}\DecValTok{2}\NormalTok{)}
+\NormalTok{                          res}
+\NormalTok{                        \}))}
+  
+  \FunctionTok{rownames}\NormalTok{(tabla\_mean) }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(tabla}\SpecialCharTok{$}\NormalTok{Condiciones)}
+  
+  \CommentTok{\# La desviación estándar}
+  
+\NormalTok{  tabla\_sd }\OtherTok{\textless{}{-}} \FunctionTok{do.call}\NormalTok{(rbind, }
+                      \FunctionTok{lapply}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(tabla\_num), }\DecValTok{2}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(i)\{}
+\NormalTok{                        x }\OtherTok{\textless{}{-}}\NormalTok{ tabla\_num[ i}\SpecialCharTok{:}\NormalTok{(i }\SpecialCharTok{+} \DecValTok{1}\NormalTok{), , drop }\OtherTok{=} \ConstantTok{FALSE}\NormalTok{]}
+\NormalTok{                        res }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(}\FunctionTok{apply}\NormalTok{(x, }\DecValTok{2}\NormalTok{, sd))}
+\NormalTok{                        res}
+\NormalTok{                      \}))}
+  
+  \CommentTok{\# Apilamos datos}
+  
+\NormalTok{  tabla\_1 }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(tabla\_mean))}
+\NormalTok{  tabla\_1}\SpecialCharTok{$}\NormalTok{Condiciones }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\FunctionTok{unique}\NormalTok{(tabla}\SpecialCharTok{$}\NormalTok{Condiciones),}\DecValTok{4}\NormalTok{)}
+  
+\NormalTok{  tabla\_2 }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(tabla\_sd))}
+\NormalTok{  tabla\_2}\SpecialCharTok{$}\NormalTok{Condiciones }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\FunctionTok{unique}\NormalTok{(tabla}\SpecialCharTok{$}\NormalTok{Condiciones),}\DecValTok{4}\NormalTok{)}
+  
+\NormalTok{  tabla\_total }\OtherTok{\textless{}{-}} \FunctionTok{merge}\NormalTok{(tabla\_1, tabla\_2, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"Condiciones"}\NormalTok{, }\StringTok{"ind"}\NormalTok{))}
+  
+\NormalTok{  tabla\_total}\SpecialCharTok{$}\NormalTok{Endulzante }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(endulzante, }\FunctionTok{nrow}\NormalTok{(tabla\_total))}
+  
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{rename}\NormalTok{(tabla\_total, }\AttributeTok{mean =}\NormalTok{ values.x , }\AttributeTok{SD =}\NormalTok{ values.y, }\AttributeTok{Compuesto =}\NormalTok{ ind)}
+  
+\NormalTok{\}}
+
+\CommentTok{\# {-}{-}{-}{-} Lectura y procesado de las tablas}
+
+\NormalTok{fenSU }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"data/Compuestos fenolicos SU VidaUtil Cronico\_1.csv"}\NormalTok{, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{","}\NormalTok{)}
+\NormalTok{fenSA }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"data/Compuestos fenolicos SA VidaUtil Cronico\_1.csv"}\NormalTok{, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{","}\NormalTok{)}
+\NormalTok{fenST }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"data/Compuestos fenolicos ST VidaUtil Cronico\_1.csv"}\NormalTok{, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{","}\NormalTok{)}
+
+
+\NormalTok{fenSU\_total }\OtherTok{\textless{}{-}} \FunctionTok{procesado}\NormalTok{(fenSU, }\StringTok{"SU"}\NormalTok{)}
+\NormalTok{fenSA\_total }\OtherTok{\textless{}{-}} \FunctionTok{procesado}\NormalTok{(fenSA, }\StringTok{"SA"}\NormalTok{)}
+\NormalTok{fenST\_total }\OtherTok{\textless{}{-}} \FunctionTok{procesado}\NormalTok{(fenST, }\StringTok{"ST"}\NormalTok{)}
+
+\NormalTok{fenFlavTotal }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(fenSU\_total, fenSA\_total, fenST\_total)}
+
+\NormalTok{skimr}\SpecialCharTok{::}\FunctionTok{skim}\NormalTok{(fenFlavTotal)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Data summary}\tabularnewline
+\toprule
+& \\
+\midrule
+\endfirsthead
+\toprule
+& \\
+\midrule
+\endhead
+Name & fenFlavTotal \\
+Number of rows & 192 \\
+Number of columns & 5 \\
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
+Column type frequency: & \\
+character & 2 \\
+factor & 1 \\
+numeric & 2 \\
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
+Group variables & None \\
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: character}
+
+\begin{longtable}[]{@{}lrrrrrrr@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & min & max & empty &
+n\_unique & whitespace \\
+\midrule
+\endhead
+Condiciones & 0 & 1 & 13 & 24 & 0 & 48 & 0 \\
+Endulzante & 0 & 1 & 2 & 2 & 0 & 3 & 0 \\
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: factor}
+
+\begin{longtable}[]{@{}lrrlrl@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & ordered & n\_unique &
+top\_counts \\
+\midrule
+\endhead
+Compuesto & 0 & 1 & FALSE & 4 & Der: 48, Eri: 48, Nar: 48, Hes: 48 \\
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: numeric}
+
+\begin{longtable}[]{@{}lrrrrrrrrrl@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & mean & sd & p0 & p25 &
+p50 & p75 & p100 & hist \\
+\midrule
+\endhead
+mean & 0 & 1 & 1.64 & 1.47 & -0.04 & 0.56 & 1.35 & 1.79 & 5.98 &
+▆▇▁▂▁ \\
+SD & 0 & 1 & 0.03 & 0.07 & 0.00 & 0.00 & 0.00 & 0.01 & 0.57 & ▇▁▁▁▁ \\
+\bottomrule
+\end{longtable}
+
+\hypertarget{pruebas-adicionales}{%
+\subsection{Pruebas adicionales}\label{pruebas-adicionales}}
+
+\hypertarget{normalidad}{%
+\paragraph{Normalidad}\label{normalidad}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{shapiro.test}\NormalTok{(fenFlavTotal}\SpecialCharTok{$}\NormalTok{mean)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  fenFlavTotal$mean
+## W = 0.85455, p-value = 1.432e-12
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{qqnorm}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SA"}\NormalTok{,}\StringTok{"mean"}\NormalTok{], }\AttributeTok{main =} \StringTok{"SA"}\NormalTok{)}
+\FunctionTok{qqline}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SA"}\NormalTok{,}\StringTok{"mean"}\NormalTok{])}
+\FunctionTok{qqnorm}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"ST"}\NormalTok{,}\StringTok{"mean"}\NormalTok{], }\AttributeTok{main =}  \StringTok{"ST"}\NormalTok{)}
+\FunctionTok{qqline}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"ST"}\NormalTok{,}\StringTok{"mean"}\NormalTok{])}
+\FunctionTok{qqnorm}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SA"}\NormalTok{,}\StringTok{"mean"}\NormalTok{], }\AttributeTok{main =} \StringTok{"SU"}\NormalTok{)}
+\FunctionTok{qqline}\NormalTok{(fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SU"}\NormalTok{,}\StringTok{"mean"}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/normalidad-1.pdf}
+
+La media de las medidas no presenta una distribución normal.
+
+\hypertarget{homocedasticidad}{%
+\subsubsection{Homocedasticidad}\label{homocedasticidad}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var.test}\NormalTok{(}\AttributeTok{x =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SA"}\NormalTok{, }\StringTok{"mean"}\NormalTok{],}
+         \AttributeTok{y =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SU"}\NormalTok{, }\StringTok{"mean"}\NormalTok{] )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  F test to compare two variances
+## 
+## data:  fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"] and fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"]
+## F = 1.4891, num df = 63, denom df = 63, p-value = 0.1167
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.9046806 2.4511295
+## sample estimates:
+## ratio of variances 
+##           1.489124
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var.test}\NormalTok{(}\AttributeTok{x =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SA"}\NormalTok{, }\StringTok{"mean"}\NormalTok{],}
+         \AttributeTok{y =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"ST"}\NormalTok{, }\StringTok{"mean"}\NormalTok{] )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  F test to compare two variances
+## 
+## data:  fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"] and fenFlavTotal[fenFlavTotal$Endulzante == "ST", "mean"]
+## F = 1.376, num df = 63, denom df = 63, p-value = 0.208
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.8359404 2.2648859
+## sample estimates:
+## ratio of variances 
+##           1.375976
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var.test}\NormalTok{(}\AttributeTok{x =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"ST"}\NormalTok{, }\StringTok{"mean"}\NormalTok{],}
+         \AttributeTok{y =}\NormalTok{ fenFlavTotal[fenFlavTotal}\SpecialCharTok{$}\NormalTok{Endulzante }\SpecialCharTok{==} \StringTok{"SU"}\NormalTok{, }\StringTok{"mean"}\NormalTok{] )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  F test to compare two variances
+## 
+## data:  fenFlavTotal[fenFlavTotal$Endulzante == "ST", "mean"] and fenFlavTotal[fenFlavTotal$Endulzante == "SU", "mean"]
+## F = 1.0822, num df = 63, denom df = 63, p-value = 0.7548
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.6574828 1.7813753
+## sample estimates:
+## ratio of variances 
+##           1.082231
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#\# Box{-}plot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =} \FunctionTok{as.data.frame}\NormalTok{(fenFlavTotal), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Endulzante, }\AttributeTok{y =}\NormalTok{ mean, }\AttributeTok{color =}\NormalTok{ Endulzante)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/box-plot-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =} \FunctionTok{as.data.frame}\NormalTok{(fenFlavTotal), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Endulzante, }\AttributeTok{y =}\NormalTok{ mean)) }\SpecialCharTok{+} 
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+\NormalTok{p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =} \FunctionTok{as.data.frame}\NormalTok{(fenFlavTotal), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Condiciones, }\AttributeTok{y =}\NormalTok{ mean)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+\NormalTok{p3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =} \FunctionTok{as.data.frame}\NormalTok{(fenFlavTotal), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Endulzante, }\AttributeTok{y =}\NormalTok{ mean, }\AttributeTok{colour =}\NormalTok{ Condiciones)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+
+\FunctionTok{grid.arrange}\NormalTok{(p1, p2, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/box-plot-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p3}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/box-plot-3.pdf}
+
+Se cumple la condición de homogeneidad de varianzas.
+
+\hypertarget{way-anova}{%
+\subsubsection{2WAY-ANOVA}\label{way-anova}}
+
+Dado que comparamos dos variables independientes cualitativas y una
+variable dependiente cuantitativa, la condición de normalidad no se
+cumple pero existe cierto margen al aproximarse la distribución de la
+variable dependiente a la normal. Por tanto, realizaremos el estudio con
+el test paramétrico:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Con interacción entre factores}
+
+\NormalTok{anova }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(mean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Compuesto }\SpecialCharTok{*}\NormalTok{ Endulzante, }\AttributeTok{data =}\NormalTok{ fenFlavTotal)}
+\FunctionTok{summary}\NormalTok{(anova)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                       Df Sum Sq Mean Sq F value  Pr(>F)    
+## Compuesto              3  350.2  116.72 381.236 < 2e-16 ***
+## Endulzante             2    3.7    1.84   6.003 0.00299 ** 
+## Compuesto:Endulzante   6    6.1    1.02   3.344 0.00379 ** 
+## Residuals            180   55.1    0.31                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(anova, }\AttributeTok{which=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/2way-ANOVA-1.pdf}
+\includegraphics{dataMetabolitos_files/figure-latex/2way-ANOVA-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{lsr}\SpecialCharTok{::}\FunctionTok{etaSquared}\NormalTok{(anova)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                           eta.sq eta.sq.part
+## Compuesto            0.843579429  0.86401847
+## Endulzante           0.008855346  0.06252886
+## Compuesto:Endulzante 0.014800446  0.10029766
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Sin interacción entre factores}
+
+\NormalTok{anova2 }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(mean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Compuesto }\SpecialCharTok{+}\NormalTok{ Endulzante, }\AttributeTok{data =}\NormalTok{ fenFlavTotal)}
+\FunctionTok{summary}\NormalTok{(anova2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              Df Sum Sq Mean Sq F value  Pr(>F)    
+## Compuesto     3  350.2  116.72 354.433 < 2e-16 ***
+## Endulzante    2    3.7    1.84   5.581 0.00443 ** 
+## Residuals   186   61.3    0.33                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(anova2, }\AttributeTok{which=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{dataMetabolitos_files/figure-latex/2way-ANOVA-3.pdf}
+\includegraphics{dataMetabolitos_files/figure-latex/2way-ANOVA-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{lsr}\SpecialCharTok{::}\FunctionTok{etaSquared}\NormalTok{(anova2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                 eta.sq eta.sq.part
+## Compuesto  0.843579429  0.85111636
+## Endulzante 0.008855346  0.05661241
+\end{verbatim}
+
+Se observa que se cumplen las condiciones para la ANOVA, y que existe un
+efecto significativo sobre la media de la medida por parte del compuesto
+y del endulzante, así como del efecto de la interacción de ambos
+factores. Vemos que el efecto es mucho más fuerte en el compuesto que en
+el endulzante
+
+\hypertarget{dudas}{%
+\subsubsection{Dudas}\label{dudas}}
+
+Hesperidina?
+
+\hypertarget{muestras-bio}{%
+\subsection{Muestras bio}\label{muestras-bio}}
+
+\hypertarget{cronico-orina-atipicos}{%
+\subsubsection{Cronico Orina Atipicos}\label{cronico-orina-atipicos}}
+
+\hypertarget{cronico-plasma-atipicos}{%
+\subsubsection{Cronico plasma Atipicos}\label{cronico-plasma-atipicos}}
+
+\end{document}

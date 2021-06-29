@@ -1,6 +1,8 @@
 ---
 title: "descripcionTablas"
 output:
+  html_document:
+    df_print: paged
   pdf_document:
     latex_engine: xelatex
 ---
@@ -90,10 +92,59 @@ fenST_total <- procesado(fenST, "ST")
 
 fenFlavTotal <- rbind(fenSU_total, fenSA_total, fenST_total)
 
+# Separamos las condiciones
+
+fenFlavTotal$Iluminacion <- rep(x = "Luz", nrow(fenFlavTotal))
+fenFlavTotal$Dia<- rep(x = "0", nrow(fenFlavTotal))
+fenFlavTotal$Temperatura <- rep(x = "25º", nrow(fenFlavTotal))
+
+for (i in seq(1,nrow(fenFlavTotal))){
+    if (grepl(pattern = "\\s5º", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Temperatura[i] <- "5º"
+    
+    }
+    
+    else if (grepl(pattern = "Osc", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Iluminacion[i] <- "Osc"  
+    }
+    
+    else if (grepl(pattern = "15", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Dia[i] <- "15"  
+      
+    }
+
+    else if (grepl(pattern = "30", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Dia[i] <- "30"  
+    
+    }
+  
+    else if (grepl(pattern = "45", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Dia[i] <- "45"  
+    
+    }
+    
+    else if (grepl(pattern = "60", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Dia[i] <- "60"  
+    
+      
+    }
+    else if (grepl(pattern = "90", x = fenFlavTotal$Condiciones[i])){
+      fenFlavTotal$Dia[i] <- "90"  
+    }
+}
+
 skimr::skim(fenFlavTotal)
 
 
 ```
+
+
+
+
+
+
+
+
 ## Pruebas adicionales
 
 #### Normalidad
