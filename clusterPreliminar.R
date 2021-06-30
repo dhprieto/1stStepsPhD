@@ -2,35 +2,35 @@
 
 library(factoextra)
 
-orinaFlav <- read.csv("data/cronicoOrinaFlav.csv", sep = ";", dec = ",")
+orinaFlav <- read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ",")
 
 orinaFlav[is.na(orinaFlav)]<-0
 
-tabla <- stack(as.data.frame(orinaFlav[,-1]))
-tabla$Condiciones <- rep(orinaFlav$X, 8) 
-tabla$Endulzante <- rep("SA", nrow(tabla))
-tabla$Tiempo <- rep("0", nrow(tabla))
+# tabla <- stack(as.data.frame(orinaFlav[,-1]))
+# tabla$Condiciones <- rep(orinaFlav$X, 8) 
+orinaFlav$Endulzante <- rep("SA", nrow(orinaFlav))
+orinaFlav$Tiempo <- rep("0", nrow(orinaFlav))
 
 # A = Estevia B = sucralosa C = sacarosa
 
 for (i in seq(1, nrow(orinaFlav))){
     
-  if (grepl(pattern = "A", x = tabla$Condiciones[i])){
-    tabla$Endulzante[i] <- "ST"
+  if (grepl(pattern = "A", x = orinaFlav$X[i])){
+    orinaFlav$Endulzante[i] <- "ST"
   }
-  else if (grepl(pattern = "B", x = tabla$Condiciones[i])){
-    tabla$Endulzante[i] <- "SU"
+  else if (grepl(pattern = "B", x = orinaFlav$X[i])){
+    orinaFlav$Endulzante[i] <- "SU"
   }
   
 }
 
 for (i in seq(1, nrow(orinaFlav))){
-  if (grepl(pattern = "F", x = tabla$Condiciones[i])){
-    tabla$Tiempo[i] <- "Final"
+  if (grepl(pattern = "F", x = orinaFlav$X[i])){
+    orinaFlav$Tiempo[i] <- "Final"
   }
 }
 
-tabla
+orinaFlav
 
 
 # Non hierarchical clustering ----
@@ -39,16 +39,17 @@ tabla
 
 ### Number of centers
 
-fviz_nbclust(x = na.omit(tabla$values), FUNcluster = kmeans, method = "wss", k.max = 10, 
-             diss = get_dist(na.omit(tabla$values)), nstart = 50)
+fviz_nbclust(x = orinaFlav[,c(2,3,4,5,6,7,8)], FUNcluster = kmeans, method = "wss", k.max = 10, 
+             diss = get_dist(orinaFlav[,c(2,3,4,5,6,7,8)]), nstart = 50)
 
 ### Plotting
 
 set.seed(123)
 
-km_clusters <- kmeans(x = tabla$values, centers = 3, nstart = 50)
+km_clusters <- kmeans(x = orinaFlav[,c(2,3,4,5,6,7,8)], centers = 3, nstart = 50)
 
-fviz_cluster(object = km_clusters, data = tabla$values, show.clust.cent = TRUE,
+fviz_cluster(object = km_clusters, data = orinaFlav[,c(2,3,4,5,6,7,8)],
+             show.clust.cent = TRUE,
              ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
   labs(title = "Clustering K-means - Regulados positivamente X-A") +
   theme_bw() +
@@ -61,18 +62,17 @@ fviz_cluster(object = km_clusters, data = tabla$values, show.clust.cent = TRUE,
 ### Number of clusters
 
 library(cluster)
-fviz_nbclust(x = cluster.up1, FUNcluster = pam, method = "wss", k.max = 10,
-             diss = dist(cluster.up1, method = "manhattan"))
+fviz_nbclust(x =  orinaFlav[,c(2,3,4,5,6,7,8)], FUNcluster = pam, method = "wss", k.max = 10,
+             diss = dist( orinaFlav[,c(2,3,4,5,6,7,8)], method = "manhattan"))
 
 set.seed(123)
-pam_clusters <- pam(x = cluster.up1, k = 3, metric = "manhattan")
+pam_clusters <- pam(x =  orinaFlav[,c(2,3,4,5,6,7,8)], k = 5, metric = "manhattan")
 
-fviz_cluster(object = pam_clusters, data = cluster.up1, ellipse.type = "t",
+fviz_cluster(object = pam_clusters, data =  orinaFlav[,c(2,3,4,5,6,7,8)], ellipse.type = "t",
              repel = TRUE) +
   theme_bw() +
   labs(title = "Clustering PAM - Regulados positivamente X-A") +
   theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
-
 
 # Hierarchical clustering 
 
@@ -81,7 +81,7 @@ fviz_cluster(object = pam_clusters, data = cluster.up1, ellipse.type = "t",
 # Number of centers
 
 set.seed(123)
-hc_euclidea_completo <- hclust(d = dist(x = cluster.up1, method = "euclidean"),
+hc_euclidea_completo <- hclust(d = dist(x =  orinaFlav[,c(2,3,4,5,6,7,8)], method = "euclidean"),
                                method = "complete")
 fviz_dend(x = hc_euclidea_completo, cex = 0.5, main = "Clustering jer?rquico por linkage completo - Regulados positivamente X-A",
           sub = "Distancia eucl?dea", k= 4, rect = TRUE) +
@@ -89,15 +89,16 @@ fviz_dend(x = hc_euclidea_completo, cex = 0.5, main = "Clustering jer?rquico por
 
 # Plotting
 
-hkmeans_cluster <- hkmeans(x = cluster.up1, hc.metric = "euclidean",
-                           hc.method = "complete", k = 4)
+hkmeans_cluster <- hkmeans(x =  orinaFlav[,c(2,3,4,5,6,7,8)], 
+                           hc.metric = "euclidean",
+                           hc.method = "complete", k = 3)
 
 fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
   theme_bw() + labs(title = "K-means Jerarquico - Regulados positivamente X-GL")+  theme(plot.title =  element_text(hjust = 0.5, size = 15))
 
 # Hierarchical clustering
 
-mat_dist <- dist(x = cluster.up1, method = "euclidean")
+mat_dist <- dist(x =  orinaFlav[,c(2,3,4,5,6,7,8)], method = "euclidean")
 
 # Dendrograms with linkage complete y average
 
@@ -109,22 +110,6 @@ cor(x = mat_dist, cophenetic(hc_euclidea_average))
 plot(hc_euclidea_average)
 
 plot(hc_euclidea_complete)
-
-
-# Data joining
-
-out.up <- data.frame(cbind(rownames(cluster.up1), km_clusters$cluster,pam_clusters$cluster, cutree(hc_euclidea_completo, 4)))
-
-DB<-read_excel("C:/Users/mexicore/Downloads/jbc.M115.655688-2.xlsx")
-DB<-data.frame(DB[, 1:3])
-
-Dt1 <- data.table(DB, key ="Gene.Symbol")
-Dt2 <- data.table (out.up, key = "X1")
-
-cluster.def <- data.frame(Dt1[Dt2, nomatch = 0])
-colnames(cluster.def)<-colnames<-c("Transcript.ID","Gene.Symbol","Gene.Title", "Kmeans cluster", "PAM cluster", "Hierarchical cluster")
-
-write.csv(cluster.def, file="clusters-up-x-a-crp")
 
 
 
