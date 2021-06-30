@@ -127,19 +127,62 @@ var.test(x = fenFlavTotal[fenFlavTotal$Endulzante == "SA", "mean"],
 
 library(ggplot2)
 
-ggplot(data = fenFlavTotal, aes(x = Compuesto, y = mean, colour = Endulzante,
+ggplot(data = fenFlavTotal, aes(x = Temperatura, y = values, colour = Endulzante,
                          group = Endulzante)) +
   stat_summary(fun = mean, geom = "point") +
   stat_summary(fun = mean, geom = "line") +
   labs(y  =  'mean (mg/100mlzumo)') +
   theme_bw()
 
-anova <- aov(values ~ Iluminacion * Dia, data = fenFlavTotal)
+anova <- aov(values ~ Endulzante, data = fenFlavTotal)
 summary(anova)
 par(mfrow=c(1,2))
 plot(anova, which=1:4)
+lsr::etaSquared(anova)
+
+kruskal.test(values ~ Endulzante, data = fenFlavTotal)
+
+library(ggplot2)
+
+ggplot(data = fenFlavTotal, mapping = aes(x = Endulzante, y = values, 
+                                          colour = Endulzante)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(legend.position = "none")
 
 
+ggplot(data = fenFlavTotal, mapping = aes(x = values, colour = Endulzante)) +
+  geom_histogram() +
+  theme_bw() +
+  facet_grid(. ~ Endulzante) +
+  theme(legend.position = "none")
+
+library(car)
+
+car::leveneTest (values ~ Temperatura, data = fenFlavTotal, center = "median")
+
+# apply(fenFlavTotal, )
+
+fenFlavTotal$Endulzante<-factor(fenFlavTotal$Endulzante)
+fenFlavTotal$Iluminacion<-factor(fenFlavTotal$Iluminacion)
+fenFlavTotal$Dia<-factor(fenFlavTotal$Dia)
+fenFlavTotal$Temperatura<-factor(fenFlavTotal$Temperatura)
+
+
+# Anovas diversas ----
+
+anova <- aov(values ~ Endulzante+Dia, data = fenFlavTotal)
+summary(anova)
+par(mfrow=c(1,2))
+plot(anova, which=1:4)
+lsr::etaSquared(anova)
+
+
+anova <- aov(values ~ Endulzante*Dia*Temperatura*Iluminacion, data = fenFlavTotal)
+summary(anova)
+par(mfrow=c(1,2))
+plot(anova, which=1:4)
+lsr::etaSquared(anova)
 
 # -----
 
@@ -149,13 +192,13 @@ plot(anova, which=1:4)
 
 
 
-#---- N-way anova
+# ---- N-way anova
 
 
 replications(yield~N*P*K,data=npk)
 
 
-#---- funcion procesado antigua
+# funcion de procesado antigua ----
 
 procesado <- function(tabla, endulzante){
   
