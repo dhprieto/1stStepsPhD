@@ -51,65 +51,54 @@ km_clusters <- kmeans(x = orinaFlav[,c(2,3,4,5,6,7,8)], centers = 3, nstart = 50
 fviz_cluster(object = km_clusters, data = orinaFlav[,c(2,3,4,5,6,7,8)],
              show.clust.cent = TRUE,
              ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
-  labs(title = "Clustering K-means - Regulados positivamente X-A") +
+  labs(title = "K-means - Cronico Orina Flavanonas") +
   theme_bw() +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 
 
+orinaFlav <- cbind(orinaFlav, km_clusters$cluster)
 
-## K-medoids clustering (PAM)
+orinaFlav[order(orinaFlav$`km_clusters$cluster`),]
 
-### Number of clusters
+grupo1 <- orinaFlav[orinaFlav$`km_clusters$cluster` == 1,]
+grupo2 <- orinaFlav[orinaFlav$`km_clusters$cluster` == 2,]
+grupo3 <- orinaFlav[orinaFlav$`km_clusters$cluster` == 3,]
 
-library(cluster)
-fviz_nbclust(x =  orinaFlav[,c(2,3,4,5,6,7,8)], FUNcluster = pam, method = "wss", k.max = 10,
-             diss = dist( orinaFlav[,c(2,3,4,5,6,7,8)], method = "manhattan"))
 
-set.seed(123)
-pam_clusters <- pam(x =  orinaFlav[,c(2,3,4,5,6,7,8)], k = 5, metric = "manhattan")
+# Análisis de los clusters
 
-fviz_cluster(object = pam_clusters, data =  orinaFlav[,c(2,3,4,5,6,7,8)], ellipse.type = "t",
-             repel = TRUE) +
-  theme_bw() +
-  labs(title = "Clustering PAM - Regulados positivamente X-A") +
-  theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
+summary(aov(ES~ Endulzante+Tiempo, data = grupo1))
 
-# Hierarchical clustering 
+install.packages("stargazer")
 
-## Hierarchical K-means
 
-# Number of centers
-
-set.seed(123)
-hc_euclidea_completo <- hclust(d = dist(x =  orinaFlav[,c(2,3,4,5,6,7,8)], method = "euclidean"),
-                               method = "complete")
-fviz_dend(x = hc_euclidea_completo, cex = 0.5, main = "Clustering jer?rquico por linkage completo - Regulados positivamente X-A",
-          sub = "Distancia eucl?dea", k= 4, rect = TRUE) +
-  theme(plot.title =  element_text(hjust = 0.5, size = 15))
-
-# Plotting
-
-hkmeans_cluster <- hkmeans(x =  orinaFlav[,c(2,3,4,5,6,7,8)], 
-                           hc.metric = "euclidean",
-                           hc.method = "complete", k = 3)
-
-fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
-  theme_bw() + labs(title = "K-means Jerarquico - Regulados positivamente X-GL")+  theme(plot.title =  element_text(hjust = 0.5, size = 15))
-
-# Hierarchical clustering
-
-mat_dist <- dist(x =  orinaFlav[,c(2,3,4,5,6,7,8)], method = "euclidean")
-
-# Dendrograms with linkage complete y average
-
-hc_euclidea_complete <- hclust(d = mat_dist, method = "complete")
-hc_euclidea_average  <- hclust(d = mat_dist, method = "average")
-cor(x = mat_dist, cophenetic(hc_euclidea_complete))
-cor(x = mat_dist, cophenetic(hc_euclidea_average))
-
-plot(hc_euclidea_average)
-
-plot(hc_euclidea_complete)
+model1 <- lm(formula = ES ~ Endulzante, data = grupo1)
+model2 <- lm(formula = ES ~ Tiempo, data = grupo1)
+model3 <- lm(formula = ES ~ Endulzante*Tiempo, data = grupo1)
 
 
 
+anova(model1, model2, model3)
+library(stargazer)
+
+analisismodel <- function(metabolito) {
+  
+  # f1 <- as.formula(paste(metabolito, paste("Endulzante")))
+  model1 <- lm(as.formula(paste(metabolito,"Endulzante", sep = "~"))
+                               , data = grupo1)
+  model2 <- lm(as.formula(paste(metabolito,"Tiempo", sep = "~"))
+               , data = grupo1)
+  model3 <- lm(as.formula(paste(metabolito,"Endulzante*Tiempo", sep = "~"))
+               , data = grupo1)
+  
+  model4 <- lm(as.formula(paste(metabolito,"Endulzante+Tiempo", sep = "~"))
+               , data = grupo1)
+  
+  stargazer(model1, model2, model3, model4,type="html",
+            title="Comparación de modelos", out = 
+              paste("resultadoAnovas", metabolito, ".html"))
+  anova(model1, model2, model3,model4)
+  
+  }
+
+analisismodel ("NG")
