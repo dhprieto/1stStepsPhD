@@ -102,3 +102,26 @@ analisismodel <- function(metabolito) {
   }
 
 analisismodel ("NG")
+
+
+
+
+library("nnet")
+
+set.seed(123)
+
+nnmdl <- nnet(formula = ES ~ Endulzante*Tiempo, data = grupo1, size=2, linout=T)
+
+bestrss <- 10000
+
+for(i in 1:100){
+  nnmdl <- nnet(formula = ES ~ Endulzante*Tiempo, data = grupo1, size=2, 
+                linout=T, trace=F)
+  cat(i,nnmdl$value,"\n")
+  if(nnmdl$value < bestrss){
+    bestnn <- nnmdl
+    bestrss <- nnmdl$value
+  }}
+bestnn$value
+
+summary(nnmdl)
