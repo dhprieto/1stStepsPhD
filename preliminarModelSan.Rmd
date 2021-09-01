@@ -1,0 +1,127 @@
+---
+title: "analisisPreliminaresModelSano"
+author: "DHdez"
+date: "6/7/2021"
+output: html_document
+---
+
+## Previa: BebeSano
+
+Estudiar biodisponibilidad y bioactividad de antocianinas y flavanonas. 
+
+#### Diseño experimental:
+
+Estudio cronico y agudo. Orina y plasma. Efecto de endulzantes.  
+
+
+Tengo las tablas de crónico, agudo y vida útil
+
+
+Objetivos:
+
+Análisis estadístico:
+Diferencias por variables antro
+Diferencias por endulzantes
+
+Modelado:
+LM
+GLM
+RF
+NNET
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(factoextra)
+library(nnet)
+library(skimr)
+```
+
+
+# Lectura y procesado de tablas
+
+```{r procesado, echo= T}
+
+procesado1 <- function(tabla, estudio){
+  
+  tabla[is.na(tabla)]<-0
+  tabla$Endulzante <- rep("SA", nrow(tabla))
+  tabla$Tiempo <- rep("-1", nrow(tabla))
+  
+  # if (estudio == "cronico"){}
+  
+  for (i in seq(1, nrow(tabla))){
+    
+    if (grepl(pattern = "A", x = tabla$X[i])){
+      tabla$Endulzante[i] <- "ST"
+    }
+    else if (grepl(pattern = "B", x = tabla$X[i])){
+      tabla$Endulzante[i] <- "SU"
+    }
+    
+  }
+  
+  for (i in seq(1, nrow(tabla))){
+    if (grepl(pattern = "F", x = tabla$X[i])){
+      tabla$Tiempo[i] <- "Final"
+    }
+    if (grepl(pattern = "3,5", x = tabla$X[i])){
+      tabla$Tiempo[i] <- "3,5"
+    }
+    
+    if (grepl(pattern = "12", x = tabla$X[i])){
+      tabla$Tiempo[i] <- "12"
+    }
+    
+    if (grepl(pattern = "24", x = tabla$X[i])){
+      tabla$Tiempo[i] <- "24"
+    }
+  }
+  return(tabla)
+}
+
+
+cronicoOrinaFlav <- procesado(read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ","))
+cronicoOrinaAnt <- procesado(read.csv("data/cronicoOrinaAntLimpio.csv", sep = ";", dec = ","))
+cronicoPlasmaFlav <- procesado(read.csv("data/cronicoPlasmaFlavLimpio.csv", sep = ";", dec = ","))
+cronicoPlasmaAnt <- procesado(read.csv("data/cronicoPlasmaAntLimpio.csv", sep = ";", dec = ","))
+
+agudoOrinaFlav <- procesado(read.csv("data/agudoOrinaFlavLimpio.csv", sep = ";", dec = ","))
+agudoOrinaAnt <- procesado(read.csv("data/agudoOrinaAntLimpio.csv", sep = ";", dec = ","))
+# agudoPlasmaFlav <- read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ",")
+# agudoPlasmaAnt <- read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ",")
+  
+  
+}
+
+```
+
+
+```{r pressure, echo=FALSE}
+
+
+
+```
+
+```{r unu, echo=FALSE}
+
+
+
+```
+
+```{r owo, echo=FALSE}
+
+
+
+```
+
+
+
+
+```{r uwu, echo=FALSE}
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

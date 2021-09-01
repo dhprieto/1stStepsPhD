@@ -1,4 +1,4 @@
-### Clustering pacientes + modelo
+### Clustering pacientes + modelo ----
 
 library(factoextra)
 
@@ -31,6 +31,15 @@ for (i in seq(1, nrow(orinaFlav))){
 }
 
 orinaFlav
+
+
+cronicoOrinaFlav <- read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ",")
+cronicoOrinaAnt <- read.csv("data/cronicoOrinaAntLimpio.csv", sep = ";", dec = ",")
+cronicoPlastaFlav <- read.csv("data/cronicoPlasmaFlavLimpio.csv", sep = ";", dec = ",")
+cronicoPlastaAnt <- read.csv("data/cronicoPlasmaAntLimpio.csv", sep = ";", dec = ",")
+
+agudoOrinaFlav <- read.csv("data/agudoOrinaFlavLimpio.csv", sep = ";", dec = ",")
+agudoOrinaAnt <- procesado(read.csv("data/agudoOrinaAntLimpio.csv", sep = ";", dec = ","))
 
 
 # Non hierarchical clustering ----
@@ -125,3 +134,8 @@ for(i in 1:100){
 bestnn$value
 
 summary(nnmdl)
+
+
+
+
+

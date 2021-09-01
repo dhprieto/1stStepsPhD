@@ -1,0 +1,32 @@
+---
+title: "clusterPreliminar"
+author: "DHdez"
+date: "5/7/2021"
+output: html_document
+---
+
+# Tabla
+
+
+```{r setup, include=FALSE}
+
+
+
+
+
+```
+
+
+```{r cars}
+
+
+
+
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+
