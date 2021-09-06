@@ -26,7 +26,8 @@ output: html_document
 
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+
+
 ```
 
 

@@ -1,6 +1,6 @@
 # 1stStepsPhD
 
-This repository contains the first steps of the 
+This repository contains the first steps of my PhD process
 
 
 ## Code & Reports
@@ -35,6 +35,11 @@ compounds *in vitro*
 1. config: it will contain files to provide aditional parameters to model
 
 2. data: contains the tables in .csv format
+
+## Pipeline
+
+1. preprocess.R : 
+2. 
 
 
 
