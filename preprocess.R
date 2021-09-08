@@ -37,6 +37,10 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
           table$Tiempo[i] <- "24"
         }  
       }
+    for (i in seq(1, nrow(table))){
+      table$numVol[i] <- as.integer(gsub("U.*", "", table[,1][i]))
+      }
+    
     }
   
   else {
@@ -49,17 +53,16 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
           
       }
     }
-    
+    for (i in seq(1, nrow(table))){
+      table$numVol[i] <- gsub("[A-C].", "", table[,1][i])
+    }
   }
-
   table <- table[,colSums(is.na(table))<(nrow(table)*nasPercentageCol)]
   
   if (nasRow == T){
     table <- na.omit(table)
   }
   
-  
-
   addAntro <- function (pathToAntro, table) {
     
     antro <- read.csv(pathToAntro, sep = ";", dec = ",")
@@ -71,59 +74,50 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
       }
       if ((antro$Nº.Volunt.[i] >= 51) & (antro$Nº.Volunt.[i] <= 96)){
         antro$Endulzante[i] <- "SU"
-        
+        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]-50
       }
       if ((antro$Nº.Volunt.[i] >= 101) & (antro$Nº.Volunt.[i] <= 146)){
         antro$Endulzante[i] <- "SA"
-        
+        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]-100
       }  
     }
-    
-    antro_ST <- subset(antro, antro$Endulzante == "ST")
-    antro_SU <- subset(antro, antro$Endulzante == "SU")
-    antro_SA <- subset(antro, antro$Endulzante == "SA")
-    
-    
-      if (agudo == T) {
-        for (i in seq(1, nrow(table))){
-          table[,1][i] <- gsub("U.*", "", table[,1][i])
-          }
-        } else {
-        for (i in seq(1, nrow(table))){
-          table[,1][i] <- gsub("[A-C].", "", table[,1][i])
-        }
-      }
-    
-    table_ST <- subset(table, table$Endulzante == "ST")
-    table_SU <- subset(table, table$Endulzante == "SU")
-    table_SA <- subset(table, table$Endulzante == "SA")
-    
-    antro_ST[,1] <- rescale(antro_ST[,1], to=c(min(as.integer(table_ST[,1])),max(as.integer(table_ST[,1]))))
-    print(c(antro_ST[,1],table_ST[,1]))
-  return(table)
+  
+  table$numVol <- as.integer(table$numVol)    
+  table <- merge(x= table, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Nº.Volunt.", "Endulzante"), all=T)
+  return(table)  
   }
   
-  
   table <- addAntro("data/datosAntropometricosCardiovasculares.csv",table)        
-  return(table)
+  table <- table[order(table$Endulzante, table$Tiempo,table$numVol),]
+  return(na.omit(table))
     
-  
 }
+
   
   
 
-tableName1 = "agudoOrinaAntLimpio.csv"
 tableName2 = "cronicoOrinaANtLimpio.csv"
 
 rootDir = "data/"
 
-tablePath = paste0(rootDir,tableName1)
+tablePath = paste0(rootDir,tableName2)
 
-agudoOrinaAnt <- preprocess (tablePath, 0.05, T)
+cronicoOrinaAnt_Antro <- preprocess (tablePath, 0.05, T)
+
 
 
 
 View(agudoOrinaAnt)
+
+
+tablaa <- read.csv("data/datosAntropometricosCardiovasculares.csv", sep =";", dec=",")
+
+str(tablaa)
+
+for (i in seq(1, nrow(tablaa))){
+  tablaa$numVol[i] <- gsub("[A-C].", "", tablaa[,1][i])}
+
+
 
 round(6.9)
 round(rescale(antro_ST[,1], to=c(min(as.integer(agudoOrinaAnt[,1])),max(as.integer(agudoOrinaAnt[,1])))))
@@ -157,11 +151,16 @@ y <- c(30,31,34,35,37,38,40,42,43,45,47,49,50)
 library(scales)
 round(rescale (y, to=c(1,20), from=c(30,50)))
 
-
-    
-    
+checkReesc <- function(tabla, nColumna){
+  for (i in seq(2, nrow(tabla))){
+    if (tabla[,nColumna][i-1] == tabla[,nColumna][i]){
+      tabla[,nColumna][i] = tabla[,nColumna][i]+1
+    }
   }
 }
 
+checkReesc(agudoOrinaAnt,21)
 
+library(dplyr)
 
+filter(agudoOrinaFlav, (agudoOrinaFlav$Endulzante == "ST") & (agudoOrinaFlav$Tiempo == "-1"))

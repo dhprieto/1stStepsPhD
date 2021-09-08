@@ -4,7 +4,7 @@
 ----
 
 genera las columnas de tiempo y endulzante a partir de los códigos de los voluntarios
--->
+--> evalua los na's y quita columnas/filas
 
 2. preAnalysis.R
 ----
