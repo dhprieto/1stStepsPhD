@@ -2,6 +2,8 @@
 
 library(factoextra)
 
+# Tablas anteriores ---- 
+
 orinaFlav <- read.csv("data/cronicoOrinaFlavLimpio.csv", sep = ";", dec = ",")
 
 orinaFlav[is.na(orinaFlav)]<-0
@@ -42,28 +44,39 @@ agudoOrinaFlav <- read.csv("data/agudoOrinaFlavLimpio.csv", sep = ";", dec = ","
 agudoOrinaAnt <- procesado(read.csv("data/agudoOrinaAntLimpio.csv", sep = ";", dec = ","))
 
 
+
+# Tablas crónico con datos antropométricos ----
+
+c_O_A.A <- readRDS("data/cronicoOrinaAnt_Antro.csv")
+
+# Retiramos datos ordinales y texto
+
+cluster.A <- c_O_A.A[,-c(1,2,3,9)]
+
 # Non hierarchical clustering ----
 
-## K-means
+## K-means ----
 
 ### Number of centers
 
-fviz_nbclust(x = orinaFlav[,c(2,3,4,5,6,7,8)], FUNcluster = kmeans, method = "wss", k.max = 10, 
-             diss = get_dist(orinaFlav[,c(2,3,4,5,6,7,8)]), nstart = 50)
+fviz_nbclust(x = cluster.A, FUNcluster = kmeans, method = "wss", k.max = 10, 
+             diss = get_dist(cluster.A), nstart = 50)
 
 ### Plotting
 
 set.seed(123)
 
-km_clusters <- kmeans(x = orinaFlav[,c(2,3,4,5,6,7,8)], centers = 3, nstart = 50)
+km_clusters <- kmeans(x = cluster.A, centers = 5, nstart = 50)
 
-fviz_cluster(object = km_clusters, data = orinaFlav[,c(2,3,4,5,6,7,8)],
+fviz_cluster(object = km_clusters, data = cluster.A,
              show.clust.cent = TRUE,
              ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
-  labs(title = "K-means - Cronico Orina Flavanonas") +
+  labs(title = "K-means - Cronico Orina Antocianos + Datos Antropométricos") +
   theme_bw() +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 
+
+### Separación por clusters
 
 orinaFlav <- cbind(orinaFlav, km_clusters$cluster)
 
@@ -113,6 +126,7 @@ analisismodel <- function(metabolito) {
 analisismodel ("NG")
 
 
+# Redes neuronales ----
 
 
 library("nnet")
