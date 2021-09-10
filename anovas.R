@@ -13,3 +13,6 @@ par(mfrow=c(1,2))
 plot(anova, which=1:4)
 par(mfrow = c(1,1))
 lsr::etaSquared(anova)
+
+
+

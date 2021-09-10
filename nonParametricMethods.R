@@ -53,3 +53,8 @@ for(i in 1:100){
 bestnn$value
 
 summary(nnmdl)
+
+# RSE ----
+
+# sqrt(mean(real - pred)^2)
+

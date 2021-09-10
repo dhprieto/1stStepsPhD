@@ -1,6 +1,3 @@
-library(data.table)
-library(scales)
-
 preprocess <- function(tablePath, nasPercentageCol, nasRow){
   table <- read.csv(tablePath, sep = ";", dec = ",")
   
@@ -84,6 +81,13 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
   
   table$numVol <- as.integer(table$numVol)    
   table <- merge(x= table, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Nº.Volunt.", "Endulzante"), all=T)
+  
+  # Añadimos sexo
+  
+  sexVol <- read.csv("data/sexoVoluntarios.csv", sep = ";")
+  
+  table <- merge(x=table, y=sexVol, by.x="numVol", by.y="Voluntario", all=T)
+  
   return(table)  
   }
   
@@ -95,15 +99,15 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
 
   
   
-tableName2 = "cronicoPlasmaAntLimpio.csv"
+tableName2 = "cronicoPlasmaFlavLimpio.csv"
 
 rootDir = "data/"
 
 tablePath = paste0(rootDir,tableName2)
 
-cronicoOrinaAnt_Antro <- preprocess (tablePath, 0.05, T)
+tabla1 <- preprocess (tablePath, 0.05, T)
 
-saveRDS(cronicoOrinaAnt_Antro, "data/cronicoPlasmaAnt_Antro.csv")
+write.csv(tabla1, "data/cronicoPlasmaFlav_Antro.csv")
 
 
 
