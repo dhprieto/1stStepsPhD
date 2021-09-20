@@ -15,3 +15,14 @@ genera las columnas de tiempo y endulzante a partir de los códigos de los volun
 ----
 
 busca posibles clusters en 
+
+4. regression.R
+----
+
+
+5. feautureImportance.R
+----
+
+
+6. Classification
+----
