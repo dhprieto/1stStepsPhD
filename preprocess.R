@@ -1,3 +1,5 @@
+# Preprocesamiento base ----
+
 preprocess <- function(tablePath, nasPercentageCol, nasRow){
   table <- read.csv(tablePath, sep = ";", dec = ",")
   
@@ -108,6 +110,4 @@ tablePath = paste0(rootDir,tableName2)
 tabla1 <- preprocess (tablePath, 0.05, T)
 
 write.csv(tabla1, "data/cronicoPlasmaFlav_Antro.csv")
-
-
 
