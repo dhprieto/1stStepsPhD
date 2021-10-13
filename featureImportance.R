@@ -38,7 +38,7 @@ featurePlot(x = set.A_num,
                           y = list(relation="free")), 
             adjust = 1.5, 
             pch = "|", 
-            layout = c(6,2), 
+            layout = c(2,1), 
             auto.key = list(columns = 3))
 
 
@@ -89,7 +89,17 @@ plot(importance)
 
 
 
+# rfe ----
 
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(scale(set.A_num[, 1:5]), set.A$Sexo, sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
 
 
 

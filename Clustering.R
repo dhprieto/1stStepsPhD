@@ -42,7 +42,7 @@ datos_simulados <- map_df(set.A_rescaled,
 pca_datos_A      <- prcomp(set.A_rescaled)
 pca_datos_simulados <- prcomp(datos_simulados)
 p1 <- fviz_pca_ind(X = pca_datos_A, habillage = set.A$Sexo,
-                   geom = "point", title = "PCA - datos uwu",
+                   geom = "point", title = "PCA - datos sexo",
                    pallete = "jco") +
   theme_bw() + theme(legend.position = "bottom")
 p2 <- fviz_pca_ind(X = pca_datos_simulados, geom = "point",
