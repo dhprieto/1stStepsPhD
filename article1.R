@@ -4,6 +4,7 @@ library(purrr)
 library(ggpubr)
 library(factoextra)
 library(clustertend)
+
 # Getting data ready ----
 
 c_O_A.A <- read.csv("data/cronicoOrinaAnt_Antro.csv")
@@ -25,11 +26,6 @@ set.A <- subset(c_O_A.A, select =-c(X.1, numVol, X, Peso.inicial, Peso.final, Ta
                                     Grasa.inicial, Grasa.final, IRCV.Final, IRCV.inicial, Bpmin.final, 
                                     Bpmin.inicial, Bpmax.final, Bpmax.inicial, Frec.final, Frec.inicial))
 
-# anovas traviesas:
-
-
-anova_sexo <- aov(Sexo ~., data = set.A)
-summary(anova_sexo)
 
 # Only numerical features
 
@@ -39,6 +35,21 @@ set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo))
 #Rescaling, can use "set.A_rescaled <- scale(set.A_num)" too
 set.A_rescaled <- set.A_num %>% mutate_each_(list(~rescale(.) %>% as.vector), 
                            vars = colnames(set.A_num))
+
+
+# anovas traviesas:
+
+library(nortest)
+
+lillie.test(x = )
+
+set.A_rescaled_sexo <- cbind(set.A_rescaled, Sexo=set.A$Sexo)
+
+anova_sexo <- aov(Sexo ~. , data = set.A_rescaled_sexo)
+
+summary(anova_sexo)
+
+
 
 # Validación de método de clustering ----
 
@@ -63,6 +74,8 @@ p2 <- fviz_pca_ind(X = pca_datos_simulados, geom = "point",
   theme_bw() + theme(legend.position = "bottom")
 
 ggarrange(p1, p2)#, common.legend = TRUE)
+
+fviz_contrib(pca_datos_A, choice="var", top = 13)
 
 ### Aplicamos clustering ----
 
