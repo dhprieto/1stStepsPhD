@@ -3,7 +3,7 @@ library(scales)
 library(purrr)
 library(ggpubr)
 library(factoextra)
-library(clustertend)
+#library(clustertend)
 
 preprocessTablas <- function(root, nombreTabla) {
   
@@ -52,7 +52,7 @@ checkCluster <- function(tabla){
   
   set.A_rescaled <- tabla
   # Validación de método de clustering
-  
+
   ## Manual 
   
   datos_simulados <- map_df(set.A_rescaled,
@@ -86,6 +86,32 @@ checkCluster <- function(tabla){
   print(ggarrange(p7, p8))
 }
 
+
+clusterVarios <- function (tabla) {
+  
+  nombreTabla <- deparse(quote(tabla))
+  
+  
+  ### Aplicamos clustering 
+  
+  # K-means clustering
+  
+  km_datos_A <- kmeans(x = tabla, centers = 2)
+  
+  p1 <- fviz_cluster(object = km_datos_A, data = tabla, 
+                     ellipse.type = "norm", geom = "point", main = paste("Datos ", nombreTabla),
+                     stand = FALSE, palette = "jco", show.legend = T)
+  
+  # Hierarchical clustering
+  p2 <- fviz_dend(x = hclust(dist(tabla)), k = 2, k_colors = "jco",
+                show_labels = T, main = paste("Datos ", nombreTabla))
+  
+  print(p1)
+  
+  print(p2)
+}
+
+
 orinaFlav <- preprocessTablas("data/", "cronicoOrinaFlav_Antro.csv")
 orinaFlavRaw <- orinaFlav$tablaRaw
 orinaFlavNum <- orinaFlav$tablaNum
@@ -97,3 +123,5 @@ orinaFlavNum_F <- subset(orinaFlavNumTiempo, Tiempo == "Final", select = -Tiempo
 
 checkCluster(orinaFlavNum_0)
 checkCluster(orinaFlavNum_F)
+
+clusterVarios(orinaFlavNum_0)
