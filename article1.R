@@ -46,7 +46,69 @@ preprocessTablas <- function(root, nombreTabla) {
   set.A_factors <- cbind(set.A_rescaled, Endulzante = set.A$Endulzante, 
                          Tiempo = set.A$Tiempo, Sexo = set.A$Sexo)
   
-  return(list(tablaFactors = set.A_factors, tablaNum = set.A_rescaled))
+  tabla_Tiempo <- subset(tabla, select=-c(Endulzante, Sexo))
+  
+  tabla_Tiempo0 <- subset(tabla_Tiempo, Tiempo == "0", select = -Tiempo)
+  tabla_TiempoF <- subset(tabla_Tiempo, Tiempo == "Final", select = -Tiempo)
+  
+  tabla_Sexo <- subset(tabla, select=-c(Endulzante, Tiempo))
+  
+  tabla_SexoM <- subset(tabla_Sexo, Sexo == "HOMBRE", select = -Sexo)
+  tabla_SexoF <- subset(tabla_Sexo, Sexo == "MUJER", select = -Sexo)
+  
+  tabla_Endulzante <- subset(tabla, select=-c(Sexo, Tiempo))
+  
+  tabla_EndulzanteSA <- subset(tabla_Endulzante, Endulzante == "SA", select = -Endulzante)
+  tabla_EndulzanteSU <- subset(tabla_Endulzante, Endulzante == "SU", select = -Endulzante)
+  tabla_EndulzanteST <- subset(tabla_Endulzante, Endulzante == "ST", select = -Endulzante)
+  
+  tabla_0xM <- subset(tabla, Tiempo == "0" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_0xF <- subset(tabla, Tiempo == "0" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxM <- subset(tabla, Tiempo == "Final" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxF <- subset(tabla, Tiempo == "Final" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSAx0 <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSAxF <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSAx0 <- subset(tabla, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSAxF <- subset(tabla, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSTx0 <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="ST" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_MxSTxF <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="ST"& Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSTx0 <- subset(tabla, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "0",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSTxF <- subset(tabla, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "Final",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSUx0 <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_MxSUxF <- subset(tabla, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSUx0 <- subset(tabla, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "0",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSUxF <- subset(tabla, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "Final",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  return(list(tablaFactors = set.A_factors, tablaNum = set.A_rescaled,
+              tabla_Tiempo, tabla_Tiempo0,
+              tabla_TiempoF, tabla_Sexo,
+              tabla_SexoM, tabla_SexoF,
+              tabla_Endulzante, tabla_EndulzanteSA,
+              tabla_EndulzanteSU, tabla_EndulzanteST,
+              tabla_0xM,tabla_0xF, tabla_FxM, tabla_FxF,
+              tabla_MxSAx0, tabla_MxSAxF, tabla_FxSAx0,
+              tabla_FxSAxF, tabla_MxSTx0, tabla_MxSTxF,
+              tabla_FxSTx0, tabla_FxSTxF, tabla_MxSUx0,
+              tabla_MxSUxF, tabla_FxSUx0, tabla_FxSUxF))
   
 }
 
@@ -458,7 +520,18 @@ p1 <- ggparcoord(data = orinaFlavNum_F, columns = c(2:14), groupColumn = "cluste
                  title = "Clustering Tiempo Final")
 
 
-ggplotly(p)
+boxplot(subset(orinaFlavNum_0, cluster==1, select=-cluster))
+boxplot(subset(orinaFlavNum_0, cluster==2, select=-cluster))
+boxplot(subset(orinaFlavNum_0, cluster==3, select=-cluster))
+
+boxplot(subset(orinaFlavNum_F, cluster==1, select=-cluster))
+boxplot(subset(orinaFlavNum_F, cluster==2, select=-cluster))
+boxplot(subset(orinaFlavNum_F, cluster==3, select=-cluster))
+boxplot(subset(orinaFlavNum_F, cluster==4, select=-cluster))
+boxplot(subset(orinaFlavNum_F, cluster==5, select=-cluster))
+
+
+plot(p)
 
 plot(orinaFlavNum_0$cluster, orinaFlavNum_0$NS)
 plot(orinaFlavNum_F$cluster, orinaFlavNum_F$NS)
