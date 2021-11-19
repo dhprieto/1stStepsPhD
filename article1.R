@@ -559,7 +559,7 @@ clusterVarios(orinaFlavNum_F, 4)
 # Plasma Antocianos ---- 
 
 orinaAnt <- preprocessTablas("data/", "cronicoPlasmaAnt_Antro.csv")
-orinaAntRaw <- orinaAnt$tablaRaw
+orinaAntFactors <- orinaAnt$tablaFactors
 orinaAntNum <- orinaAnt$tablaNum
 
 orinaAntNumTiempo <- cbind(orinaAntNum, Tiempo = orinaAntRaw$Tiempo)
@@ -569,3 +569,16 @@ orinaAntNum_F <- subset(orinaAntNumTiempo, Tiempo == "Final", select = -Tiempo)
 
 
 
+# ANOVA ----
+
+require(tidyr)
+
+orinaFlavT_F <- orinaFlav$tablaFactors
+
+datos_tabla_larga <- gather(data = orinaAntFactors, key = "Sexo", value = "VA.GG", 2:5)
+head(datos_tabla_larga, 5)
+orinaAntFactors
+
+anova_pareado <- aov(formula = ES ~ Tiempo + Sexo + Endulzante, 
+                     data = orinaFlav_Factors)
+summary(anova_pareado)
