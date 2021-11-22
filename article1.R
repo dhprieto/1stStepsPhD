@@ -6,7 +6,8 @@ library(factoextra)
 library(GGally)
 library(plotly)
 library(FactoMineR)
-#library(clustertend)
+library(cluster)
+library(mclust)
 
 preprocessTablas <- function(root, nombreTabla) {
   
@@ -22,6 +23,7 @@ preprocessTablas <- function(root, nombreTabla) {
   tabla$Endulzante <- factor(tabla$Endulzante, levels = c("SA", "ST", "SU"))
   tabla$Sexo <- factor(tabla$Sexo, levels = c("HOMBRE", "MUJER"))
   tabla$Tiempo <- factor(tabla$Tiempo, levels = c("0", "Final"))
+  tabla$numVol <- factor(tabla$numVol)
   
   tabla$Delta.IRCV <- tabla$IRCV.Final - tabla$IRCV.inicial
   tabla$Delta.Bpmin <- tabla$Bpmin.final - tabla$Bpmin.inicial
@@ -30,13 +32,13 @@ preprocessTablas <- function(root, nombreTabla) {
   
   # Removing of trivial redundant and useless features 
   
-  set.A <- subset(tabla, select =-c(X.1, numVol, X, Peso.inicial, Peso.final, Talla, IMC.Inicial, IMC.Final, 
+  set.A <- subset(tabla, select =-c(X.1, X, Peso.inicial, Peso.final, Talla, IMC.Inicial, IMC.Final, 
                                     Grasa.inicial, Grasa.final, IRCV.Final, IRCV.inicial, Bpmin.final, 
                                     Bpmin.inicial, Bpmax.final, Bpmax.inicial, Frec.final, Frec.inicial))
   
   # Only numerical features
   
-  set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo))
+  set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo, numVol))
   
   #Rescaling, can use "set.A_rescaled <- scale(set.A_num)" too
   
@@ -44,7 +46,7 @@ preprocessTablas <- function(root, nombreTabla) {
                                                vars = colnames(set.A_num))
   
   set.A_factors <- cbind(set.A_rescaled, Endulzante = set.A$Endulzante, 
-                         Tiempo = set.A$Tiempo, Sexo = set.A$Sexo)
+                         Tiempo = set.A$Tiempo, Sexo = set.A$Sexo, numVol = set.A$numVol)
   
   tabla_Tiempo <- subset(tabla, select=-c(Endulzante, Sexo))
   
@@ -141,8 +143,8 @@ checkCluster <- function(tabla){
   
   print(ggarrange(p1, p2), common.legend = TRUE)
   
-  dist_datos_A      <- dist(set.A_rescaled, method = "euclidean")
-  dist_datos_simulados <- dist(datos_simulados, method = "euclidean")
+  dist_datos_A      <- get_dist(set.A_rescaled, method = "manhattan")
+  dist_datos_simulados <- get_dist(datos_simulados, method = "manhattan")
   
   p7 <- fviz_dist(dist.obj = dist_datos_A, show_labels = FALSE) +
     labs(title = paste("Datos ", nombreTabla)) + theme(legend.position = "bottom")
@@ -152,6 +154,8 @@ checkCluster <- function(tabla){
   print(ggarrange(p7, p8))
   
   print(fviz_nbclust(set.A_rescaled, kmeans, method="wss"))
+  print(fviz_nbclust(x = set.A_rescaled, FUNcluster = pam, method = "wss", k.max = 15,
+               diss = get_dist(set.A_rescaled, method = "manhattan")))
 }
 
 
@@ -163,22 +167,59 @@ clusterVarios <- function (tabla, nclust) {
   ### Aplicamos clustering 
   
   # K-means clustering
+  set.seed(123)
   
   km_datos_A <- kmeans(x = tabla, centers = nclust)
   
   p1 <- fviz_cluster(object = km_datos_A, data = tabla, 
-                     ellipse.type = "norm", geom = "point", main = paste("Datos ", nombreTabla),
+                     ellipse.type = "norm", geom = "point", main = paste("Resultados clustering kmeans ", 
+                                                                         nombreTabla),
                      stand = FALSE, palette = "jco", show.legend = T)
   
+  # PAM clustering
+  
+  pam_clusters <- pam(x = tabla, k = nclust, metric = "manhattan")
+  
+  p2 <- fviz_cluster(object = pam_clusters, data = tabla, ellipse.type = "t",
+               repel = TRUE) +
+    theme_bw() +
+    labs(title = "Resultados clustering PAM") +
+    theme(legend.position = "none")
+  
+  # fuzzy clustering
+  
+  fuzzy_cluster <- fanny(x = tabla, k = nclust, diss = FALSE, metric = "manhattan", stand = FALSE)
+  
+  p3 <- fviz_cluster(object = fuzzy_cluster, repel = TRUE, ellipse.type = "norm",
+                     pallete = "jco") + theme_bw() + labs(title = "Fuzzy Cluster plot")
+
   # Hierarchical clustering
-  p2 <- fviz_dend(x = hclust(dist(tabla)), k = nclust, k_colors = "jco",
+  p4 <- fviz_dend(x = hclust(get_dist(tabla, method = "manhattan")), k = nclust, k_colors = "jco",
                 show_labels = T, main = paste("Datos ", nombreTabla))
+  
+  
+  model_clustering <- Mclust(tabla)
+  
+  p5 <- fviz_mclust(object = model_clustering, what = "BIC", pallete = "jco") +
+    scale_x_discrete(limits = c(1:10))
+  
+  p6 <- fviz_mclust(model_clustering, what = "classification", geom = "point",
+              pallete = "jco")
+  
   
   print(p1)
   
   print(p2)
   
+  print(p3)
   
+  print(p4)
+  
+  print(p5)
+  
+  print(p6)
+  
+  return(model_clustering)
   
 }
 
@@ -416,11 +457,11 @@ pcaVarios<- function(tabla, nombreTabla){
 ## Preprocess ----
 
 orinaFlav <- preprocessTablas("data/", "cronicoOrinaFlav_Antro.csv")
-orinaFlavRaw <- orinaFlav$tablaFactors
+orinaFlavFactors <- orinaFlav$tablaFactors
 orinaFlavNum <- orinaFlav$tablaNum
 
-orinaFlavNum_0 <- subset(orinaFlavNumTiempo, Tiempo == "0", select = -Tiempo)
-orinaFlavNum_F <- subset(orinaFlavNumTiempo, Tiempo == "Final", select = -Tiempo)
+orinaFlavNum_0 <- subset(orinaFlavFactors, Tiempo == "0", select = -Tiempo)
+orinaFlavNum_F <- subset(orinaFlavFactors, Tiempo == "Final", select = -Tiempo)
 
 
 ## PCA ----
@@ -496,8 +537,45 @@ checkCluster(orinaFlavNum_F)
 
 ### Performing kmeans ----
 
-clusterVarios(orinaFlavNum_0, 3)
-clusterVarios(orinaFlavNum_F, 5)
+orinaFlav_Factors_T0 <- subset(orinaFlavFactors, Tiempo == "0")
+orinaFlav_Factors_TF <- subset(orinaFlav_Factors, Tiempo == "Final")
+
+stack(orinaFlav_Factors_T0)
+
+model_clustering_OFT_0 <- Mclust(orinaFlavNum_0)
+model_clustering_OFT_F <- Mclust(orinaFlavNum_F)
+
+orinaFlavNum_0_clusters <- cbind(orinaFlavNum_0, clusters = model_clustering_OFT_0$classification) 
+                                 #Endulzante = orinaFlav_Factors_T0$Endulzante, 
+                                 #Sexo = orinaFlav_Factors_T0$Sexo)
+orinaFlavNum_F_clusters <- cbind(orinaFlavNum_F, clusters = model_clustering_OFT_F$classification)
+                                 #Endulzante = orinaFlav_Factors_TF$Endulzante, 
+                                 #Sexo = orinaFlav_Factors_TF$Sexo)
+
+orinaFlavNum_0_clusters$Endulzante <- rescale(as.numeric(orinaFlavNum_0_clusters$Endulzante))
+orinaFlavNum_0_clusters$Sexo <- rescale(as.numeric(orinaFlavNum_0_clusters$Sexo))
+
+# Change box plot colors by groups
+ggplot(orinaFlavNum_0_clusters, aes(x=col_name, y=value, fill=Endulzante)) +
+  geom_boxplot()
+# Change the position
+
+
+
+
+# Boxplot a partir de un data frame
+
+
+boxplot(subset(orinaFlavNum_0_clusters, clusters==1, select=-c(clusters,numVol)))
+boxplot(subset(orinaFlavNum_0_clusters, clusters==2, select=-c(clusters,numVol)))
+boxplot(subset(orinaFlavNum_0_clusters, clusters==3, select=-c(clusters,numVol)))
+
+boxplot(subset(orinaFlavNum_F_clusters, clusters==1, select=-clusters))
+boxplot(subset(orinaFlavNum_F_clusters, clusters==2, select=-clusters))
+boxplot(subset(orinaFlavNum_F_clusters, clusters==3, select=-clusters))
+boxplot(subset(orinaFlavNum_F_clusters, clusters==4, select=-clusters))
+boxplot(subset(orinaFlavNum_F_clusters, clusters==5, select=-clusters))
+
 
 km_datos_A <- kmeans(x = orinaFlavNum_0, centers = 3)
 km_datos_B <- kmeans(x = orinaFlavNum_F, centers = 5)
@@ -573,12 +651,18 @@ orinaAntNum_F <- subset(orinaAntNumTiempo, Tiempo == "Final", select = -Tiempo)
 
 require(tidyr)
 
-orinaFlavT_F <- orinaFlav$tablaFactors
+orinaFlavT_F <- subset(orinaFlav$tablaFactors, Tiempo == "Final")
 
-datos_tabla_larga <- gather(data = orinaAntFactors, key = "Sexo", value = "VA.GG", 2:5)
-head(datos_tabla_larga, 5)
-orinaAntFactors
-
-anova_pareado <- aov(formula = ES ~ Tiempo + Sexo + Endulzante, 
+anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
                      data = orinaFlav_Factors)
+summary(anova_no_pareado)
+
+# ANOVA paired ----
+
+orinaFlavFactors
+
+orinaFlavDupl <- orinaFlavFactors[duplicated(orinaFlavFactors$numVol) == TRUE,]
+
+anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
+                     data = orinaFlavDupl)
 summary(anova_pareado)
