@@ -8,6 +8,11 @@ library(plotly)
 library(FactoMineR)
 library(cluster)
 library(mclust)
+library(reshape2)
+library(gridExtra)
+
+
+
 
 preprocessTablas <- function(root, nombreTabla) {
   
@@ -17,24 +22,44 @@ preprocessTablas <- function(root, nombreTabla) {
   tabla <- read.csv(rootTabla)
   
   
-  # Make factors of categorical features, deltaing intial-final features
-  
+  # Make factors of categorical features
   
   tabla$Endulzante <- factor(tabla$Endulzante, levels = c("SA", "ST", "SU"))
   tabla$Sexo <- factor(tabla$Sexo, levels = c("HOMBRE", "MUJER"))
   tabla$Tiempo <- factor(tabla$Tiempo, levels = c("0", "Final"))
   tabla$numVol <- factor(tabla$numVol)
   
-  tabla$Delta.IRCV <- tabla$IRCV.Final - tabla$IRCV.inicial
-  tabla$Delta.Bpmin <- tabla$Bpmin.final - tabla$Bpmin.inicial
-  tabla$Delta.Bpmax <- tabla$Bpmax.final - tabla$Bpmax.inicial
-  tabla$Delta.Frec <- tabla$Frec.final - tabla$Frec.inicial
+  for (i in seq(1:nrow(tabla))){
+    print(i)
+    if (tabla$Tiempo[i] == "0"){
+      tabla$Peso[i] = tabla$Peso.inicial[i]
+      tabla$IMC[i] = tabla$IMC.Inicial[i]
+      tabla$Grasa[i] = tabla$Grasa.inicial[i]
+      tabla$IRCV[i] = tabla$IRCV.inicial[i]
+      tabla$Bpmin[i] = tabla$Bpmin.inicial[i]
+      tabla$Bpmax[i] = tabla$Bpmax.inicial[i]
+      tabla$Frec[i] = tabla$Frec.inicial[i]
+      
+    }
+    
+    else if (tabla$Tiempo[i] == "Final"){
+      tabla$Peso[i] = tabla$Peso.final[i]
+      tabla$IMC[i] = tabla$IMC.Final[i]
+      tabla$Grasa[i] = tabla$Grasa.final[i]
+      tabla$IRCV[i] = tabla$IRCV.Final[i]
+      tabla$Bpmin[i] = tabla$Bpmin.final[i]
+      tabla$Bpmax[i] = tabla$Bpmax.final[i]
+      tabla$Frec[i] = tabla$Frec.final[i]
+    }
+    
+    
+  }
   
   # Removing of trivial redundant and useless features 
   
-  set.A <- subset(tabla, select =-c(X.1, X, Peso.inicial, Peso.final, Talla, IMC.Inicial, IMC.Final, 
-                                    Grasa.inicial, Grasa.final, IRCV.Final, IRCV.inicial, Bpmin.final, 
-                                    Bpmin.inicial, Bpmax.final, Bpmax.inicial, Frec.final, Frec.inicial))
+  set.A <- subset(tabla, select =-c(X.1, X, Peso.inicial, Peso.final, Delta.Peso, Talla, IMC.Inicial, IMC.Final, 
+                                    Delta.IMC, Grasa.inicial, Grasa.final, Delta.Grasa, IRCV.Final, IRCV.inicial, 
+                                    Bpmin.final, Bpmin.inicial, Bpmax.final, Bpmax.inicial, Frec.final, Frec.inicial))
   
   # Only numerical features
   
@@ -467,7 +492,7 @@ set.seed(123)
 
 ## Preprocess ----
 
-orinaFlav <- preprocessTablas("data/", "cronicoOrinaFlav_Antro.csv")
+orinaFlav <- preprocessTablas("data/", "tablaOrinaFlav.csv")
 orinaFlavFactors <- orinaFlav$tablaFactors
 orinaFlavNum <- orinaFlav$tablaNum
 
@@ -499,17 +524,17 @@ model_clustering_OFT_F <- Mclust(orinaFlavT_F[, colnames(orinaFlavT_F) != "numVo
 
 ### Plotting results of model based clustering 
 
-p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav T 0") + scale_x_discrete(limits = c(1:10))
 
 p2 <- fviz_mclust(model_clustering_OFT_0, what = "classification", geom = "point",
-                  pallete = "jco")
+                  title = "Clusters Plot Orina Flav T 0", pallete = "jco")
 
-p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco", 
+                  title = "Model Selection Orina Flav T F") + scale_x_discrete(limits = c(1:10))
 
-p4 <- fviz_mclust(model_clustering_OFT_F, what = "classification", geom = "point",
-                  pallete = "jco")
+p4 <- fviz_mclust(model_clustering_OFT_F, what = "classification", geom = "point", 
+                  title = "Clusters plot Orina Flav T F", pallete = "jco")
 
 
 ggarrange(p1,p3)
@@ -524,7 +549,17 @@ orinaFlavNum_F_clusters <- cbind(orinaFlavT_F, clusters = as.factor(model_cluste
                                  Endulzante = orinaFlav_Factors_TF$Endulzante, 
                                  Sexo = orinaFlav_Factors_TF$Sexo)
 
-### Scaling factors to plot them. 
+### Counting factors to plot them
+
+tableSexo0 <- table(orinaFlavNum_0_clusters$Sexo,orinaFlavNum_0_clusters$clusters)
+tableEdulcorante0 <- table(orinaFlavNum_0_clusters$Endulzante,orinaFlavNum_0_clusters$clusters)
+
+tableSexoF <- table(orinaFlavNum_F_clusters$Sexo,orinaFlavNum_F_clusters$clusters)
+tableEdulcoranteF <- table(orinaFlavNum_F_clusters$Endulzante,orinaFlavNum_F_clusters$clusters)
+
+
+### Scaling factors to plot them. SA = 0.0, ST = 0.5, SU = 1; Hombre = 0, Mujer = 1
+
 
 orinaFlavNum_0_clusters$Endulzante <- rescale(as.numeric(orinaFlavNum_0_clusters$Endulzante))
 orinaFlavNum_0_clusters$Sexo <- rescale(as.numeric(orinaFlavNum_0_clusters$Sexo))
@@ -534,21 +569,38 @@ orinaFlavNum_F_clusters$Sexo <- rescale(as.numeric(orinaFlavNum_F_clusters$Sexo)
 
 ### Boxplot to explain clusters ----
 
+#### Reformatting for boxplot
 
-boxplot(subset(orinaFlavNum_0_clusters, clusters==1, select=-c(clusters,numVol)), 
-        main = "Cluster 1 Orina Flav Tiempo 0")
-boxplot(subset(orinaFlavNum_0_clusters, clusters==2, select=-c(clusters,numVol)), 
-        main = "Cluster 2 Orina Flav Tiempo 0")
-boxplot(subset(orinaFlavNum_0_clusters, clusters==3, select=-c(clusters,numVol)), 
-        main = "Cluster 3 Orina Flav Tiempo 0")
+longtableT_0 <-melt(orinaFlavNum_0_clusters[,colnames(orinaFlavNum_0_clusters)!="numVol"], id = "clusters")
 
-boxplot(subset(orinaFlavNum_F_clusters, clusters==1, select=-c(clusters,numVol)))
-boxplot(subset(orinaFlavNum_F_clusters, clusters==2, select=-c(clusters,numVol)))
-boxplot(subset(orinaFlavNum_F_clusters, clusters==3, select=-c(clusters,numVol)))
-boxplot(subset(orinaFlavNum_F_clusters, clusters==4, select=-c(clusters,numVol)))
+longtableT_F <-melt(orinaFlavNum_F_clusters[,colnames(orinaFlavNum_0_clusters)!="numVol"], id = "clusters")
+
+#### Boxplotting all together
+
+ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids T 0")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids T F")+
+  labs(y = "standarized value", x = "variables/clusters")
 
 
-### Explicando clusters
+### Explainig clusters with parallell coordinates plot----
 
 p <- ggparcoord(data = orinaFlavNum_0_clusters[, colnames(orinaFlavT_0) != "numVol"], groupColumn = "clusters", 
                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
@@ -564,6 +616,7 @@ p1 <- ggparcoord(data = orinaFlavNum_F_clusters[, colnames(orinaFlavT_F) != "num
                 title = "Clustering Tiempo F")
 
 ggarrange(p,p1)
+
 
 ## ANOVA ----
 
@@ -624,17 +677,17 @@ model_clustering_OFT_F <- Mclust(orinaAntT_F[, colnames(orinaAntT_F) != "numVol"
 
 ### Plotting results of model based clustering 
 
-p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco", 
+                  title = "Model Selection Orina Ant T 0") + scale_x_discrete(limits = c(1:10))
 
 p2 <- fviz_mclust(model_clustering_OFT_0, what = "classification", geom = "point",
-                  pallete = "jco")
+                  title = "Clusters Plot Orina Ant T 0", pallete = "jco")
 
-p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco",
+                  title = "Model Selection Orina Ant T F") + scale_x_discrete(limits = c(1:10))
 
 p4 <- fviz_mclust(model_clustering_OFT_F, what = "classification", geom = "point",
-                  pallete = "jco")
+                  title = "Clusters Plot Orina Ant T F", pallete = "jco")
 
 
 ggarrange(p1,p3)
@@ -649,7 +702,17 @@ orinaAntNum_F_clusters <- cbind(orinaAntT_F, clusters = as.factor(model_clusteri
                                  Endulzante = orinaAnt_Factors_TF$Endulzante, 
                                  Sexo = orinaAnt_Factors_TF$Sexo)
 
-### Scaling factors to plot them. 
+### Counting factors to plot them
+
+tableSexo0 <- table(orinaAntNum_0_clusters$Sexo,orinaAntNum_0_clusters$clusters)
+tableEdulcorante0 <- table(orinaAntNum_0_clusters$Endulzante,orinaAntNum_0_clusters$clusters)
+
+tableSexoF <- table(orinaAntNum_F_clusters$Sexo,orinaAntNum_F_clusters$clusters)
+tableEdulcoranteF <- table(orinaAntNum_F_clusters$Endulzante,orinaAntNum_F_clusters$clusters)
+
+
+### Scaling factors to plot them. SA = 0.0, ST = 0.5, SU = 1; Hombre = 0, Mujer = 1
+
 
 orinaAntNum_0_clusters$Endulzante <- rescale(as.numeric(orinaAntNum_0_clusters$Endulzante))
 orinaAntNum_0_clusters$Sexo <- rescale(as.numeric(orinaAntNum_0_clusters$Sexo))
@@ -659,40 +722,50 @@ orinaAntNum_F_clusters$Sexo <- rescale(as.numeric(orinaAntNum_F_clusters$Sexo))
 
 ### Boxplot to explain clusters ----
 
+#### Reformatting for boxplot
 
-boxplot(subset(orinaAntNum_0_clusters, clusters==1, select=-c(clusters,numVol)), 
-        main = "Cluster 1 Orina Ant Tiempo 0")
-boxplot(subset(orinaAntNum_0_clusters, clusters==2, select=-c(clusters,numVol)), 
-        main = "Cluster 2 Orina Ant Tiempo 0")
-boxplot(subset(orinaAntNum_0_clusters, clusters==3, select=-c(clusters,numVol)), 
-        main = "Cluster 3 Orina Ant Tiempo 0")
+longtableT_0 <-melt(orinaAntNum_0_clusters[,colnames(orinaAntNum_0_clusters)!="numVol"], id = "clusters")
 
-boxplot(subset(orinaAntNum_F_clusters, clusters==1, select=-c(clusters,numVol)), 
-        main = "Cluster 1 Orina Ant Tiempo F")
-boxplot(subset(orinaAntNum_F_clusters, clusters==2, select=-c(clusters,numVol)), 
-        main = "Cluster 2 Orina Ant Tiempo F")
-boxplot(subset(orinaAntNum_F_clusters, clusters==3, select=-c(clusters,numVol)), 
-        main = "Cluster 3 Orina Ant Tiempo F")
+longtableT_F <-melt(orinaAntNum_F_clusters[,colnames(orinaAntNum_0_clusters)!="numVol"], id = "clusters")
 
-### Explicando clusters
+#### Boxplotting all together
 
-orinaAntNum_0_clusters <- cbind(orinaAntT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                Endulzante = orinaAnt_Factors_T0$Endulzante, 
-                                Sexo = orinaAnt_Factors_T0$Sexo)
-orinaAntNum_F_clusters <- cbind(orinaAntT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                Endulzante = orinaAnt_Factors_TF$Endulzante, 
-                                Sexo = orinaAnt_Factors_TF$Sexo)
+ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Antocians T 0")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Antocians T F")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Explainig clusters with parallell coordinates plot----
 
 p <- ggparcoord(data = orinaAntNum_0_clusters[, colnames(orinaAntT_0) != "numVol"], groupColumn = "clusters", 
-                scale = "std", columns = c(1:12,14,15)) + 
-                labs(x = "variables", y = "value (in standard-deviation units)", title = "Clustering Tiempo 0")
-
+                scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo 0")
 
 p1 <- ggparcoord(data = orinaAntNum_F_clusters[, colnames(orinaAntT_F) != "numVol"], groupColumn = "clusters", 
-                 scale = "std", columns = c(1:12,14,15)) + 
-                 labs(x = "variables", 
-                 y = "value (in standard-deviation units)", 
-                 title = "Clustering Tiempo F")
+                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo F")
 
 ggarrange(p,p1)
 
@@ -727,7 +800,7 @@ plasmaAntT_F <- plasmaAnt$tabla_TiempoF
 
 ## PCA ----
 
-pcaVarios(plasmaAntFactors, "Plasma Flavonoides")
+pcaVarios(plasmaAntFactors, "Plasma Antocianos")
 
 ## Clustering ----
 
@@ -748,19 +821,20 @@ plasmaAnt_Factors_TF <- subset(plasmaAntFactors, Tiempo == "Final")
 model_clustering_OFT_0 <- Mclust(plasmaAntT_0[, colnames(plasmaAntT_0) != "numVol"])
 model_clustering_OFT_F <- Mclust(plasmaAntT_F[, colnames(plasmaAntT_F) != "numVol"])
 
+
 ### Plotting results of model based clustering 
 
-p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco", 
+                  title = "Model Selection Plasma Ant T 0") + scale_x_discrete(limits = c(1:10))
 
 p2 <- fviz_mclust(model_clustering_OFT_0, what = "classification", geom = "point",
-                  pallete = "jco")
+                  title = "Clusters Plot Plasma Ant T 0", pallete = "jco")
 
-p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco") +
-  scale_x_discrete(limits = c(1:10))
+p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco",
+                  title = "Model Selection Plasma Ant T F") + scale_x_discrete(limits = c(1:10))
 
 p4 <- fviz_mclust(model_clustering_OFT_F, what = "classification", geom = "point",
-                  pallete = "jco")
+                  title = "Clusters Plot Plasma Ant T F", pallete = "jco")
 
 
 ggarrange(p1,p3)
@@ -775,7 +849,17 @@ plasmaAntNum_F_clusters <- cbind(plasmaAntT_F, clusters = as.factor(model_cluste
                                 Endulzante = plasmaAnt_Factors_TF$Endulzante, 
                                 Sexo = plasmaAnt_Factors_TF$Sexo)
 
-### Scaling factors to plot them. 
+### Counting factors to plot them
+
+tableSexo0 <- table(plasmaAntNum_0_clusters$Sexo,plasmaAntNum_0_clusters$clusters)
+tableEdulcorante0 <- table(plasmaAntNum_0_clusters$Endulzante,plasmaAntNum_0_clusters$clusters)
+
+tableSexoF <- table(plasmaAntNum_F_clusters$Sexo,plasmaAntNum_F_clusters$clusters)
+tableEdulcoranteF <- table(plasmaAntNum_F_clusters$Endulzante,plasmaAntNum_F_clusters$clusters)
+
+
+### Scaling factors to plot them. SA = 0.0, ST = 0.5, SU = 1; Hombre = 0, Mujer = 1
+
 
 plasmaAntNum_0_clusters$Endulzante <- rescale(as.numeric(plasmaAntNum_0_clusters$Endulzante))
 plasmaAntNum_0_clusters$Sexo <- rescale(as.numeric(plasmaAntNum_0_clusters$Sexo))
@@ -785,32 +869,47 @@ plasmaAntNum_F_clusters$Sexo <- rescale(as.numeric(plasmaAntNum_F_clusters$Sexo)
 
 ### Boxplot to explain clusters ----
 
-boxplot(subset(plasmaAntNum_0_clusters, clusters==1, select=-c(clusters,numVol)), 
-        main = "Cluster 1 Plasma Ant Tiempo 0")
-boxplot(subset(plasmaAntNum_0_clusters, clusters==2, select=-c(clusters,numVol)), 
-        main = "Cluster 2 Plama Ant Tiempo 0")
+#### Reformatting for boxplot
 
-boxplot(subset(plasmaAntNum_F_clusters, clusters==1, select=-c(clusters,numVol)), 
-        main = "Cluster 1 Plasma Ant Tiempo F")
-boxplot(subset(plasmaAntNum_F_clusters, clusters==2, select=-c(clusters,numVol)), 
-        main = "Cluster 2 Plasma Ant Tiempo F")
+longtableT_0 <-melt(plasmaAntNum_0_clusters[,colnames(plasmaAntNum_0_clusters)!="numVol"], id = "clusters")
 
-### Explicando clusters
+longtableT_F <-melt(plasmaAntNum_F_clusters[,colnames(plasmaAntNum_0_clusters)!="numVol"], id = "clusters")
 
-plasmaAntNum_0_clusters <- cbind(plasmaAntT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                Endulzante = plasmaAnt_Factors_T0$Endulzante, 
-                                Sexo = plasmaAnt_Factors_T0$Sexo)
-plasmaAntNum_F_clusters <- cbind(plasmaAntT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                Endulzante = plasmaAnt_Factors_TF$Endulzante, 
-                                Sexo = plasmaAnt_Factors_TF$Sexo)
+#### Boxplotting all together
+
+ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 15, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 15, y = -0.03, label = "Hombre") +
+  annotate("text", x = 14, y = 1.03, label = "SU") + 
+  annotate("text",x = 14, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma Antocians T 0")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 15, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 15, y = -0.03, label = "Hombre") +
+  annotate("text", x = 14, y = 1.03, label = "SU") + 
+  annotate("text",x = 14, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma Antocians T F")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Explainig clusters with parallell coordinates plot----
 
 p <- ggparcoord(data = plasmaAntNum_0_clusters[, colnames(plasmaAntT_0) != "numVol"], groupColumn = "clusters", 
-                scale = "std", columns = c(1:13,15,16)) + 
-  labs(x = "variables", y = "value (in standard-deviation units)", title = "Clustering Tiempo 0")
-
+                scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,13,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo 0")
 
 p1 <- ggparcoord(data = plasmaAntNum_F_clusters[, colnames(plasmaAntT_F) != "numVol"], groupColumn = "clusters", 
-                 scale = "std", columns = c(1:13,15,16)) + 
+                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,13,15)) + 
   labs(x = "variables", 
        y = "value (in standard-deviation units)", 
        title = "Clustering Tiempo F")

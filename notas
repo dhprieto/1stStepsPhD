@@ -6,3 +6,15 @@ orinaAnt0 y orinaFlavF -> iguales
 
 
 por hacer
+
+comparar por tiempo y no solo a tiempo F
+
+
+idea:
+
+entrenar modelo con t_0 y testarlo con t_F, con endulzantes y sexo. 
+
+set de train -> t_0
+set de test -> t_F
+
+interrogar al modelo con SHAC

@@ -53,9 +53,16 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
       }
     }
     for (i in seq(1, nrow(table))){
-      table$numVol[i] <- gsub("[A-C].", "", table[,1][i])
+      table$numVol[i] <- as.numeric(gsub("[A-C].", "", table[,1][i]))
+      if (table$Endulzante[i] == "SU"){
+        table$numVol[i] = table$numVol[i] + 50
+      }
+      else if (table$Endulzante[i] == "SA"){
+        table$numVol[i] = table$numVol[i] + 100
+      }
     }
   }
+  
   table <- table[,colSums(is.na(table))<(nrow(table)*nasPercentageCol)]
   
   if (nasRow == T){
@@ -73,11 +80,11 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
       }
       if ((antro$Nº.Volunt.[i] >= 51) & (antro$Nº.Volunt.[i] <= 96)){
         antro$Endulzante[i] <- "SU"
-        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]-50
-      }
+        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]
+        }
       if ((antro$Nº.Volunt.[i] >= 101) & (antro$Nº.Volunt.[i] <= 146)){
         antro$Endulzante[i] <- "SA"
-        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]-100
+        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]
       }  
     }
   
@@ -94,14 +101,12 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
   }
   
   table <- addAntro("data/datosAntropometricosCardiovasculares.csv",table)        
-  table <- table[order(table$Endulzante, table$Tiempo,table$numVol),]
+  table <- table[order(table$Tiempo,table$numVol),]
   return(na.omit(table))
     
 }
 
-  
-  
-tableName2 = "cronicoPlasmaFlavLimpio.csv"
+tableName2 = "cronicoOrinaFlavLimpio.csv"
 
 rootDir = "data/"
 
@@ -109,5 +114,5 @@ tablePath = paste0(rootDir,tableName2)
 
 tabla1 <- preprocess (tablePath, 0.05, T)
 
-write.csv(tabla1, "data/cronicoPlasmaFlav_Antro.csv")
+write.csv(tabla1, "data/tablaOrinaFlav.csv")
 
