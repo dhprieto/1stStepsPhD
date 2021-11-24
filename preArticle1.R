@@ -111,7 +111,7 @@ preprocessTablas1 <- function(root, nombreTabla) {
     labs(title = paste("Datos simulados", nombreTabla)) + theme(legend.position = "bottom")
   
   print(ggarrange(p7, p8))
-}
+} 
 
 clusteringVarios <- function(root, nombreTabla) {
   
