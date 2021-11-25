@@ -1,20 +1,20 @@
+pendiente
+-----
+- anotar resultados gráficas
+- probar resultados con anovas pareadas y no pareadas
+- modelar con todo el dataset
+- modelar entrenando con T_0 y testando con T_F
+
 hecho
-
-comparativa t_0 t_Final
-orinaFlav0 y orinaFlavF -> distintos
-orinaAnt0 y orinaFlavF -> iguales
-
-
-por hacer
-
-comparar por tiempo y no solo a tiempo F
+-----
+- formateo de los datos
+- análisis clustering total
+- análisis clustering a T_0 y T_F
+- PCA de todas las combinaciones de factores
 
 
-idea:
-
-entrenar modelo con t_0 y testarlo con t_F, con endulzantes y sexo. 
-
-set de train -> t_0
-set de test -> t_F
-
-interrogar al modelo con SHAC
+posible
+-----
+- probar métodos de clustering
+- extraer features con RF
+- guardar y anotar PCA's
