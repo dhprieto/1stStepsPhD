@@ -1,75 +1,71 @@
 # Preprocesamiento base ----
 
-preprocess <- function(tablePath, nasPercentageCol, nasRow){
-  table <- read.csv(tablePath, sep = ";", dec = ",")
-  
-  for (i in seq(1, nrow(table))){
+preprocess <- function(tablaPath, nasPercentageCol, nasRow){
+  tabla <- read.csv(tablaPath, sep = ";", dec = ",")
+  for (i in seq(1, nrow(tabla))){
     
-    if (grepl(pattern = "A", x = table$X[i])){
-      table$Endulzante[i] <- "ST"
+    if (grepl(pattern = "A", x = tabla$X[i])){
+      tabla$Endulzante[i] <- "ST"
     }
-    else if (grepl(pattern = "B", x = table$X[i])){
-      table$Endulzante[i] <- "SU"
+    else if (grepl(pattern = "B", x = tabla$X[i])){
+      tabla$Endulzante[i] <- "SU"
     }
-    else if (grepl(pattern = "C", x = table$X[i])){
-      table$Endulzante[i] <- "SA"
+    else if (grepl(pattern = "C", x = tabla$X[i])){
+      tabla$Endulzante[i] <- "SA"
     }
   }
   
   
-  if (grepl("agudo", tablePath)){agudo = T}
+  if (grepl("agudo", tablaPath)){agudo = T}
   else {agudo = F}
   
   if(agudo){
     
-    for (i in seq(1, nrow(table))){
-      if (grepl(pattern = "([A-C]) -1", x = table$X[i])){
-        table$Tiempo[i] <- "-1"
+    for (i in seq(1, nrow(tabla))){
+      if (grepl(pattern = "([A-C]) -1", x = tabla$X[i])){
+        tabla$Tiempo[i] <- "-1"
         }      
-      else if (grepl(pattern = "([A-C]) 3,5", x = table$X[i])){
-          table$Tiempo[i] <- "3,5"
+      else if (grepl(pattern = "([A-C]) 3,5", x = tabla$X[i])){
+          tabla$Tiempo[i] <- "3,5"
         }    
-      else if (grepl(pattern = "([A-C]) 12", x = table$X[i])){
-          table$Tiempo[i] <- "12"
+      else if (grepl(pattern = "([A-C]) 12", x = tabla$X[i])){
+          tabla$Tiempo[i] <- "12"
         }
-      else if (grepl(pattern = "([A-C]) 24", x = table$X[i])){
-          table$Tiempo[i] <- "24"
+      else if (grepl(pattern = "([A-C]) 24", x = tabla$X[i])){
+          tabla$Tiempo[i] <- "24"
         }  
       }
-    for (i in seq(1, nrow(table))){
-      table$numVol[i] <- as.integer(gsub("U.*", "", table[,1][i]))
+    for (i in seq(1, nrow(tabla))){
+      tabla$numVol[i] <- as.integer(gsub("U.*", "", tabla[,1][i]))
       }
     
     }
   
   else {
-    for (i in seq(1, nrow(table))){
-      if (grepl(pattern = "F", x = table$X[i])){
-        table$Tiempo[i] <- "Final"
+    for (i in seq(1, nrow(tabla))){
+      if (grepl(pattern = "F", x = tabla$X[i])){
+        tabla$Tiempo[i] <- "Final"
       }
-      if (grepl(pattern = "([A-C])0", x = table$X[i])){
-        table$Tiempo[i] <- "0"
+      if (grepl(pattern = "([A-C])0", x = tabla$X[i])){
+        tabla$Tiempo[i] <- "0"
           
       }
     }
-    for (i in seq(1, nrow(table))){
-      table$numVol[i] <- as.numeric(gsub("[A-C].", "", table[,1][i]))
-      if (table$Endulzante[i] == "SU"){
-        table$numVol[i] = table$numVol[i] + 50
+    for (i in seq(1, nrow(tabla))){
+      tabla$numVol[i] <- as.numeric(gsub("[A-C].", "", tabla[,1][i]))
+      if (tabla$Endulzante[i] == "SU"){
+        tabla$numVol[i] = tabla$numVol[i] + 50
       }
-      else if (table$Endulzante[i] == "SA"){
-        table$numVol[i] = table$numVol[i] + 100
+      else if (tabla$Endulzante[i] == "SA"){
+        tabla$numVol[i] = tabla$numVol[i] + 100
       }
+
     }
   }
-  
-  table <- table[,colSums(is.na(table))<(nrow(table)*nasPercentageCol)]
-  
-  if (nasRow == T){
-    table <- na.omit(table)
-  }
-  
-  addAntro <- function (pathToAntro, table) {
+    
+  tabla <- tabla[,colSums(is.na(tabla))<(nrow(tabla)*nasPercentageCol)]
+
+  addAntro <- function (pathToAntro, tabla) {
     
     antro <- read.csv(pathToAntro, sep = ";", dec = ",")
     
@@ -88,31 +84,37 @@ preprocess <- function(tablePath, nasPercentageCol, nasRow){
       }  
     }
   
-  table$numVol <- as.integer(table$numVol)    
-  table <- merge(x= table, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Nº.Volunt.", "Endulzante"), all=T)
+  tabla$numVol <- as.integer(tabla$numVol)    
+  tabla <- merge(x= tabla, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Nº.Volunt.", "Endulzante"), all=T)
   
   # Añadimos sexo
   
   sexVol <- read.csv("data/sexoVoluntarios.csv", sep = ";")
   
-  table <- merge(x=table, y=sexVol, by.x="numVol", by.y="Voluntario", all=T)
+  tabla <- merge(x=tabla, y=sexVol, by.x="numVol", by.y="Voluntario", all=T)
   
-  return(table)  
+  return(tabla)  
   }
   
-  table <- addAntro("data/datosAntropometricosCardiovasculares.csv",table)        
-  table <- table[order(table$Tiempo,table$numVol),]
-  return(na.omit(table))
+  tabla <- addAntro("data/datosAntropometricosCardiovasculares.csv",tabla)        
+  
+
+  tabla <- tabla[order(tabla$Tiempo,tabla$numVol),]
+  
+  if (nasRow == T){
+    tabla <- na.omit(tabla)
+  }
+
+  return(tabla)
     
 }
 
-tableName2 = "cronicoOrinaFlavLimpio.csv"
+tablaName2 = "cronicoPlasmaFlavLimpio.csv"
 
 rootDir = "data/"
 
-tablePath = paste0(rootDir,tableName2)
+tablaPath = paste0(rootDir,tablaName2)
 
-tabla1 <- preprocess (tablePath, 0.05, T)
+tabla1 <- preprocess (tablaPath, nasPercentageCol = 0.5, nasRow = T)
 
-write.csv(tabla1, "data/tablaOrinaFlav.csv")
-
+write.csv(tabla1, "data/tablaPlasmaFlav_adjusted.csv")

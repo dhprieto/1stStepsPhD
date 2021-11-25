@@ -11,9 +11,6 @@ library(mclust)
 library(reshape2)
 library(gridExtra)
 
-
-
-
 preprocessTablas <- function(root, nombreTabla) {
   
   # Getting data ready
@@ -487,7 +484,7 @@ clusterVarios <- function (tabla, nclust) {
 
 set.seed(123)
 
-# Orina Flavonoides ----
+# Orina Flavonoides  ----
 
 ## Preprocess ----
 
@@ -514,6 +511,47 @@ checkCluster(orinaFlavT_F[, colnames(orinaFlavT_) != "numVol"])
 clusterVarios()
 
 ### Performing model based clustering ----
+
+## All times
+
+model_clustering_OF <- Mclust(orinaFlav$tablaNum)
+
+p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina Flav", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+orinaFlav_clusters <- cbind(orinaFlav$tablaNum, clusters = as.factor(model_clustering_OF$classification),
+                                 Endulzante = orinaFlavFactors$Endulzante, 
+                                 Sexo = orinaFlavFactors$Sexo,
+                                 Tiempo = orinaFlavFactors$Tiempo)
+
+tableSexoOF <- table(orinaFlav_clusters$Sexo,orinaFlav_clusters$clusters)
+tableEdulcoranteOF <- table(orinaFlav_clusters$Endulzante,orinaFlav_clusters$clusters)
+
+orinaFlav_clusters$Endulzante <- rescale(as.numeric(orinaFlav_clusters$Endulzante))
+orinaFlav_clusters$Sexo <- rescale(as.numeric(orinaFlav_clusters$Sexo))
+orinaFlav_clusters$Tiempo <- rescale(as.numeric(orinaFlav_clusters$Tiempo))
+
+longtableOF <- melt(orinaFlav_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtableOF, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  facet_wrap(~Tiempo)
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoOF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteOF, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+## Separating by time
 
 orinaFlav_Factors_T0 <- subset(orinaFlavFactors, Tiempo == "0")
 orinaFlav_Factors_TF <- subset(orinaFlavFactors, Tiempo == "Final")
