@@ -541,15 +541,15 @@ longtableOF <- melt(orinaFlav_clusters, id = c("clusters", "Tiempo"))
 
 ggplot(longtableOF, aes(variable,as.numeric(value), fill=factor(clusters))) +
   geom_boxplot()+
-  facet_wrap(~Tiempo)
   annotate("text", x = 14, y = 1.03, label = "Mujer") + 
   annotate("text",x = 14, y = -0.03, label = "Hombre") +
   annotate("text", x = 13, y = 1.03, label = "SU") + 
   annotate("text",x = 13, y = -0.03, label = "SA")+
-  annotation_custom(grob = tableGrob(tableSexoOF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
-  annotation_custom(grob = tableGrob(tableEdulcoranteOF, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  annotation_custom(grob = tableGrob(tableSexoOF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 14,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteOF, theme = ttheme_default(base_size = 8)), xmin= 14,xmax=17, ymin=0, ymax=0.25)+
   ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
-  labs(y = "standarized value", x = "variables/clusters")
+  labs(y = "standarized value", x = "variables/clusters")+
+  facet_wrap(~Tiempo)
 
 ## Separating by time
 
@@ -706,6 +706,47 @@ clusterVarios()
 
 ### Performing model based clustering ----
 
+## All times
+
+model_clustering_OA <- Mclust(orinaAnt$tablaNum)
+
+p1 <- fviz_mclust(object = model_clustering_OA, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina ant") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OA, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina ant", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+orinaAnt_clusters <- cbind(orinaAnt$tablaNum, clusters = as.factor(model_clustering_OA$classification),
+                            Endulzante = orinaAntFactors$Endulzante, 
+                            Sexo = orinaAntFactors$Sexo,
+                            Tiempo = orinaAntFactors$Tiempo)
+
+tableSexoOA <- table(orinaAnt_clusters$Sexo,orinaAnt_clusters$clusters)
+tableEdulcoranteOA <- table(orinaAnt_clusters$Endulzante,orinaAnt_clusters$clusters)
+
+orinaAnt_clusters$Endulzante <- rescale(as.numeric(orinaAnt_clusters$Endulzante))
+orinaAnt_clusters$Sexo <- rescale(as.numeric(orinaAnt_clusters$Sexo))
+orinaAnt_clusters$Tiempo <- rescale(as.numeric(orinaAnt_clusters$Tiempo))
+
+longtableOA <- melt(orinaAnt_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtableOA, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  facet_wrap(~Tiempo)+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoOA, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteOA, theme = ttheme_default(base_size = 8)), xmin= 13,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina antocians")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+### Selecting by time
+
 orinaAnt_Factors_T0 <- subset(orinaAntFactors, Tiempo == "0")
 orinaAnt_Factors_TF <- subset(orinaAntFactors, Tiempo == "Final")
 
@@ -852,6 +893,48 @@ clusterVarios()
 
 ### Performing model based clustering ----
 
+## All times
+
+model_clustering_PA <- Mclust(plasmaAnt$tablaNum)
+
+p1 <- fviz_mclust(object = model_clustering_PA, what = "BIC", pallete = "jco",  
+                  title = "Model Selection plasma ant") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_PA, what = "classification", geom = "point",
+                  title = "Clusters Plot plasma ant", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+plasmaAnt_clusters <- cbind(plasmaAnt$tablaNum, clusters = as.factor(model_clustering_PA$classification),
+                           Endulzante = plasmaAntFactors$Endulzante, 
+                           Sexo = plasmaAntFactors$Sexo,
+                           Tiempo = plasmaAntFactors$Tiempo)
+
+tableSexoPA <- table(plasmaAnt_clusters$Sexo,plasmaAnt_clusters$clusters)
+tableEdulcorantePA <- table(plasmaAnt_clusters$Endulzante,plasmaAnt_clusters$clusters)
+
+plasmaAnt_clusters$Endulzante <- rescale(as.numeric(plasmaAnt_clusters$Endulzante))
+plasmaAnt_clusters$Sexo <- rescale(as.numeric(plasmaAnt_clusters$Sexo))
+plasmaAnt_clusters$Tiempo <- rescale(as.numeric(plasmaAnt_clusters$Tiempo))
+
+longtablePA <- melt(plasmaAnt_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtablePA, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  facet_wrap(~Tiempo)+
+  annotate("text", x = 15, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 15, y = -0.03, label = "Hombre") +
+  annotate("text", x = 14, y = 1.03, label = "SU") + 
+  annotate("text",x = 14, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoPA, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorantePA, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis plasma ant")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Selecting by time
+
 plasmaAnt_Factors_T0 <- subset(plasmaAntFactors, Tiempo == "0")
 plasmaAnt_Factors_TF <- subset(plasmaAntFactors, Tiempo == "Final")
 
@@ -922,7 +1005,7 @@ ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
   annotate("text",x = 14, y = -0.03, label = "SA")+
   annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
   annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
-  ggtitle("Boxplot Cluster Analysis Plasma Antocians T 0")+
+  ggtitle("Boxplot Cluster Analysis Plasma Ant T 0")+
   labs(y = "standarized value", x = "variables/clusters")
 
 ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
@@ -933,7 +1016,7 @@ ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
   annotate("text",x = 14, y = -0.03, label = "SA")+
   annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
   annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
-  ggtitle("Boxplot Cluster Analysis Plasma Antocians T F")+
+  ggtitle("Boxplot Cluster Analysis Plasma Ant T F")+
   labs(y = "standarized value", x = "variables/clusters")
 
 
@@ -974,7 +1057,7 @@ summary(anova_no_pareado)
 
 
 
-# Plasma antocianos ----
+# Plasma flavonoides sin ajustar ----
 
 ## Preprocess ----
 
@@ -999,9 +1082,51 @@ checkCluster(plasmaFlavT_F[, colnames(plasmaFlavT_F) != "numVol"])
 
 ### Performing kmeans, PAM and fuzzy ----
 
-clusterVarios()
+#clusterVarios()
 
 ### Performing model based clustering ----
+
+## All times
+
+model_clustering_PF <- Mclust(plasmaFlav$tablaNum)
+
+p1 <- fviz_mclust(object = model_clustering_PF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Plasma flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_PF, what = "classification", geom = "point",
+                  title = "Clusters Plot Plasma flav", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+plasmaFlav_clusters <- cbind(plasmaFlav$tablaNum, clusters = as.factor(model_clustering_PF$classification),
+                           Endulzante = plasmaFlavFactors$Endulzante, 
+                           Sexo = plasmaFlavFactors$Sexo,
+                           Tiempo = plasmaFlavFactors$Tiempo)
+
+tableSexoPF <- table(plasmaFlav_clusters$Sexo,plasmaFlav_clusters$clusters)
+tableEdulcorantePF <- table(plasmaFlav_clusters$Endulzante,plasmaFlav_clusters$clusters)
+
+plasmaFlav_clusters$Endulzante <- rescale(as.numeric(plasmaFlav_clusters$Endulzante))
+plasmaFlav_clusters$Sexo <- rescale(as.numeric(plasmaFlav_clusters$Sexo))
+plasmaFlav_clusters$Tiempo <- rescale(as.numeric(plasmaFlav_clusters$Tiempo))
+
+longtablePF <- melt(plasmaFlav_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtablePF, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  facet_wrap(~Tiempo)+
+  annotate("text", x = 9, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 9, y = -0.03, label = "Hombre") +
+  annotate("text", x = 8, y = 1.03, label = "SU") + 
+  annotate("text",x = 8, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoPF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorantePF, theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma flav")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Selecting by time
 
 plasmaFlav_Factors_T0 <- subset(plasmaFlavFactors, Tiempo == "0")
 plasmaFlav_Factors_TF <- subset(plasmaFlavFactors, Tiempo == "Final")
@@ -1067,23 +1192,23 @@ longtableT_F <-melt(plasmaFlavNum_F_clusters[,colnames(plasmaFlavNum_0_clusters)
 
 ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
   geom_boxplot()+
-  annotate("text", x = 15, y = 1.03, label = "Mujer") + 
-  annotate("text",x = 15, y = -0.03, label = "Hombre") +
-  annotate("text", x = 14, y = 1.03, label = "SU") + 
-  annotate("text",x = 14, y = -0.03, label = "SA")+
-  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
-  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
+  annotate("text", x = 9, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 9, y = -0.03, label = "Hombre") +
+  annotate("text", x = 8, y = 1.03, label = "SU") + 
+  annotate("text",x = 8, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0, ymax=0.25)+
   ggtitle("Boxplot Cluster Analysis Plasma Flavonoids T 0")+
   labs(y = "standarized value", x = "variables/clusters")
 
 ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
   geom_boxplot()+
-  annotate("text", x = 15, y = 1.03, label = "Mujer") + 
-  annotate("text",x = 15, y = -0.03, label = "Hombre") +
-  annotate("text", x = 14, y = 1.03, label = "SU") + 
-  annotate("text",x = 14, y = -0.03, label = "SA")+
-  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0.75, ymax=1)+
-  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 15,xmax=17, ymin=0, ymax=0.25)+
+  annotate("text", x = 9, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 9, y = -0.03, label = "Hombre") +
+  annotate("text", x = 9, y = 1.03, label = "SU") + 
+  annotate("text",x = 8, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 9,xmax=11, ymin=0, ymax=0.25)+
   ggtitle("Boxplot Cluster Analysis Plasma Flavonoids T F")+
   labs(y = "standarized value", x = "variables/clusters")
 
@@ -1118,6 +1243,195 @@ summary(anova_pareado)
 
 anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
                         data = plasmaFlav_Factors)
+summary(anova_no_pareado)
+
+
+# Plasma AJUSTADO flavonoides ----
+
+## Preprocess ----
+
+plasmaFlav_adjusted <- preprocessTablas("data/", "tablaplasmaFlav_adjusted.csv")
+
+plasmaFlav_adjustedFactors <- plasmaFlav_adjusted$tablaFactors
+plasmaFlav_adjustedNum <- plasmaFlav_adjusted$tablaNum
+
+plasmaFlav_adjustedT_0 <- plasmaFlav_adjusted$tabla_Tiempo0
+plasmaFlav_adjustedT_F <- plasmaFlav_adjusted$tabla_TiempoF
+
+## PCA ----
+
+pcaVarios(plasmaFlav_adjustedFactors, "Plasma Antocianos")
+
+## Clustering ----
+
+### Checking clustering ----
+
+checkCluster(plasmaFlav_adjustedT_0[, colnames(plasmaFlav_adjustedT_0) != "numVol"])
+checkCluster(plasmaFlav_adjustedT_F[, colnames(plasmaFlav_adjustedT_F) != "numVol"])
+
+### Performing kmeans, PAM and fuzzy ----
+
+#clusterVarios()
+
+### Performing model based clustering ----
+
+## All times
+
+model_clustering_PF <- Mclust(plasmaFlav_adjusted$tablaNum)
+
+p1 <- fviz_mclust(object = model_clustering_PF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Plasma ADJ flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_PF, what = "classification", geom = "point",
+                  title = "Clusters Plot Plasma ADJ flav", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+plasmaFlav_adjusted_clusters <- cbind(plasmaFlav_adjusted$tablaNum, clusters = as.factor(model_clustering_PF$classification),
+                             Endulzante = plasmaFlav_adjustedFactors$Endulzante, 
+                             Sexo = plasmaFlav_adjustedFactors$Sexo,
+                             Tiempo = plasmaFlav_adjustedFactors$Tiempo)
+
+tableSexoPF <- table(plasmaFlav_adjusted_clusters$Sexo,plasmaFlav_adjusted_clusters$clusters)
+tableEdulcorantePF <- table(plasmaFlav_adjusted_clusters$Endulzante,plasmaFlav_adjusted_clusters$clusters)
+
+plasmaFlav_adjusted_clusters$Endulzante <- rescale(as.numeric(plasmaFlav_adjusted_clusters$Endulzante))
+plasmaFlav_adjusted_clusters$Sexo <- rescale(as.numeric(plasmaFlav_adjusted_clusters$Sexo))
+plasmaFlav_adjusted_clusters$Tiempo <- rescale(as.numeric(plasmaFlav_adjusted_clusters$Tiempo))
+
+longtablePF <- melt(plasmaFlav_adjusted_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtablePF, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  facet_wrap(~Tiempo)+
+  annotate("text", x = 11, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 11, y = -0.03, label = "Hombre") +
+  annotate("text", x = 10, y = 1.03, label = "SU") + 
+  annotate("text",x = 10, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoPF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorantePF, theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma ADJ flav")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Selecting by time
+
+plasmaFlav_adjusted_Factors_T0 <- subset(plasmaFlav_adjustedFactors, Tiempo == "0")
+plasmaFlav_adjusted_Factors_TF <- subset(plasmaFlav_adjustedFactors, Tiempo == "Final")
+
+model_clustering_OFT_0 <- Mclust(plasmaFlav_adjustedT_0[, colnames(plasmaFlav_adjustedT_0) != "numVol"])
+model_clustering_OFT_F <- Mclust(plasmaFlav_adjustedT_F[, colnames(plasmaFlav_adjustedT_F) != "numVol"])
+
+
+### Plotting results of model based clustering 
+
+p1 <- fviz_mclust(object = model_clustering_OFT_0, what = "BIC", pallete = "jco", 
+                  title = "Model Selection Plasma Flav T 0") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OFT_0, what = "classification", geom = "point",
+                  title = "Clusters Plot Plasma ADJ Flav T 0", pallete = "jco")
+
+p3 <- fviz_mclust(object = model_clustering_OFT_F, what = "BIC", pallete = "jco",
+                  title = "Model Selection Plasma Flav T F") + scale_x_discrete(limits = c(1:10))
+
+p4 <- fviz_mclust(model_clustering_OFT_F, what = "classification", geom = "point",
+                  title = "Clusters Plot Plasma ADJ Flav T F", pallete = "jco")
+
+
+ggarrange(p1,p3)
+ggarrange(p2,p4)
+
+### Rejoining factors to dataframe
+
+plasmaFlav_adjustedNum_0_clusters <- cbind(plasmaFlav_adjustedT_0, clusters = as.factor(model_clustering_OFT_0$classification),
+                                  Endulzante = plasmaFlav_adjusted_Factors_T0$Endulzante, 
+                                  Sexo = plasmaFlav_adjusted_Factors_T0$Sexo)
+plasmaFlav_adjustedNum_F_clusters <- cbind(plasmaFlav_adjustedT_F, clusters = as.factor(model_clustering_OFT_F$classification),
+                                  Endulzante = plasmaFlav_adjusted_Factors_TF$Endulzante, 
+                                  Sexo = plasmaFlav_adjusted_Factors_TF$Sexo)
+
+### Counting factors to plot them
+
+tableSexo0 <- table(plasmaFlav_adjustedNum_0_clusters$Sexo,plasmaFlav_adjustedNum_0_clusters$clusters)
+tableEdulcorante0 <- table(plasmaFlav_adjustedNum_0_clusters$Endulzante,plasmaFlav_adjustedNum_0_clusters$clusters)
+
+tableSexoF <- table(plasmaFlav_adjustedNum_F_clusters$Sexo,plasmaFlav_adjustedNum_F_clusters$clusters)
+tableEdulcoranteF <- table(plasmaFlav_adjustedNum_F_clusters$Endulzante,plasmaFlav_adjustedNum_F_clusters$clusters)
+
+
+### Scaling factors to plot them. SA = 0.0, ST = 0.5, SU = 1; Hombre = 0, Mujer = 1
+
+
+plasmaFlav_adjustedNum_0_clusters$Endulzante <- rescale(as.numeric(plasmaFlav_adjustedNum_0_clusters$Endulzante))
+plasmaFlav_adjustedNum_0_clusters$Sexo <- rescale(as.numeric(plasmaFlav_adjustedNum_0_clusters$Sexo))
+
+plasmaFlav_adjustedNum_F_clusters$Endulzante <- rescale(as.numeric(plasmaFlav_adjustedNum_F_clusters$Endulzante))
+plasmaFlav_adjustedNum_F_clusters$Sexo <- rescale(as.numeric(plasmaFlav_adjustedNum_F_clusters$Sexo))
+
+### Boxplot to explain clusters ----
+
+#### Reformatting for boxplot
+
+longtableT_0 <-melt(plasmaFlav_adjustedNum_0_clusters[,colnames(plasmaFlav_adjustedNum_0_clusters)!="numVol"], id = "clusters")
+
+longtableT_F <-melt(plasmaFlav_adjustedNum_F_clusters[,colnames(plasmaFlav_adjustedNum_0_clusters)!="numVol"], id = "clusters")
+
+#### Boxplotting all together
+
+ggplot(longtableT_0, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 11, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 11, y = -0.03, label = "Hombre") +
+  annotate("text", x = 10, y = 1.03, label = "SU") + 
+  annotate("text",x = 10, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante0, theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma ADJ Flavonoids T 0")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 11, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 11, y = -0.03, label = "Hombre") +
+  annotate("text", x = 10, y = 1.03, label = "SU") + 
+  annotate("text",x = 10, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteF, theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Plasma ADJ Flavonoids T F")+
+  labs(y = "standarized value", x = "variables/clusters")
+
+
+### Explainig clusters with parallell coordinates plot----
+
+p <- ggparcoord(data = plasmaFlav_adjustedNum_0_clusters[, colnames(plasmaFlav_adjustedT_0) != "numVol"], groupColumn = "clusters", 
+                scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,13,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo 0")
+
+p1 <- ggparcoord(data = plasmaFlav_adjustedNum_F_clusters[, colnames(plasmaFlav_adjustedT_F) != "numVol"], groupColumn = "clusters", 
+                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,13,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo F")
+
+ggarrange(p,p1)
+
+## ANOVA ----
+
+#### ANOVA paired ----
+
+plasmaFlav_adjustedDupl <- plasmaFlav_adjustedFactors[duplicated(plasmaFlav_adjustedFactors$numVol) == TRUE,]
+
+anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
+                     data = plasmaFlav_adjustedDupl)
+summary(anova_pareado)
+
+#### ANOVA dos/tres vias ----
+
+anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
+                        data = plasmaFlav_adjusted_Factors)
 summary(anova_no_pareado)
 
 
