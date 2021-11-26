@@ -655,25 +655,108 @@ p1 <- ggparcoord(data = orinaFlavNum_F_clusters[, colnames(orinaFlavT_F) != "num
 ggarrange(p,p1)
 
 
-## ANOVA ----
+## ANOVA paired ----
 
-#### ANOVA paired ----
+counts <- data.frame(table(orinaFlavFactors$numVol))
 
-orinaFlavDupl <- orinaFlavFactors[duplicated(orinaFlavFactors$numVol) == TRUE,]
+orinaFlavDupl <- orinaFlavFactors[orinaFlavFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
-anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
+### Datos metabólicos ----
+
+anova_pareado_EG <- aov(formula = EG ~ Sexo + Endulzante + Tiempo
+                     + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                     + Error(numVol/Tiempo),
                      data = orinaFlavDupl)
-summary(anova_pareado)
 
-#### ANOVA dos/tres vias ----
+summary(anova_pareado_EG)
 
-anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
-                        data = orinaFlav_Factors)
-summary(anova_no_pareado)
+anova_pareado_ES <- aov(formula = ES ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
+
+summary(anova_pareado_ES)
+
+anova_pareado_HE.G <- aov(formula = HE.G ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
+summary(anova_pareado_HE.G)
+
+anova_pareado_NG <- aov(formula = NG ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
 
 
-###################################################################################
-###################################################################################
+summary(anova_pareado_NG)
+
+anova_pareado_NS <- aov(formula = NS ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
+
+
+summary(anova_pareado_NS)
+
+### Datos antro ----
+
+anova_pareado_Peso <- aov(formula = Peso ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
+
+
+summary(anova_pareado_Peso)
+
+anova_pareado_IMC <- aov(formula = IMC ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = orinaFlavDupl)
+
+
+summary(anova_pareado_IMC)
+
+anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo + Endulzante + Tiempo
+                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                         + Error(numVol/Tiempo),
+                         data = orinaFlavDupl)
+
+
+summary(anova_pareado_Grasa)
+
+anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo + Endulzante + Endulzante*Sexo
+                         + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                         + Error(numVol/Tiempo),
+                         data = orinaFlavDupl)
+
+
+summary(anova_pareado_IRCV)
+
+anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = orinaFlavDupl)
+
+
+summary(anova_pareado_Bpmin)
+
+anova_pareado_Bpmax <- aov(formula = Bpmax ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = orinaFlavDupl)
+
+
+summary(anova_pareado_Bpmax)
+
+anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = orinaFlavDupl)
+
+
+summary(anova_pareado_Frec)
+
 
 
 # Orina Antocianos ---- 
@@ -847,23 +930,106 @@ p1 <- ggparcoord(data = orinaAntNum_F_clusters[, colnames(orinaAntT_F) != "numVo
 
 ggarrange(p,p1)
 
-## ANOVA ----
+## ANOVA paired ----
 
-#### ANOVA paired ----
+counts <- data.frame(table(orinaAntFactors$numVol))
 
-orinaAntDupl <- orinaAntFactors[duplicated(orinaAntFactors$numVol) == TRUE,]
+orinaAntDupl <- orinaAntFactors[orinaAntFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
-anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
-                     data = orinaAntDupl)
-summary(anova_pareado)
+### Datos metabólicos ----
 
-#### ANOVA dos/tres vias ----
+anova_pareado_CA.Gluc <- aov(formula = CA.Gluc ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaAntDupl)
 
-anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
-                        data = orinaAnt_Factors)
-summary(anova_no_pareado)
+summary(anova_pareado_CA.Gluc)
+
+anova_pareado_DHPAA.Gluc <- aov(formula = DHPAA.Gluc ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaAntDupl)
+
+summary(anova_pareado_DHPAA.Gluc)
+
+anova_pareado_TFA.Gluc <- aov(formula = TFA.Gluc ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = orinaAntDupl)
+summary(anova_pareado_TFA.Gluc)
+
+anova_pareado_TFA.Sulfate <- aov(formula = TFA.Sulfate ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaAntDupl)
+
+summary(anova_pareado_TFA.Sulfate)
+
+anova_pareado_Ácido.Vanílico..VA. <- aov(formula = Ácido.Vanílico..VA. ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = orinaAntDupl)
 
 
+summary(anova_pareado_Ácido.Vanílico..VA.)
+
+### Datos antro ----
+
+anova_pareado_Peso <- aov(formula = Peso ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = orinaAntDupl)
+
+
+summary(anova_pareado_Peso)
+
+anova_pareado_IMC <- aov(formula = IMC ~ Sexo + Endulzante + Tiempo
+                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                         + Error(numVol/Tiempo),
+                         data = orinaAntDupl)
+
+
+summary(anova_pareado_IMC)
+
+anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo + Endulzante + Tiempo
+                           + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                           + Error(numVol/Tiempo),
+                           data = orinaAntDupl)
+
+
+summary(anova_pareado_Grasa)
+
+anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = orinaAntDupl)
+
+
+summary(anova_pareado_IRCV)
+
+anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = orinaAntDupl)
+
+
+summary(anova_pareado_Bpmin)
+
+anova_pareado_Bpmax <- aov(formula = Bpmax ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = orinaAntDupl)
+
+
+summary(anova_pareado_Bpmax)
+
+anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = orinaAntDupl)
+
+
+summary(anova_pareado_Frec)
 # Plasma antocianos ----
 
 ## Preprocess ----
@@ -1036,26 +1202,115 @@ p1 <- ggparcoord(data = plasmaAntNum_F_clusters[, colnames(plasmaAntT_F) != "num
 
 ggarrange(p,p1)
 
-## ANOVA ----
+## ANOVA paired ----
 
-#### ANOVA paired ----
+counts <- data.frame(table(plasmaAntFactors$numVol))
 
-plasmaAntDupl <- plasmaAntFactors[duplicated(plasmaAntFactors$numVol) == TRUE,]
+plasmaAntDupl <- plasmaAntFactors[plasmaAntFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
-anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
-                     data = plasmaAntDupl)
-summary(anova_pareado)
+### Datos metabólicos ----
 
-#### ANOVA dos/tres vias ----
+anova_pareado_Ácido.Caféico..CA. <- aov(formula = Ácido.Caféico..CA. ~ Sexo + Endulzante + Tiempo
+                             + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                             + Error(numVol/Tiempo),
+                             data = plasmaAntDupl)
 
-anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
-                        data = plasmaAnt_Factors)
-summary(anova_no_pareado)
+summary(anova_pareado_Ácido.Caféico..CA.)
+
+anova_pareado_CA.Gluc <- aov(formula = CA.Gluc ~ Sexo + Endulzante + Tiempo
+                                + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                                + Error(numVol/Tiempo),
+                                data = plasmaAntDupl)
+
+summary(anova_pareado_CA.Gluc)
+
+anova_pareado_X3.4.Ácido.Dihidroxifenilacético..DHPAA. <- aov(formula = X3.4.Ácido.Dihidroxifenilacético..DHPAA. ~ Sexo + Endulzante + Tiempo
+                              + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                              + Error(numVol/Tiempo),
+                              data = plasmaAntDupl)
+summary(anova_pareado_X3.4.Ácido.Dihidroxifenilacético..DHPAA.)
+
+anova_pareado_DHPAA.Gluc <- aov(formula = DHPAA.Gluc ~ Sexo + Endulzante + Tiempo
+                                 + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                                 + Error(numVol/Tiempo),
+                                 data = plasmaAntDupl)
+
+summary(anova_pareado_DHPAA.Gluc)
+
+anova_pareado_VA.GG <- aov(formula = VA.GG ~ Sexo + Endulzante + Tiempo
+                                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                                         + Error(numVol/Tiempo),
+                                         data = plasmaAntDupl)
 
 
-############################################################### separacion
+summary(anova_pareado_VA.GG)
+
+anova_pareado_VA.Gluc.sulfate <- aov(formula = VA.Gluc.sulfate ~ Sexo + Endulzante + Tiempo
+                           + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                           + Error(numVol/Tiempo),
+                           data = plasmaAntDupl)
 
 
+summary(anova_pareado_VA.Gluc.sulfate)
+
+
+### Datos antro ----
+
+anova_pareado_Peso <- aov(formula = Peso ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = plasmaAntDupl)
+
+
+summary(anova_pareado_Peso)
+
+anova_pareado_IMC <- aov(formula = IMC ~ Sexo + Endulzante + Tiempo
+                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                         + Error(numVol/Tiempo),
+                         data = plasmaAntDupl)
+
+
+summary(anova_pareado_IMC)
+
+anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo + Endulzante + Tiempo
+                           + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                           + Error(numVol/Tiempo),
+                           data = plasmaAntDupl)
+
+
+summary(anova_pareado_Grasa)
+
+anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaAntDupl)
+
+
+summary(anova_pareado_IRCV)
+
+anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaAntDupl)
+
+
+summary(anova_pareado_Bpmin)
+
+anova_pareado_Bpmax <- aov(formula = Bpmax ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaAntDupl)
+
+
+summary(anova_pareado_Bpmax)
+
+anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaAntDupl)
+
+
+summary(anova_pareado_Frec)
 
 # Plasma flavonoides sin ajustar ----
 
@@ -1229,21 +1484,71 @@ p1 <- ggparcoord(data = plasmaFlavNum_F_clusters[, colnames(plasmaFlavT_F) != "n
 
 ggarrange(p,p1)
 
-## ANOVA ----
+## ANOVA paired ----
 
-#### ANOVA paired ----
+counts <- data.frame(table(plasmaFlavFactors$numVol))
 
-plasmaFlavDupl <- plasmaFlavFactors[duplicated(plasmaFlavFactors$numVol) == TRUE,]
+plasmaFlavDupl <- plasmaFlavFactors[plasmaFlavFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
-anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
-                     data = plasmaFlavDupl)
-summary(anova_pareado)
+### Datos metabólicos ----
 
-#### ANOVA dos/tres vias ----
+### Datos antro ----
 
-anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
-                        data = plasmaFlav_Factors)
-summary(anova_no_pareado)
+anova_pareado_Peso <- aov(formula = Peso ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlavDupl)
+
+
+summary(anova_pareado_Peso)
+
+anova_pareado_IMC <- aov(formula = IMC ~ Sexo + Endulzante + Tiempo
+                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                         + Error(numVol/Tiempo),
+                         data = plasmaFlavDupl)
+
+
+summary(anova_pareado_IMC)
+
+anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo + Endulzante + Tiempo
+                           + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlavDupl)
+
+
+summary(anova_pareado_Grasa)
+
+anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlavDupl)
+
+
+summary(anova_pareado_IRCV)
+
+anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlavDupl)
+
+
+summary(anova_pareado_Bpmin)
+
+anova_pareado_Bpmax <- aov(formula = Bpmax ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlavDupl)
+
+
+summary(anova_pareado_Bpmax)
+
+anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlavDupl)
+
+
+summary(anova_pareado_Frec)
 
 
 # Plasma AJUSTADO flavonoides ----
@@ -1418,20 +1723,86 @@ p1 <- ggparcoord(data = plasmaFlav_adjustedNum_F_clusters[, colnames(plasmaFlav_
 
 ggarrange(p,p1)
 
-## ANOVA ----
+## ANOVA paired ----
 
-#### ANOVA paired ----
+counts <- data.frame(table(plasmaFlav_adjustedFactors$numVol))
 
-plasmaFlav_adjustedDupl <- plasmaFlav_adjustedFactors[duplicated(plasmaFlav_adjustedFactors$numVol) == TRUE,]
+plasmaFlav_adjustedDupl <- plasmaFlav_adjustedFactors[plasmaFlav_adjustedFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
-anova_pareado <- aov(formula = NS ~ Sexo + Endulzante + Tiempo + Sexo*Endulzante + Error(numVol/Tiempo),
-                     data = plasmaFlav_adjustedDupl)
-summary(anova_pareado)
+### Datos metabólicos ----
 
-#### ANOVA dos/tres vias ----
+anova_pareado_Eriodictiol..E. <- aov(formula = Eriodictiol..E. ~ Sexo + Endulzante + Tiempo
+                                     + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                                     + Error(numVol/Tiempo),
+                                     data = plasmaFlav_adjustedDupl)
 
-anova_no_pareado <- aov(formula = NS ~ Sexo + Endulzante, 
-                        data = plasmaFlav_adjusted_Factors)
-summary(anova_no_pareado)
 
+summary(anova_pareado_Eriodictiol..E.)
+
+
+anova_pareado_ES <- aov(formula = ES ~ Sexo + Endulzante + Tiempo
+                        + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                        + Error(numVol/Tiempo),
+                        data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_ES)
+
+### Datos antro ----
+
+anova_pareado_Peso <- aov(formula = Peso ~ Sexo + Endulzante + Tiempo
+                          + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_Peso)
+
+anova_pareado_IMC <- aov(formula = IMC ~ Sexo + Endulzante + Tiempo
+                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                         + Error(numVol/Tiempo),
+                         data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_IMC)
+
+anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo + Endulzante + Tiempo
+                           + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_Grasa)
+
+anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_IRCV)
+
+anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_Bpmin)
+
+anova_pareado_Bpmax <- aov(formula = Bpmax ~ Sexo + Endulzante + Endulzante*Sexo
+                           + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                           + Error(numVol/Tiempo),
+                           data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_Bpmax)
+
+anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
+                          + Tiempo + Sexo*Tiempo + Tiempo*Endulzante 
+                          + Error(numVol/Tiempo),
+                          data = plasmaFlav_adjustedDupl)
+
+
+summary(anova_pareado_Frec)
 
