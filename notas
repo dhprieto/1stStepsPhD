@@ -1,6 +1,5 @@
 pendiente
 -----
-- anotar resultados gráficas
 - probar resultados con anovas pareadas y no pareadas
 - modelar con todo el dataset
 - modelar entrenando con T_0 y testando con T_F
@@ -11,10 +10,13 @@ hecho
 - análisis clustering total
 - análisis clustering a T_0 y T_F
 - PCA de todas las combinaciones de factores
-
+- anotar resultados gráficas totales
 
 posible
 -----
-- probar métodos de clustering
+- probar otros métodos de clustering
 - extraer features con RF
 - guardar y anotar PCA's
+- estudiar que pasa con los clusters a tiempo 0 en tiempo final
+- 
+- anotar resultados gráficas por tiempo
