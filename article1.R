@@ -1,6 +1,6 @@
-library(dplyr)
+library(tidyverse)
+library(rstatix)
 library(scales)
-library(purrr)
 library(ggpubr)
 library(factoextra)
 library(GGally)
@@ -504,7 +504,7 @@ pcaVarios(orinaFlavFactors, "orina flavonoides")
 ### Checking clustering ----
 
 checkCluster(orinaFlavT_0[, colnames(orinaFlavT_0) != "numVol"])
-checkCluster(orinaFlavT_F[, colnames(orinaFlavT_) != "numVol"])
+checkCluster(orinaFlavT_F[, colnames(orinaFlavT_F) != "numVol"])
 
 ### Performing kmeans, PAM and fuzzy ----
 
@@ -661,14 +661,76 @@ counts <- data.frame(table(orinaFlavFactors$numVol))
 
 orinaFlavDupl <- orinaFlavFactors[orinaFlavFactors$numVol %in% counts$Var1[counts$Freq > 1],]
 
+datos <- orinaFlavFactors 
+
+ggplot(data = orinaFlavFactors, aes(x = Peso)) +
+  geom_histogram(aes(y = ..density.., fill = ..count..)) +
+  scale_fill_gradient(low = "#DCDCDC", high = "#7C7C7C") +
+  stat_function(fun = dnorm, colour = "firebrick",
+                args = list(mean = mean(orinaFlavFactors$Peso),
+                            sd = sd(orinaFlavFactors$Peso))) +
+  ggtitle("Histograma con curva normal teórica") +
+  theme_bw()
+
+
+
+datos %>% sample_n_by(EG, Peso, size = 1)
+
+datos <- datos %>%
+  select(Endulzante, Sexo, Tiempo, numVol, Peso)%>%
+  group_by(Endulzante, Sexo, Tiempo) %>%
+  mutate(zscore = scale(EG)) %>%
+  filter(between(zscore, -1, +2.))
+
+bxp <- ggboxplot(
+  datos, x = "Endulzante", y = "Peso",
+  color = "Tiempo", pallette = "jco",
+  facet.by = "Sexo", short.panel.labs = FALSE,
+  outlier.shape = "p"
+)
+
+bxp
+
+datos %>% 
+  select(Endulzante, Sexo, Tiempo, numVol, Peso)%>%
+  group_by(Endulzante, Sexo, Tiempo) %>%
+  identify_outliers(Peso)
+
+
+datos %>% 
+  group_by(Endulzante, Sexo, Tiempo) %>%
+  shapiro_test(Peso)
+
+ggqqplot(datos, "Peso", ggtheme = theme_bw()) +
+  facet_grid(Endulzante + Sexo ~Tiempo, labeller="label_both")
+
+res.aov <- anova_test(
+  data = datos, dv = Peso, wid= numVol, 
+  within = c(Endulzante, Sexo, Tiempo)
+)
+
+get_anova_table(res.aov)
+
+lm(Peso~numVol+Tiempo:Endulzante:Sexo, data= datos)
+
+all(is.na(datos$EG))
+all(is.na(datos$numVol))
+all(is.na(datos$Tiempo))
+all(is.na(datos$Sexo))
+all(is.na(datos$Endulzante))
+
 ### Datos metabólicos ----
 
-anova_pareado_EG <- aov(formula = EG ~ Sexo + Endulzante + Tiempo
-                     + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
-                     + Error(numVol/Tiempo),
+anova_pareado_EG <- aov(formula = EG ~ Sexo * Endulzante * Tiempo +
+                     Error(numVol/Tiempo),
                      data = orinaFlavDupl)
 
+
+
+
 summary(anova_pareado_EG)
+plot(anova_pareado_EG)
+
 
 anova_pareado_ES <- aov(formula = ES ~ Sexo + Endulzante + Tiempo
                         + Sexo*Tiempo + Tiempo*Endulzante + Endulzante*Sexo
@@ -698,6 +760,9 @@ anova_pareado_NS <- aov(formula = NS ~ Sexo + Endulzante + Tiempo
 
 
 summary(anova_pareado_NS)
+
+stargazer(anova_pareado_EG, anova_pareado_ES, anova_pareado_HE.G, 
+          anova_pareado_NG, anova_pareado_NS)
 
 ### Datos antro ----
 
@@ -756,6 +821,8 @@ anova_pareado_Frec <- aov(formula = Frec ~ Sexo + Endulzante + Endulzante*Sexo
 
 
 summary(anova_pareado_Frec)
+
+## Modelos ----
 
 
 
