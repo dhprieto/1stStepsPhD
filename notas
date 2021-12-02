@@ -20,3 +20,26 @@ posible
 - estudiar que pasa con los clusters a tiempo 0 en tiempo final
 - 
 - anotar resultados gráficas por tiempo
+
+REUNIÓN 29/11
+--------------
+
+- Posibilidad de agrupar datos de metabolitos por grupos funcionales. En caso de repetirse datos, investigar que
+compromiso se puede hacer entre las dos medidas (una distancia aritmética, elegir el metabolito "más" importante...)
+- Repetir el clustering y las anovas con cada individuo siendo su propio control, es decir, conservando los números 
+de voluntarios.
+- IMC entre 25-29 -> quizá no sea la mejor manera de medir el volumen corporal -> % grasa, distribución de grasa
+- Repetir el análisis sin los datos antropométricos asociados y luego acoplarlos.
+- Importancia de la esperidina y de la eriotricina
+- Los flavonoides se metabolizan en cafeico casi siempre
+- Para realizar los análisis como en weightloss, tengo que comparar ese dataset con el mío
+- El resultado de la anova del peso no necesariamente implica que la subida de peso, puede que la variabilidad esté en 
+la bajada de peso, siendo unas más grandes que otras. 
+---->>>>>>>>>>>>>>>>>> HAY QUE HACER LAS COMPARACIONES MULTIPLES
+
+- Para crear el modelo de ML, dirigirlo hacia donde esté interesado (generar individuos con ciertas características)
+- Buscar metabolitos importantes 
+- Posible influencia de la edad, algo IMV
+- Ver relevancia de la variable respuesta
+
+_ Para el report: estructura normal de artículo, sin desarrollar demasiado la itnroducción. 

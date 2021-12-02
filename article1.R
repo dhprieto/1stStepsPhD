@@ -1759,7 +1759,87 @@ summary(anova_pareado_Frec)
 
 # PRUEBAS ----
 
-### Anova paired ----
+### Solo metabolicos ----
+
+#### Cluster ----
+
+datosuwu <- orinaFlav$tablaNum %>%
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+
+model_clustering_OF <- Mclust(datosuwu)
+
+p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina Flav", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+orinaFlav_clusters <- datosuwu %>% tibble::add_column(Peso = orinaFlav$tablaNum$Peso, 
+                                                      IMC = orinaFlav$tablaNum$IMC, 
+                                                      Grasa = orinaFlav$tablaNum$Grasa, 
+                                                      IRCV = orinaFlav$tablaNum$IRCV, 
+                                                      Bpmin = orinaFlav$tablaNum$Bpmin, 
+                                                      Bpmax = orinaFlav$tablaNum$Bpmax, 
+                                                      Frec = orinaFlav$tablaNum$Frec,
+                                                      clusters = model_clustering_OF$classification,
+                                                      Endulzante = rescale(as.numeric(orinaFlavFactors$Endulzante)), 
+                                                      Sexo = rescale(as.numeric(orinaFlavFactors$Sexo)),
+                                                      Tiempo = orinaFlavFactors$Tiempo)
+
+tableSexo <- orinaFlav_clusters %>% count(Sexo, clusters)  
+tableEdulcorante <- orinaFlav_clusters %>% count(Endulzante, clusters)
+
+
+orinaFlav_clusters$Endulzante <- rescale(as.numeric(orinaFlav_clusters$Endulzante))
+orinaFlav_clusters$Sexo <- rescale(as.numeric(orinaFlav_clusters$Sexo))
+orinaFlav_clusters$Tiempo <- rescale(as.numeric(orinaFlav_clusters$Tiempo))
+
+longtableOF <- melt(orinaFlav_clusters, id = c("clusters", "Tiempo"))
+
+longtableOF <- orinaFlav_clusters %>% gather(variable, values, -clusters, -Tiempo, )
+
+ggplot(longtableOF, aes(variable,as.numeric(values), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
+  labs(y = "standarized value", x = "variables/clusters")+
+  facet_wrap(~Tiempo)
+
+
+
+#### Anova ----
+
+datosuwu <- orinaFlavDupl %>%
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+
+
+
+datosuwu_aov <- aov(formula = EG ~ Sexo*Endulzante*Tiempo + Error(numVol/Tiempo), data = datosuwu)
+
+anova_pareado_ES <- aov(formula = EG ~ Sexo*Endulzante*Tiempo + Error(numVol/Tiempo), data = orinaFlavDupl)
+
+summary(anova_pareado_ES)
+
+summary(datosuwu_aov)
+
+
+### Conservar numVol ----
+
+datosOwo <- orinaFlav$tablaFactors
+
+for (i in range(1,nrow(tabla))){
+  if (tabla$clusters_0[i] != tabla$clusters_F[i]){
+      tabla_ =+ 
+  }
+}
+
+### Anova OTRO METODO paired ----
 
 datos <- orinaFlavFactors 
 
