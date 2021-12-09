@@ -1828,6 +1828,41 @@ summary(anova_pareado_ES)
 
 summary(datosuwu_aov)
 
+### TODO JUNTO ----
+
+tabla1 <- orinaFlav$tablaFactors %>% 
+          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+
+tabla2 <- orinaAnt$tablaFactors %>% 
+          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
+                    Sexo, Tiempo))
+
+tabla3 <- plasmaAnt$tablaFactors %>% 
+          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
+                    Sexo, Tiempo))
+
+tabla_antro <- plasmaFlav$tablaFactors %>% 
+               select(c(numVol, Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec)) 
+
+tabla_merge <- tabla_antro %>% inner_join(tabla1) %>% inner_join(tabla2) %>%
+               inner_join(tabla3,by ="numVol")
+
+
+nrow(na.omit(tabla_merge))
+
+nrow(orinaFlav$tablaFactors)
+nrow(orinaAnt$tablaFactors)
+nrow(plasmaAnt$tablaFactors)
+nrow(plasmaFlav$tablaFactors)
+nrow(plasmaFlav_adjusted$tablaFactors)
+
+
+prueba_union <- merge(orinaFlavFactors, orinaAntFactors, by = "numVol")
+
+
+prueba_union2 <- orinaFlavFactors %>% full_join(orinaAntFactors)
+
+
 
 ### Conservar numVol ----
 
