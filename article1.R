@@ -1844,24 +1844,104 @@ tabla3 <- plasmaAnt$tablaFactors %>%
 tabla_antro <- plasmaFlav$tablaFactors %>% 
                select(c(numVol, Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec)) 
 
-tabla_merge <- tabla_antro %>% inner_join(tabla1) %>% inner_join(tabla2) %>%
-               inner_join(tabla3,by ="numVol")
+tabla_merge <- na.omit(full_join( full_join( full_join(
+               tabla_antro %>% group_by(numVol) %>% mutate(id = row_number()),
+               tabla1 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")), 
+               tabla2 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")),
+               tabla3 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")) )
+                                                    
+
+model_clustering_OF <- Mclust(ungroup(tabla_merge) %>% select(-c(numVol, Endulzante, Sexo, Tiempo, id, Peso, IMC,
+                                                                 Grasa, IRCV, Bpmin, Bpmax, Frec)))
+
+p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina Flav", pallete = "jco")
+
+ggarrange(p1,p2)
 
 
-nrow(na.omit(tabla_merge))
+tabla_merge_clusters <- cbind(ungroup(tabla_merge) %>% select(-c(numVol, id)), clusters = as.factor(model_clustering_OF$classification))
 
-nrow(orinaFlav$tablaFactors)
-nrow(orinaAnt$tablaFactors)
-nrow(plasmaAnt$tablaFactors)
-nrow(plasmaFlav$tablaFactors)
-nrow(plasmaFlav_adjusted$tablaFactors)
+tableSexoOF <- table(tabla_merge_clusters$Sexo,tabla_merge_clusters$clusters)
+tableEdulcoranteOF <- table(tabla_merge_clusters$Endulzante,tabla_merge_clusters$clusters)
+
+tabla_merge_clusters$Endulzante <- rescale(as.numeric(tabla_merge_clusters$Endulzante))
+tabla_merge_clusters$Sexo <- rescale(as.numeric(tabla_merge_clusters$Sexo))
+tabla_merge_clusters$Tiempo <- rescale(as.numeric(tabla_merge_clusters$Tiempo))
+
+longtableOF <- melt(tabla_merge_clusters, id = c("clusters", "Tiempo"))
+
+ggplot(longtableOF, aes(variable,as.numeric(value), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
+  annotate("text",x = 14, y = -0.03, label = "Hombre") +
+  annotate("text", x = 13, y = 1.03, label = "SU") + 
+  annotate("text",x = 13, y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexoOF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 22,xmax=24, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcoranteOF, theme = ttheme_default(base_size = 8)), xmin= 22,xmax=24, ymin=0, ymax=0.25)+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
+  labs(y = "standarized value", x = "variables/clusters")+
+  facet_wrap(~Tiempo)
 
 
-prueba_union <- merge(orinaFlavFactors, orinaAntFactors, by = "numVol")
+#### Anovas ----
 
 
-prueba_union2 <- orinaFlavFactors %>% full_join(orinaAntFactors)
+counts <- data.frame(table(tabla_merge$numVol))
 
+tabla_mergeDupl <- tabla_merge[tabla_merge$numVol %in% counts$Var1[counts$Freq > 1],]
+
+### Datos metabólicos ----
+
+anova_pareado_EG <- aov(formula = EG ~ Sexo * Endulzante * Tiempo +
+                          Error(numVol/Tiempo),
+                        data = tabla_mergeDupl)
+
+summary(anova_pareado_EG)
+
+
+anova_pareado_ES <- aov(formula = ES ~ Sexo * Endulzante * Tiempo +
+                          Error(numVol/Tiempo),
+                        data = tabla_mergeDupl)
+
+summary(anova_pareado_ES)
+
+
+for(i in colnames(tabla_mergeDupl)) {
+  
+  if (i == "numVol"){
+   print("uwu") 
+  } 
+  else{
+  print(as.matrix(i))  
+  anova_paired <- aov(formula = as.matrix(i) ~ Sexo * Endulzante * Tiempo +
+                        Error(numVol/Tiempo),
+                      data = tabla_mergeDupl)
+  }
+
+}
+
+
+anova_results <- purrr::map(tabla_mergeDupl[,2:9], ~aov(.x ~  tabla_mergeDupl$Sexo * tabla_mergeDupl$Endulzante 
+                                                        * tabla_mergeDupl$Tiempo + 
+                                                          Error(tabla_mergeDupl$numVol/tabla_mergeDupl$Tiempo)))
+anova_results[[1]]
+
+
+
+# [1] "numVol"                                   "Peso"                                     "IMC"                                     
+# [4] "Grasa"                                    "IRCV"                                     "Bpmin"                                   
+# [7] "Bpmax"                                    "Frec"                                     "id"                                      
+# [10] "EG"                                       "ES"                                       "HE.G"                                    
+# [13] "NG"                                       "NS"                                       "Endulzante"                              
+# [16] "Tiempo"                                   "Sexo"                                     "CA.Gluc.x"                               
+# [19] "DHPAA.Gluc.x"                             "TFA.Gluc"                                 "TFA.Sulfate"                             
+# [22] "Ácido.Vanílico..VA."                      "Ácido.Caféico..CA."                       "CA.Gluc.y"                               
+# [25] "X3.4.Ácido.Dihidroxifenilacético..DHPAA." "DHPAA.Gluc.y"                             "VA.GG"                                   
+# [28] "VA.Gluc.sulfate"
 
 
 ### Conservar numVol ----
