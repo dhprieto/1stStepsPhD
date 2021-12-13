@@ -1932,6 +1932,42 @@ anova_results[[1]]
 
 
 
+aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
+                                                               Error(numVol/Tiempo),
+                                                               data = tabla_mergeDupl))
+
+
+pruebaUwu <- anova(aov_results[[2]]$`numVol:Tiempo`)
+
+
+
+library(stargazer)
+
+stargazer(anova(aov_results[[1]]$`numVol:Tiempo`), type = "html")
+
+  
+  for (j in seq(1, length(aov_results))) {
+    print(paste("Variable analizada: ", names(aov_results)[j]))
+    resultado <- anova(aov_results[[j]]$`numVol:Tiempo`)
+    
+    for (i in seq(1,nrow(resultado)-1)){
+      
+      if (resultado$`Pr(>F)`[i] < 0.05){
+        print(resultado[i,])
+      }
+      
+    }  
+    
+  }
+  
+
+  
+names(aov_results)[1]
+
+lapply(aov_results, print)
+
+str(tabla_mergeDupl)
+
 # [1] "numVol"                                   "Peso"                                     "IMC"                                     
 # [4] "Grasa"                                    "IRCV"                                     "Bpmin"                                   
 # [7] "Bpmax"                                    "Frec"                                     "id"                                      
