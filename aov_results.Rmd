@@ -190,13 +190,14 @@ aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * En
 
 
   for (j in seq(1, length(aov_results))) {
-    message(paste("Variable analizada: ", names(aov_results)[j]))
-    resultado <- anova(aov_results[[j]]$`numVol:Tiempo`)
+    print(paste("Variable analizada: ", names(aov_results)[j]))
     
-    for (i in seq(1,nrow(resultado)-1)){
+    resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+    
+    for (i in seq(1,4)){
       
-      if (resultado$`Pr(>F)`[i] < 0.1){
-        print(resultado[i,])
+      if (resultado[[1]][,5][i] < 0.1){
+        print(resultado[[1]][i,])
       }
       
     }  

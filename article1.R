@@ -1830,6 +1830,11 @@ summary(datosuwu_aov)
 
 ### TODO JUNTO ----
 
+orinaFlav <- preprocessTablas("data/", "tablaOrinaFlav.csv")
+orinaAnt <- preprocessTablas("data/", "tablaorinaAnt.csv")
+plasmaAnt <- preprocessTablas("data/", "tablaplasmaAnt.csv")
+plasmaFlav <- preprocessTablas("data/", "tablaplasmaFlav.csv")
+
 tabla1 <- orinaFlav$tablaFactors %>% 
           select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
@@ -1937,7 +1942,10 @@ aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * En
                                                                data = tabla_mergeDupl))
 
 
-pruebaUwu <- anova(aov_results[[2]]$`numVol:Tiempo`)
+pruebaUwu <- summary(aov_results[[2]])
+
+pruebaUwu$`Error: numVol:Tiempo`[[1]][1,]
+
 
 
 
@@ -1948,12 +1956,13 @@ stargazer(anova(aov_results[[1]]$`numVol:Tiempo`), type = "html")
   
   for (j in seq(1, length(aov_results))) {
     print(paste("Variable analizada: ", names(aov_results)[j]))
-    resultado <- anova(aov_results[[j]]$`numVol:Tiempo`)
     
-    for (i in seq(1,nrow(resultado)-1)){
+    resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+    
+    for (i in seq(1,4)){
       
-      if (resultado$`Pr(>F)`[i] < 0.05){
-        print(resultado[i,])
+      if (resultado[[1]][,5][i] < 0.05){
+        print(resultado[[1]][i,])
       }
       
     }  
