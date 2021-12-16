@@ -1763,6 +1763,8 @@ summary(anova_pareado_Frec)
 
 #### Cluster ----
 
+clusterNPlot <- function(listaTablas){
+
 tablaNumMet <- listaTablas$tablaNum %>%
   select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
@@ -1771,7 +1773,7 @@ tablaFactorsAll <-listaTablas$tablaFactors
 model_clustering_OF <- Mclust(tablaNumMet)
 
 p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
-                  title = "mapply(function, ...)odel Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
 
 p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
                   title = "Clusters Plot Orina Flav", pallete = "jco")
@@ -1779,29 +1781,29 @@ p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
 ggarrange(p1,p2)
 
 
-tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = orinaFlav$tablaNum$Peso, 
-                                                      IMC = orinaFlav$tablaNum$IMC, 
-                                                      Grasa = orinaFlav$tablaNum$Grasa, 
-                                                      IRCV = orinaFlav$tablaNum$IRCV, 
-                                                      Bpmin = orinaFlav$tablaNum$Bpmin, 
-                                                      Bpmax = orinaFlav$tablaNum$Bpmax, 
-                                                      Frec = orinaFlav$tablaNum$Frec,
+tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$tablaNum$Peso, 
+                                                      IMC = listaTablas$tablaNum$IMC, 
+                                                      Grasa = listaTablas$tablaNum$Grasa, 
+                                                      IRCV = listaTablas$tablaNum$IRCV, 
+                                                      Bpmin = listaTablas$tablaNum$Bpmin, 
+                                                      Bpmax = listaTablas$tablaNum$Bpmax, 
+                                                      Frec = listaTablas$tablaNum$Frec,
                                                       clusters = model_clustering_OF$classification,
-                                                      Endulzante = rescale(as.numeric(orinaFlavFactors$Endulzante)), 
-                                                      Sexo = rescale(as.numeric(orinaFlavFactors$Sexo)),
-                                                      Tiempo = orinaFlavFactors$Tiempo)
+                                                      Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
+                                                      Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
+                                                      Tiempo = tablaFactorsAll$Tiempo)
 
-tableSexo <- orinaFlav_clusters %>% count(Sexo, clusters)  
-tableEdulcorante <- orinaFlav_clusters %>% count(Endulzante, clusters)
+tableSexo <- tabla_clusters %>% count(Sexo, clusters)  
+tableEdulcorante <- tabla_clusters %>% count(Endulzante, clusters)
 
 
-orinaFlav_clusters$Endulzante <- rescale(as.numeric(orinaFlav_clusters$Endulzante))
-orinaFlav_clusters$Sexo <- rescale(as.numeric(orinaFlav_clusters$Sexo))
+tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
+tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
 orinaFlav_clusters$Tiempo <- rescale(as.numeric(orinaFlav_clusters$Tiempo))
 
-longtableOF <- melt(orinaFlav_clusters, id = c("clusters", "Tiempo"))
+longtableOF <- melt(tabla_clusters, id = c("clusters", "Tiempo"))
 
-longtableOF <- orinaFlav_clusters %>% gather(variable, values, -clusters, -Tiempo, )
+longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
 
 ggplot(longtableOF, aes(variable,as.numeric(values), fill=factor(clusters))) +
   geom_boxplot()+
@@ -1813,7 +1815,9 @@ ggplot(longtableOF, aes(variable,as.numeric(values), fill=factor(clusters))) +
   labs(y = "standarized value", x = "variables/clusters")+
   facet_wrap(~Tiempo)
 
+}
 
+clusterNPlot(orinaAnt)
 
 #### Anova ----
 
