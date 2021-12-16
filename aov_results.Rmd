@@ -190,7 +190,7 @@ aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * En
 
 
   for (j in seq(1, length(aov_results))) {
-    print(paste("Variable analizada: ", names(aov_results)[j]))
+    message(paste("Variable analizada: ", names(aov_results)[j]))
     
     resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
     

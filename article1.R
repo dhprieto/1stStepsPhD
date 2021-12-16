@@ -1763,13 +1763,15 @@ summary(anova_pareado_Frec)
 
 #### Cluster ----
 
-datosuwu <- orinaFlav$tablaNum %>%
+tablaNumMet <- listaTablas$tablaNum %>%
   select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
-model_clustering_OF <- Mclust(datosuwu)
+tablaFactorsAll <-listaTablas$tablaFactors
+
+model_clustering_OF <- Mclust(tablaNumMet)
 
 p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
-                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+                  title = "mapply(function, ...)odel Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
 
 p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
                   title = "Clusters Plot Orina Flav", pallete = "jco")
@@ -1777,7 +1779,7 @@ p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
 ggarrange(p1,p2)
 
 
-orinaFlav_clusters <- datosuwu %>% tibble::add_column(Peso = orinaFlav$tablaNum$Peso, 
+tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = orinaFlav$tablaNum$Peso, 
                                                       IMC = orinaFlav$tablaNum$IMC, 
                                                       Grasa = orinaFlav$tablaNum$Grasa, 
                                                       IRCV = orinaFlav$tablaNum$IRCV, 

@@ -174,23 +174,23 @@ pre code {
 <pre class="r"><code>aov_results &lt;- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
                                                                Error(numVol/Tiempo),
                                                                data = tabla_mergeDupl))</code></pre>
-<pre><code>## [1] &quot;Variable analizada:  numVol&quot;
-##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
+<pre><code>## Variable analizada:  numVol</code></pre>
+<pre><code>##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
 ## Tiempo                  1 8.679e-27 8.679e-27  3.1374 0.08135 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Peso&quot;
-##                        Df    Sum Sq   Mean Sq F value Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>##                        Df    Sum Sq   Mean Sq F value Pr(&gt;F)  
 ## Endulzante:Tiempo       2 0.0030259 0.0015129  4.3367 0.0172 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  IMC&quot;
-##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
 ## Endulzante:Tiempo       2 0.0065965 0.0032983  3.7962 0.02776 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Grasa&quot;
-##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Tiempo                  1 0.031617 0.031617    4.88 0.03081 *
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -205,83 +205,83 @@ pre code {
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Endulzante:Tiempo  2 0.038828 0.019414  2.9964 0.05713 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  IRCV&quot;
-##                        Df   Sum Sq  Mean Sq F value   Pr(&gt;F)   
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>##                        Df   Sum Sq  Mean Sq F value   Pr(&gt;F)   
 ## Tiempo                  1 0.071143 0.071143  10.832 0.001637 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.040897 0.040897  6.2267 0.01522 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Bpmin&quot;
-## [1] &quot;Variable analizada:  Bpmax&quot;
-## [1] &quot;Variable analizada:  Frec&quot;
-##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.051643 0.051643  4.3605 0.04083 *
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Endulzante:Tiempo       2 0.073084 0.036542  3.0855 0.05268 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  id&quot;
-##                        Df Sum Sq Mean Sq    F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  id</code></pre>
+<pre><code>##                        Df Sum Sq Mean Sq    F value    Pr(&gt;F)    
 ## Tiempo                  1   34.5    34.5 5.8524e+30 &lt; 2.2e-16 ***
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  EG&quot;
-## [1] &quot;Variable analizada:  ES&quot;
-## [1] &quot;Variable analizada:  HE.G&quot;
-##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  EG</code></pre>
+<pre><code>## Variable analizada:  ES</code></pre>
+<pre><code>## Variable analizada:  HE.G</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Tiempo                  1 0.46322 0.46322  22.138 1.433e-05 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.068492 0.068492  3.2732 0.07519 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  NG&quot;
-##                        Df  Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  NG</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value   Pr(&gt;F)    
 ## Tiempo                  1 0.45095 0.45095  20.087 3.19e-05 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
 ## Sexo:Tiempo             1 0.19209 0.19209  8.5567 0.004781 **
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  NS&quot;
-##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  NS</code></pre>
+<pre><code>##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.082469 0.082469   7.022 0.01017 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Endulzante&quot;
-## [1] &quot;Variable analizada:  Tiempo&quot;
-##                        Df Sum Sq Mean Sq    F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Endulzante</code></pre>
+<pre><code>## Variable analizada:  Tiempo</code></pre>
+<pre><code>##                        Df Sum Sq Mean Sq    F value    Pr(&gt;F)    
 ## Tiempo                  1   34.5    34.5 5.8524e+30 &lt; 2.2e-16 ***
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Sexo&quot;
-## [1] &quot;Variable analizada:  CA.Gluc.x&quot;
-## [1] &quot;Variable analizada:  DHPAA.Gluc.x&quot;
-## [1] &quot;Variable analizada:  TFA.Gluc&quot;
-##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Sexo</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc.x</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc.x</code></pre>
+<pre><code>## Variable analizada:  TFA.Gluc</code></pre>
+<pre><code>##                        Df    Sum Sq   Mean Sq F value  Pr(&gt;F)  
 ## Tiempo                  1 0.0011152 0.0011152  2.9782 0.08929 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  TFA.Sulfate&quot;
-## [1] &quot;Variable analizada:  Ácido.Vanílico..VA.&quot;
-##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  TFA.Sulfate</code></pre>
+<pre><code>## Variable analizada:  Ácido.Vanílico..VA.</code></pre>
+<pre><code>##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Tiempo                  1 0.041544 0.041544  3.1431 0.08108 .
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.054192 0.054192  4.1001 0.04712 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  Ácido.Caféico..CA.&quot;
-##                        Df Sum Sq Mean Sq F value  Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  Ácido.Caféico..CA.</code></pre>
+<pre><code>##                        Df Sum Sq Mean Sq F value  Pr(&gt;F)    
 ## Tiempo                  1 0.7352  0.7352  35.156 1.4e-07 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -292,27 +292,27 @@ pre code {
 ##                        Df  Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Endulzante:Tiempo  2 0.14805 0.074026  3.5398 0.03492 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  CA.Gluc.y&quot;
-##                        Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc.y</code></pre>
+<pre><code>##                        Df Sum Sq Mean Sq F value   Pr(&gt;F)   
 ## Tiempo                  1 0.1151  0.1151  10.901 0.001586 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df   Sum Sq  Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Tiempo             1 0.048413 0.048413  4.5848 0.03613 *
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  X3.4.Ácido.Dihidroxifenilacético..DHPAA.&quot;
-##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Tiempo                  1 0.51076 0.51076  14.624 0.0003035 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
 ## Sexo:Tiempo             1 0.30901 0.30901  8.8476 0.004156 **
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  DHPAA.Gluc.y&quot;
-##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc.y</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Tiempo                  1 0.28785 0.28785  21.794 1.635e-05 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -327,18 +327,18 @@ pre code {
 ##                        Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
 ## Sexo:Endulzante:Tiempo  2 0.06772 0.03386  2.5637 0.08503 .
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  VA.GG&quot;
-##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  VA.GG</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Tiempo                  1 0.61575 0.61575  47.166 3.396e-09 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Endulzante:Tiempo       2 0.40948 0.20474  15.683 2.969e-06 ***
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## [1] &quot;Variable analizada:  VA.Gluc.sulfate&quot;
-##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## Variable analizada:  VA.Gluc.sulfate</code></pre>
+<pre><code>##                        Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
 ## Tiempo                  1 0.54418 0.54418  18.163 6.908e-05 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
