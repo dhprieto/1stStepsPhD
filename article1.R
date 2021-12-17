@@ -1791,33 +1791,47 @@ tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$tablaNum
                                                       clusters = model_clustering_OF$classification,
                                                       Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
                                                       Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
-                                                      Tiempo = tablaFactorsAll$Tiempo)
+                                                      Tiempo = tablaFactorsAll$Tiempo) %>%
+                  select(everything(),Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, Tiempo, clusters)
 
-tableSexo <- tabla_clusters %>% count(Sexo, clusters)  
-tableEdulcorante <- tabla_clusters %>% count(Endulzante, clusters)
 
+
+tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters) #tabla_clusters %>% count(Endulzante, clusters)
 
 tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
 tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
-orinaFlav_clusters$Tiempo <- rescale(as.numeric(orinaFlav_clusters$Tiempo))
 
 longtableOF <- melt(tabla_clusters, id = c("clusters", "Tiempo"))
 
 longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
 
-ggplot(longtableOF, aes(variable,as.numeric(values), fill=factor(clusters))) +
+ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
   geom_boxplot()+
-  annotate("text", x = 14, y = 1.03, label = "Mujer") + 
-  annotate("text",x = 14, y = -0.03, label = "Hombre") +
-  annotate("text", x = 13, y = 1.03, label = "SU") + 
-  annotate("text",x = 13, y = -0.03, label = "SA")+
-  ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
+  annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
+  annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
+  annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
+  annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
+  annotation_custom(grob = tableGrob(tableSexo, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+  ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(listaTablas))))+
   labs(y = "standarized value", x = "variables/clusters")+
   facet_wrap(~Tiempo)
 
 }
 
 clusterNPlot(orinaAnt)
+clusterNPlot(orinaFlav)
+clusterNPlot(plasmaAnt)
+
+plasmaFlav_adjusted <- preprocessTablas("data/", "tablaplasmaFlav_adjusted.csv")
+
+
+clusterNPlot(plasmaFlav_adjusted)
+
+
+deparse(substitute(pruebaUwu))
+
 
 #### Anova ----
 

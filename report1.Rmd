@@ -1,0 +1,246 @@
+---
+title: "report1stSteps"
+author: "DHdez"
+date: "17/12/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(scales)
+library(mclust)
+library(factoextra)
+library(ggpubr)
+library(reshape2)
+library(gridExtra)
+
+
+
+preprocessTablas <- function(root, nombreTabla) {
+  
+  # Getting data ready
+  rootTabla <- paste0(root, nombreTabla)
+  
+  tabla <- read.csv(rootTabla)
+  
+  
+  # Make factors of categorical features
+  
+  tabla$Endulzante <- factor(tabla$Endulzante, levels = c("SA", "ST", "SU"))
+  tabla$Sexo <- factor(tabla$Sexo, levels = c("HOMBRE", "MUJER"))
+  tabla$Tiempo <- factor(tabla$Tiempo, levels = c("0", "Final"))
+  tabla$numVol <- factor(tabla$numVol)
+  
+  for (i in seq(1:nrow(tabla))){
+    if (tabla$Tiempo[i] == "0"){
+      tabla$Peso[i] = tabla$Peso.inicial[i]
+      tabla$IMC[i] = tabla$IMC.Inicial[i]
+      tabla$Grasa[i] = tabla$Grasa.inicial[i]
+      tabla$IRCV[i] = tabla$IRCV.inicial[i]
+      tabla$Bpmin[i] = tabla$Bpmin.inicial[i]
+      tabla$Bpmax[i] = tabla$Bpmax.inicial[i]
+      tabla$Frec[i] = tabla$Frec.inicial[i]
+      
+    }
+    
+    else if (tabla$Tiempo[i] == "Final"){
+      tabla$Peso[i] = tabla$Peso.final[i]
+      tabla$IMC[i] = tabla$IMC.Final[i]
+      tabla$Grasa[i] = tabla$Grasa.final[i]
+      tabla$IRCV[i] = tabla$IRCV.Final[i]
+      tabla$Bpmin[i] = tabla$Bpmin.final[i]
+      tabla$Bpmax[i] = tabla$Bpmax.final[i]
+      tabla$Frec[i] = tabla$Frec.final[i]
+    }
+    
+    
+  }
+  
+  # Removing of trivial redundant and useless features 
+  
+  set.A <- subset(tabla, select =-c(X.1, X, Peso.inicial, Peso.final, Delta.Peso, Talla, IMC.Inicial, IMC.Final, 
+                                    Delta.IMC, Grasa.inicial, Grasa.final, Delta.Grasa, IRCV.Final, IRCV.inicial, 
+                                    Bpmin.final, Bpmin.inicial, Bpmax.final, Bpmax.inicial, Frec.final, Frec.inicial))
+  
+  # Only numerical features
+  
+  set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo, numVol))
+  
+  #Rescaling, can use "set.A_rescaled <- scale(set.A_num)" too
+  
+  set.A_rescaled <- set.A_num %>% mutate_each_(list(~rescale(.) %>% as.vector), 
+                                               vars = colnames(set.A_num))
+  
+  set.A_factors <- cbind(set.A_rescaled, Endulzante = set.A$Endulzante, 
+                         Tiempo = set.A$Tiempo, Sexo = set.A$Sexo, numVol = set.A$numVol)
+  
+  tabla_Tiempo <- subset(set.A_factors, select=-c(Endulzante, Sexo))
+  
+  tabla_Tiempo0 <- subset(tabla_Tiempo, Tiempo == "0", select = -Tiempo)
+  tabla_TiempoF <- subset(tabla_Tiempo, Tiempo == "Final", select = -Tiempo)
+  
+  tabla_Sexo <- subset(set.A_factors, select=-c(Endulzante, Tiempo))
+  
+  tabla_SexoM <- subset(tabla_Sexo, Sexo == "HOMBRE", select = -Sexo)
+  tabla_SexoF <- subset(tabla_Sexo, Sexo == "MUJER", select = -Sexo)
+  
+  tabla_Endulzante <- subset(set.A_factors, select=-c(Sexo, Tiempo))
+  
+  tabla_EndulzanteSA <- subset(tabla_Endulzante, Endulzante == "SA", select = -Endulzante)
+  tabla_EndulzanteSU <- subset(tabla_Endulzante, Endulzante == "SU", select = -Endulzante)
+  tabla_EndulzanteST <- subset(tabla_Endulzante, Endulzante == "ST", select = -Endulzante)
+  
+  tabla_0xM <- subset(set.A_factors, Tiempo == "0" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_0xF <- subset(set.A_factors, Tiempo == "0" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxM <- subset(set.A_factors, Tiempo == "Final" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxF <- subset(set.A_factors, Tiempo == "Final" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSAx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSAxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSAx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSAxF <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSTx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="ST" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_MxSTxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="ST"& Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSTx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "0",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSTxF <- subset(tabla, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "Final",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_MxSUx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "0", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_MxSUxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "Final", 
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  tabla_FxSUx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "0",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  tabla_FxSUxF <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "Final",
+                         select =-c(Tiempo, Sexo, Endulzante))
+  
+  return(list(tablaFactors = set.A_factors, tablaNum = set.A_rescaled,
+              tabla_Tiempo = tabla_Tiempo, tabla_Tiempo0 = tabla_Tiempo0,
+              tabla_TiempoF = tabla_TiempoF,  tabla_Sexo=tabla_Sexo,
+              tabla_SexoM=tabla_SexoM, tabla_SexoF=tabla_SexoF,
+              tabla_Endulzante=tabla_Endulzante, 
+              tabla_EndulzanteSA=tabla_EndulzanteSA,
+              tabla_EndulzanteSU=tabla_EndulzanteSU, 
+              tabla_EndulzanteST=tabla_EndulzanteST,
+              tabla_0xM=tabla_0xM,tabla_0xF=tabla_0xF, 
+              tabla_FxM=tabla_FxM, tabla_FxF=tabla_FxF,
+              tabla_MxSAx0=tabla_MxSAx0, tabla_MxSAxF=tabla_MxSAxF,
+              tabla_FxSAx0=tabla_FxSAx0, tabla_FxSAxF=tabla_FxSAxF, 
+              tabla_MxSTx0=tabla_MxSTx0, tabla_MxSTxF=tabla_MxSTxF,
+              tabla_FxSTx0=tabla_FxSTx0, tabla_FxSTxF=tabla_FxSTxF, 
+              tabla_MxSUx0=tabla_MxSUx0, tabla_MxSUxF=tabla_MxSUxF, 
+              tabla_FxSUx0=tabla_FxSUx0, tabla_FxSUxF=tabla_FxSUxF))
+  
+}
+
+clusterNPlot <- function(listaTablas){
+
+tablaNumMet <- listaTablas$tablaNum %>%
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+
+tablaFactorsAll <-listaTablas$tablaFactors
+
+model_clustering_OF <- Mclust(tablaNumMet)
+
+p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+
+p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina Flav", pallete = "jco")
+
+ggarrange(p1,p2)
+
+
+tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$tablaNum$Peso, 
+                                                      IMC = listaTablas$tablaNum$IMC, 
+                                                      Grasa = listaTablas$tablaNum$Grasa, 
+                                                      IRCV = listaTablas$tablaNum$IRCV, 
+                                                      Bpmin = listaTablas$tablaNum$Bpmin, 
+                                                      Bpmax = listaTablas$tablaNum$Bpmax, 
+                                                      Frec = listaTablas$tablaNum$Frec,
+                                                      clusters = model_clustering_OF$classification,
+                                                      Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
+                                                      Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
+                                                      Tiempo = tablaFactorsAll$Tiempo) %>%
+                  select(everything(),Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, Tiempo, clusters)
+
+
+
+tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)
+rownames(tableSexo) <- c("H", "M")#tabla_clusters %>% count(Sexo, clusters)  
+tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters)
+rownames(tableEdulcorante) <-c("SA", "ST", "SU")#tabla_clusters %>% count(Endulzante, clusters)
+
+tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
+tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
+
+longtableOF <- melt(tabla_clusters, id = c("clusters", "Tiempo"))
+
+longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
+
+print(ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
+  geom_boxplot()+
+  annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
+  annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
+  annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
+  annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
+  ggtitle("Boxplot Cluster Analysis Orina Flavonoids")+
+  labs(y = "standarized value", x = "variables/clusters")+
+  facet_wrap(~Tiempo))
+
+knitr::kables(list(knitr::kable(tableSexo, rownames = T),
+                   knitr::kable(tableEdulcorante, rownames = T)), caption = "Distribución ")
+
+}
+
+```
+
+## Introduction
+
+
+```{r summary}
+
+orinaFlav <- preprocessTablas("data/", "tablaOrinaFlav.csv")
+orinaAnt <- preprocessTablas("data/", "tablaorinaAnt.csv")
+plasmaAnt <- preprocessTablas("data/", "tablaplasmaAnt.csv")
+plasmaFlav <- preprocessTablas("data/", "tablaplasmaFlav.csv")
+plasmaFlav_adjusted <- preprocessTablas("data/", "tablaplasmaFlav_adjusted.csv")
+
+
+summary(orinaFlav$tablaFactors)
+summary(orinaAnt$tablaFactors)
+summary(plasmaAnt$tablaFactors)
+summary(plasmaFlav$tablaFactors)
+summary(plasmaFlav_adjusted$tablaFactors)
+
+
+```
+
+## Cluster boxplot
+
+
+```{r cluster, echo=TRUE,message=FALSE, warning=FALSE, fig.width=30,fig.height=15}
+
+clusterNPlot(orinaAnt)
+clusterNPlot(orinaFlav)
+clusterNPlot(plasmaAnt)
+clusterNPlot(plasmaFlav_adjusted)
+
+
+```
