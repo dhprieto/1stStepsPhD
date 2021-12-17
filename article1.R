@@ -1826,11 +1826,9 @@ clusterNPlot(plasmaAnt)
 
 plasmaFlav_adjusted <- preprocessTablas("data/", "tablaplasmaFlav_adjusted.csv")
 
-
 clusterNPlot(plasmaFlav_adjusted)
 
 
-deparse(substitute(pruebaUwu))
 
 
 #### Anova ----
