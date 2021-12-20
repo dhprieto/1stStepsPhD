@@ -1766,7 +1766,7 @@ summary(anova_pareado_Frec)
 clusterNPlot <- function(listaTablas){
 
 tablaNumMet <- listaTablas$tablaNum %>%
-  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
 tablaFactorsAll <-listaTablas$tablaFactors
 
@@ -1820,8 +1820,29 @@ ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),a
 
 }
 
+library(QuantPsyc)
+library(energy)
+
+
+checkMultVar <- function(listaTablas) {
+    
+
+    tablaNumMet1 <- listaTablas$tablaNum %>% 
+    dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+
+multivarTest <- mult.norm(tablaNumMet1)$mult.test
+print(multivarTest)
+print (mvnorm.etest(tablaNumMet1, R=1000))
+
+}
+
+checkMultVar(orinaAnt)
 clusterNPlot(orinaAnt)
+
+checkMultVar(orinaFlav)
 clusterNPlot(orinaFlav)
+
+checkMultVar(plasmaAnt)
 clusterNPlot(plasmaAnt)
 
 plasmaFlav_adjusted <- preprocessTablas("data/", "tablaplasmaFlav_adjusted.csv")
@@ -2019,60 +2040,44 @@ for (i in range(1,nrow(tabla))){
 
 ### Anova OTRO METODO paired ----
 
-datos <- orinaFlavFactors 
+set.seed(123)
 
-ggplot(data = orinaFlavFactors, aes(x = Peso)) +
-  geom_histogram(aes(y = ..density.., fill = ..count..)) +
-  scale_fill_gradient(low = "#DCDCDC", high = "#7C7C7C") +
-  stat_function(fun = dnorm, colour = "firebrick",
-                args = list(mean = mean(orinaFlavFactors$Peso),
-                            sd = sd(orinaFlavFactors$Peso))) +
-  ggtitle("Histograma con curva normal teórica") +
-  theme_bw()
+datos <- orinaFlav$tablaFactors %>% dplyr::select (numVol, Sexo, Endulzante, Tiempo, EG)
 
+datos %>% sample_n_by(Sexo, Endulzante, size=1)
 
+# long format needed?
 
-datos %>% sample_n_by(EG, Peso, size = 1)
-
-datos <- datos %>%
-  select(Endulzante, Sexo, Tiempo, numVol, Peso)%>%
-  group_by(Endulzante, Sexo, Tiempo) %>%
-  mutate(zscore = scale(EG)) %>%
-  filter(between(zscore, -1, +2.))
+datos %>% 
+  group_by(Sexo, Endulzante, Tiempo) %>%
+  get_summary_stats(EG, type = "mean_sd")
 
 bxp <- ggboxplot(
-  datos, x = "Endulzante", y = "Peso",
-  color = "Tiempo", pallette = "jco",
-  facet.by = "Sexo", short.panel.labs = FALSE,
-  outlier.shape = "p"
+  datos, x = "Endulzante", y = "EG",
+  color = "Tiempo", palette = "jco",
+  facet.by = "Sexo", short.panel.labs = FALSE
 )
 
 bxp
+bxp_nogg <- boxplot(datos$Endulzante, datos$EG)
+datos <- datos[-which(datos$EG %in% bxp_nogg$out),]
 
-datos %>% 
-  select(Endulzante, Sexo, Tiempo, numVol, Peso)%>%
-  group_by(Endulzante, Sexo, Tiempo) %>%
-  identify_outliers(Peso)
+datos %>%
+  group_by(Sexo, Endulzante, Tiempo) %>%
+  identify_outliers(EG)
 
+# Normality
 
-datos %>% 
-  group_by(Endulzante, Sexo, Tiempo) %>%
-  shapiro_test(Peso)
-
-ggqqplot(datos, "Peso", ggtheme = theme_bw()) +
-  facet_grid(Endulzante + Sexo ~Tiempo, labeller="label_both")
+datos %>%
+  group_by(Sexo, Endulzante, Tiempo) %>%
+  shapiro_test(EG)
 
 res.aov <- anova_test(
-  data = datos, dv = Peso, wid= numVol, 
-  within = c(Endulzante, Sexo, Tiempo)
-)
+  data = datos, dv = EG, wid = numVol,
+  within = c(Endulzante, Tiempo)
+  )
 
-get_anova_table(res.aov)
+### 
 
-lm(Peso~numVol+Tiempo:Endulzante:Sexo, data= datos)
-
-all(is.na(datos$EG))
-all(is.na(datos$numVol))
-all(is.na(datos$Tiempo))
-all(is.na(datos$Sexo))
-all(is.na(datos$Endulzante))
+datos <- as.matrix(datos[-4])
+modelo_lm <- lm(datos ~1 )
