@@ -2079,5 +2079,76 @@ res.aov <- anova_test(
 
 ### 
 
-datos <- as.matrix(datos[-4])
-modelo_lm <- lm(datos ~1 )
+checkNorm <- function (listaTablas, var) {
+
+datos <- listaTablas$tablaFactors# %>% dplyr::select (numVol, Sexo, Endulzante, Tiempo, EG)
+
+Q <- quantile(datos[,var], probs=c(.25, .75), na.rm = FALSE)
+
+iqr <- IQR(datos[,var])
+
+datos <- subset(datos, 
+                datos[,var] > (Q[1] - 0.5*iqr) & 
+                  datos[,var] < (Q[2] + 0.5*iqr))
+
+
+#datos <- datos [-which(datos$ES > 0.2),]
+
+print(
+  ggplot(data = datos, aes(x = datos[,var])) +
+  geom_histogram(aes(y = ..density.., fill = ..count..)) +
+  scale_fill_gradient(low = "#DCDCDC", high = "#7C7C7C") +
+  stat_function(fun = dnorm, colour = "firebrick",
+                args = list(mean = mean(datos[,var]),
+                            sd = sd(datos[,var]))) +
+  ggtitle("Histograma con curva normal teórica") +
+  theme_bw()
+  )
+
+print(
+qqnorm(datos[,var], pch = 19, col = "gray50")
+)
+qqline(datos[,var])
+
+print(shapiro.test(datos[,var]))
+
+print(ks.test(datos[,var], "pnorm", mean(datos[,var]), sd(datos[,var])))
+
+print(nortest::lillie.test(datos[,var]))
+
+return(datos)
+}
+
+
+orinaFlavNorm <- checkNorm(orinaFlav, 'ES')
+
+aov_todo <- function (tablaFactors) {
+
+counts <- data.frame(table(tablaFactors$numVol))
+
+tabla_Dupl <- tablaFactors[tablaFactors$numVol %in% counts$Var1[counts$Freq > 1],]
+
+
+aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo *
+                                                         Endulzante * Tiempo +
+                                                         Error(numVol/Tiempo),
+                                                        data = tabla_Dupl))
+
+for (j in seq(1, length(aov_results))) {
+  message(paste("Variable analizada: ", names(aov_results)[j]))
+  
+  resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+  
+  for (i in seq(1,4)){
+    
+    if (resultado[[1]][,5][i] < 0.1){
+      print(resultado[[1]][i,])
+    }
+    
+  }  
+  
+}
+
+}
+
+aov_todo (orinaFlavNorm)
