@@ -2116,11 +2116,16 @@ print(ks.test(datos[,var], "pnorm", mean(datos[,var]), sd(datos[,var])))
 
 print(nortest::lillie.test(datos[,var]))
 
-return(datos)
+return()
+
 }
 
 
+
 orinaFlavNorm <- checkNorm(orinaFlav, 'ES')
+
+orinaFlavNormES <- orinaFlavNorm %>% select(numVol, Tiempo, Endulzante, Sexo, ES)
+
 
 aov_todo <- function (tablaFactors) {
 
@@ -2152,3 +2157,86 @@ for (j in seq(1, length(aov_results))) {
 }
 
 aov_todo (orinaFlavNorm)
+
+
+
+
+### ----
+
+orinaFlavNorm <- checkNorm(orinaFlav, 'ES')
+
+orinaFlavNormES <- orinaFlavNorm %>% select(numVol, Tiempo, Endulzante, Sexo, ES)
+
+# bxp <- ggboxplot(
+#   orinaFlavNormES, x = "Endulzante", y = "ES",
+#   color = "Tiempo", palette = "jco",
+#   facet.by = "Sexo", short.panel.labs = FALSE
+# )
+# bxp
+# 
+# orinaFlavNormES %>%
+#   group_by(Sexo, Endulzante, Tiempo) %>%
+#   identify_outliers(ES)
+# 
+# orinaFlavNormES %>%
+#   group_by(Sexo, Endulzante, Tiempo) %>%
+#   shapiro_test(ES)
+# 
+# res.aov <- anova_test(
+#   data = orinaFlavNormES, dv= ES, wid = numVol, 
+#   within = c(Endulzante, Sexo, Tiempo))
+
+tabla_Dupl %>%
+  group_by(Endulzante, Tiempo) %>%
+  identify_outliers(ES)
+
+tabla_Dupl %>%
+  group_by(Endulzante, Tiempo) %>%
+  shapiro_test(ES)
+
+counts <- data.frame(table(orinaFlavNormES$numVol))
+
+tabla_Dupl <- orinaFlavNormES[orinaFlavNormES$numVol %in% counts$Var1[counts$Freq > 1],]
+
+### ANOVA BIEN HECHO ----
+
+res.aov <- anova_test(
+  data = tabla_Dupl, formula = ES ~ Sexo * Endulzante * Tiempo +
+    Error(numVol/Tiempo), )
+res.aov <- anova_test(
+  data = orinaFlav$tablaFactors, dv=ES, wid=numVol, between = c(Sexo, Endulzante), 
+  within= Tiempo)
+
+  
+  
+
+anova_tablexD <- get_anova_table(res.aov, correction = "GG")
+
+
+tabla1 <-  as.matrix(tabla_Dupl[, "ES"])
+
+modelo_lm <- lm(tabla1~1)
+
+tiempo <- factor(c("0", "Final"))
+
+anova_pareado <- Anova(modelo_lm, idata = data.frame(tiempo),
+                       idesign = ~ tiempo, type = "III")
+
+summary(anova_pareado, multivariate = F)
+
+
+library(car)
+
+uwu3 <- aov(formula = ES~ Sexo * Endulzante * Tiempo +
+            Error(numVol/Tiempo),
+            data = tabla_Dupl)
+
+Anova(uwu3$`numVol:Tiempo`, type = "III")
+
+
+uwu2 <- tabla_Dupl %>% arrange(numVol)
+
+matriz1 <- matrix(tabla_Dupl[, "ES"], nrow = 64, ncol = 2)
+
+mauchly.test(lm(matriz1 ~1), X = ~1)
+
