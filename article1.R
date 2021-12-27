@@ -2202,41 +2202,24 @@ tabla_Dupl <- orinaFlavNormES[orinaFlavNormES$numVol %in% counts$Var1[counts$Fre
 
 res.aov <- anova_test(
   data = tabla_Dupl, formula = ES ~ Sexo * Endulzante * Tiempo +
-    Error(numVol/Tiempo), )
+    Error(numVol/Tiempo))
 res.aov <- anova_test(
   data = orinaFlav$tablaFactors, dv=ES, wid=numVol, between = c(Sexo, Endulzante), 
-  within= Tiempo)
+  within= Tiempo, detailed = T)
 
-  
-  
+anova_tablexD <- get_anova_table(res.aov, correction = "auto")
 
-anova_tablexD <- get_anova_table(res.aov, correction = "GG")
+aov_results2 <- lapply(tabla_Dupl, function(x) anova_test(tabla_Dupl,
+                                                          as.numeric(x) ~ Sexo * 
+                                                          Endulzante * Tiempo +
+                                                          Error(numVol/Tiempo)
+                                                          ))
+aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
+                                                         Error(numVol/Tiempo),
+                                                       data = tabla_Dupl))
+aov()
 
+anov
 
-tabla1 <-  as.matrix(tabla_Dupl[, "ES"])
-
-modelo_lm <- lm(tabla1~1)
-
-tiempo <- factor(c("0", "Final"))
-
-anova_pareado <- Anova(modelo_lm, idata = data.frame(tiempo),
-                       idesign = ~ tiempo, type = "III")
-
-summary(anova_pareado, multivariate = F)
-
-
-library(car)
-
-uwu3 <- aov(formula = ES~ Sexo * Endulzante * Tiempo +
-            Error(numVol/Tiempo),
-            data = tabla_Dupl)
-
-Anova(uwu3$`numVol:Tiempo`, type = "III")
-
-
-uwu2 <- tabla_Dupl %>% arrange(numVol)
-
-matriz1 <- matrix(tabla_Dupl[, "ES"], nrow = 64, ncol = 2)
-
-mauchly.test(lm(matriz1 ~1), X = ~1)
+lapply(tabla_Dupl, print)
 

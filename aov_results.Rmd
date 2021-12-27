@@ -183,6 +183,10 @@ aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * En
                                                                Error(numVol/Tiempo),
                                                                data = tabla_mergeDupl))
 
+aov_results2 <- lapply(tabla_mergeDupl, function(x) anova_test(data = tabla_mergeDupl, 
+                                                                   formula = as.numeric(x) ~ Sexo * 
+                                                                   Endulzante * Tiempo +
+                                                                   Error(numVol/Tiempo)))
 
 ```
 
@@ -193,6 +197,8 @@ aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * En
     message(paste("Variable analizada: ", names(aov_results)[j]))
     
     resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+    resultado2 <- anova
+    
     
     for (i in seq(1,4)){
       
