@@ -2219,10 +2219,8 @@ aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo * Endulza
                                                        data = tabla_Dupl))
 aov_test <- function(tabla, variable){
   
-  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, 
-                               tabla[,variable])
-  browser()
-  res.aov <- anova_test(data = tablaVar, dv=tablaVar[,varariable], wid=numVol, 
+  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  res.aov <- anova_test(data = tablaVar, dv=variable, wid=numVol, 
                         between = c(Sexo, Endulzante), within= Tiempo)
   
   tablaAnova <- get_anova_table(res.aov, correction = "auto")
@@ -2234,9 +2232,18 @@ aov_test(orinaFlav$tablaFactors, "ES")
 
 tablaVar <- orinaFlav$tablaFactors %>% select(numVol, Endulzante, Sexo, Tiempo, "ES")
 
+str(orinaFlav$tablaFactors)
 
-
-lapply(tabla_Dupl, print)
+for (i in seq(1,ncol(orinaFlav$tablaFactors))){
+  
+  if (is.numeric(orinaFlav$tablaFactors[,i])){
+  
+    aov_test(orinaFlav$tablaFactors,
+           names(orinaFlav$tablaFactors)[i])
+  }
+  
+  
+}
 
 
 anova_test()
