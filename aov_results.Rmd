@@ -1,19 +1,18 @@
 ---
-title: "Untitled"
-author: "DHdez"
-date: "13/12/2021"
+title: "aov_results"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(rstatix)
 library(scales)
-library(stargazer)
 
-preprocessTablas <- function(root, nombreTabla) {
+preprocessTablas1 <- function(root, nombreTabla) {
   
-  # Getting data ready
+    # Getting data ready
   rootTabla <- paste0(root, nombreTabla)
   
   tabla <- read.csv(rootTabla)
@@ -69,107 +68,22 @@ preprocessTablas <- function(root, nombreTabla) {
   set.A_factors <- cbind(set.A_rescaled, Endulzante = set.A$Endulzante, 
                          Tiempo = set.A$Tiempo, Sexo = set.A$Sexo, numVol = set.A$numVol)
   
-  tabla_Tiempo <- subset(set.A_factors, select=-c(Endulzante, Sexo))
   
-  tabla_Tiempo0 <- subset(tabla_Tiempo, Tiempo == "0", select = -Tiempo)
-  tabla_TiempoF <- subset(tabla_Tiempo, Tiempo == "Final", select = -Tiempo)
-  
-  tabla_Sexo <- subset(set.A_factors, select=-c(Endulzante, Tiempo))
-  
-  tabla_SexoM <- subset(tabla_Sexo, Sexo == "HOMBRE", select = -Sexo)
-  tabla_SexoF <- subset(tabla_Sexo, Sexo == "MUJER", select = -Sexo)
-  
-  tabla_Endulzante <- subset(set.A_factors, select=-c(Sexo, Tiempo))
-  
-  tabla_EndulzanteSA <- subset(tabla_Endulzante, Endulzante == "SA", select = -Endulzante)
-  tabla_EndulzanteSU <- subset(tabla_Endulzante, Endulzante == "SU", select = -Endulzante)
-  tabla_EndulzanteST <- subset(tabla_Endulzante, Endulzante == "ST", select = -Endulzante)
-  
-  tabla_0xM <- subset(set.A_factors, Tiempo == "0" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
-  tabla_0xF <- subset(set.A_factors, Tiempo == "0" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
-  tabla_FxM <- subset(set.A_factors, Tiempo == "Final" & Sexo == "HOMBRE", select =-c(Tiempo, Sexo, Endulzante))
-  tabla_FxF <- subset(set.A_factors, Tiempo == "Final" & Sexo == "MUJER", select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_MxSAx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "0", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_MxSAxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SA" & Tiempo == "Final", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_FxSAx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "0", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  tabla_FxSAxF <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SA"& Tiempo == "Final", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_MxSTx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="ST" & Tiempo == "0", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  tabla_MxSTxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="ST"& Tiempo == "Final", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_FxSTx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "0",
-                         select =-c(Tiempo, Sexo, Endulzante))
-  tabla_FxSTxF <- subset(tabla, Sexo == "MUJER" & Endulzante =="ST" & Tiempo == "Final",
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_MxSUx0 <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "0", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  tabla_MxSUxF <- subset(set.A_factors, Sexo == "HOMBRE" & Endulzante =="SU" & Tiempo == "Final", 
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  tabla_FxSUx0 <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "0",
-                         select =-c(Tiempo, Sexo, Endulzante))
-  tabla_FxSUxF <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "Final",
-                         select =-c(Tiempo, Sexo, Endulzante))
-  
-  return(list(tablaFactors = set.A_factors, tablaNum = set.A_rescaled,
-              tabla_Tiempo = tabla_Tiempo, tabla_Tiempo0 = tabla_Tiempo0,
-              tabla_TiempoF = tabla_TiempoF,  tabla_Sexo=tabla_Sexo,
-              tabla_SexoM=tabla_SexoM, tabla_SexoF=tabla_SexoF,
-              tabla_Endulzante=tabla_Endulzante, 
-              tabla_EndulzanteSA=tabla_EndulzanteSA,
-              tabla_EndulzanteSU=tabla_EndulzanteSU, 
-              tabla_EndulzanteST=tabla_EndulzanteST,
-              tabla_0xM=tabla_0xM,tabla_0xF=tabla_0xF, 
-              tabla_FxM=tabla_FxM, tabla_FxF=tabla_FxF,
-              tabla_MxSAx0=tabla_MxSAx0, tabla_MxSAxF=tabla_MxSAxF,
-              tabla_FxSAx0=tabla_FxSAx0, tabla_FxSAxF=tabla_FxSAxF, 
-              tabla_MxSTx0=tabla_MxSTx0, tabla_MxSTxF=tabla_MxSTxF,
-              tabla_FxSTx0=tabla_FxSTx0, tabla_FxSTxF=tabla_FxSTxF, 
-              tabla_MxSUx0=tabla_MxSUx0, tabla_MxSUxF=tabla_MxSUxF, 
-              tabla_FxSUx0=tabla_FxSUx0, tabla_FxSUxF=tabla_FxSUxF))
-  
+
+  return(tablaFactors = set.A_factors)
 }
 
-orinaFlav <- preprocessTablas("data/", "tablaOrinaFlav.csv")
-orinaAnt <- preprocessTablas("data/", "tablaorinaAnt.csv")
-plasmaAnt <- preprocessTablas("data/", "tablaplasmaAnt.csv")
-plasmaFlav <- preprocessTablas("data/", "tablaplasmaFlav.csv")
+
+```
 
 
-tabla1 <- orinaFlav$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
-
-tabla2 <- orinaAnt$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
-                    Sexo, Tiempo))
-
-tabla3 <- plasmaAnt$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
-                    Sexo, Tiempo))
-
-tabla_antro <- plasmaFlav$tablaFactors %>% 
-               select(c(numVol, Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec)) 
-
-tabla_merge <- na.omit(full_join( full_join( full_join(
-               tabla_antro %>% group_by(numVol) %>% mutate(id = row_number()),
-               tabla1 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")), 
-               tabla2 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")),
-               tabla3 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")) )
+```{r lectura tablas}
 
 
-counts <- data.frame(table(tabla_merge$numVol))
-
-tabla_mergeDupl <- tabla_merge[tabla_merge$numVol %in% counts$Var1[counts$Freq > 1],]
+orinaFlav <- preprocessTablas1("data/", "tablaOrinaFlav.csv")
+orinaAnt <- preprocessTablas1("data/", "tablaorinaAnt.csv")
+plasmaAnt <- preprocessTablas1("data/", "tablaplasmaAnt.csv")
+plasmaFlav <- preprocessTablas1("data/", "tablaplasmaFlav.csv")
 
 
 
@@ -177,47 +91,34 @@ tabla_mergeDupl <- tabla_merge[tabla_merge$numVol %in% counts$Var1[counts$Freq >
 ```
 
 
-```{r cars}
+```{r anova}
 
-aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
-                                                               Error(numVol/Tiempo),
-                                                               data = tabla_mergeDupl))
-
-aov_results2 <- lapply(tabla_mergeDupl, function(x) anova_test(data = tabla_mergeDupl, 
-                                                                   formula = as.numeric(x) ~ Sexo * 
-                                                                   Endulzante * Tiempo +
-                                                                   Error(numVol/Tiempo)))
-
-```
-
-```{r pressure, echo=FALSE}
-
-
-  for (j in seq(1, length(aov_results))) {
-    message(paste("Variable analizada: ", names(aov_results)[j]))
-    
-    resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
-    resultado2 <- anova
-    
-    
-    for (i in seq(1,4)){
-      
-      if (resultado[[1]][,5][i] < 0.1){
-        print(resultado[[1]][i,])
-      }
-      
-    }  
-    
-  }
+aov_test <- function(tabla, variable){
   
+  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  res.aov <- anova_test(data = tablaVar, dv=variable, wid=numVol, 
+                         between = c(Sexo, Endulzante), within= Tiempo)
 
-```
+  tablaAnova <- get_anova_table(res.aov, correction = "auto")
+  
+  print(tablaAnova)
+}
 
-```{r tablas}
+aov_loop <- function(tabla){
 
+  for (i in seq(1,ncol(tabla))){
+  
+    if (is.numeric(tabla[,i])){
+        message(paste("Variable analizada: ", names(tabla)[i]))
+        aov_test(tabla,
+           names(tabla)[i])
+    }
+  
+  
+  }
+}
 
-stargazer(anova(aov_results[[3]]$`numVol:Tiempo`), type = "text")
-
+aov_loop(orinaFlav)
 
 ```
 
