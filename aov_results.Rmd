@@ -105,7 +105,8 @@ aov_test <- function(tabla, variable){
 }
 
 aov_loop <- function(tabla){
-
+   
+  message(paste("Tabla analizada: ", deparse(substitute(tabla))))
   for (i in seq(1,ncol(tabla))){
   
     if (is.numeric(tabla[,i])){
@@ -119,6 +120,9 @@ aov_loop <- function(tabla){
 }
 
 aov_loop(orinaFlav)
+aov_loop(orinaAnt)
+aov_loop(plasmaAnt)
+
 
 ```
 

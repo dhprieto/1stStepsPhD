@@ -188,7 +188,8 @@ plasmaFlav &lt;- preprocessTablas1(&quot;data/&quot;, &quot;tablaplasmaFlav.csv&
 }
 
 aov_loop &lt;- function(tabla){
-
+   
+  message(paste(&quot;Tabla analizada: &quot;, deparse(substitute(tabla))))
   for (i in seq(1,ncol(tabla))){
   
     if (is.numeric(tabla[,i])){
@@ -202,6 +203,7 @@ aov_loop &lt;- function(tabla){
 }
 
 aov_loop(orinaFlav)</code></pre>
+<pre><code>## Tabla analizada:  orinaFlav</code></pre>
 <pre><code>## Variable analizada:  EG</code></pre>
 <pre><code>## Note: Using an external vector in selections is ambiguous.
 ## i Use `all_of(variable)` instead of `variable` to silence this message.
@@ -338,6 +340,285 @@ aov_loop(orinaFlav)</code></pre>
 ## 5            Sexo:Tiempo   1  85  1.251 0.267000       3.00e-03
 ## 6      Endulzante:Tiempo   2  85  1.747 0.180000       9.00e-03
 ## 7 Sexo:Endulzante:Tiempo   2  85  0.302 0.740000       2.00e-03</code></pre>
+<pre class="r"><code>aov_loop(orinaAnt)</code></pre>
+<pre><code>## Tabla analizada:  orinaAnt</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05      ges
+## 1                   Sexo   1  98 1.113 0.294       6.00e-03
+## 2             Endulzante   2  98 0.049 0.952       5.01e-04
+## 3                 Tiempo   1  98 0.006 0.941       2.84e-05
+## 4        Sexo:Endulzante   2  98 1.379 0.257       1.40e-02
+## 5            Sexo:Tiempo   1  98 0.011 0.917       5.51e-05
+## 6      Endulzante:Tiempo   2  98 0.364 0.696       4.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  98 0.017 0.983       1.71e-04</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F        p p&lt;.05      ges
+## 1                   Sexo   1  98 3.206 0.076000       1.60e-02
+## 2             Endulzante   2  98 9.930 0.000118     * 9.00e-02
+## 3                 Tiempo   1  98 1.040 0.310000       5.00e-03
+## 4        Sexo:Endulzante   2  98 0.503 0.606000       5.00e-03
+## 5            Sexo:Tiempo   1  98 0.624 0.431000       3.00e-03
+## 6      Endulzante:Tiempo   2  98 0.260 0.772000       3.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  98 0.005 0.995000       5.26e-05</code></pre>
+<pre><code>## Variable analizada:  TFA.Gluc</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05   ges
+## 1                   Sexo   1  98 3.160 0.079       0.017
+## 2             Endulzante   2  98 0.986 0.377       0.011
+## 3                 Tiempo   1  98 0.327 0.569       0.002
+## 4        Sexo:Endulzante   2  98 1.069 0.347       0.011
+## 5            Sexo:Tiempo   1  98 0.545 0.462       0.003
+## 6      Endulzante:Tiempo   2  98 1.331 0.269       0.013
+## 7 Sexo:Endulzante:Tiempo   2  98 0.886 0.415       0.008</code></pre>
+<pre><code>## Variable analizada:  TFA.Sulfate</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05   ges
+## 1                   Sexo   1  98 2.091 0.151       0.011
+## 2             Endulzante   2  98 5.568 0.005     * 0.058
+## 3                 Tiempo   1  98 0.881 0.350       0.004
+## 4        Sexo:Endulzante   2  98 0.868 0.423       0.009
+## 5            Sexo:Tiempo   1  98 2.835 0.095       0.013
+## 6      Endulzante:Tiempo   2  98 0.167 0.847       0.002
+## 7 Sexo:Endulzante:Tiempo   2  98 1.115 0.332       0.010</code></pre>
+<pre><code>## Variable analizada:  Ácido.Vanílico..VA.</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05   ges
+## 1                   Sexo   1  98 0.521 0.472       0.003
+## 2             Endulzante   2  98 5.277 0.007     * 0.049
+## 3                 Tiempo   1  98 4.911 0.029     * 0.025
+## 4        Sexo:Endulzante   2  98 0.198 0.821       0.002
+## 5            Sexo:Tiempo   1  98 3.055 0.084       0.016
+## 6      Endulzante:Tiempo   2  98 0.234 0.792       0.002
+## 7 Sexo:Endulzante:Tiempo   2  98 0.106 0.900       0.001</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  98 43.347 2.28e-09     * 3.05e-01
+## 2             Endulzante   2  98  1.840 1.64e-01       3.60e-02
+## 3                 Tiempo   1  98  0.025 8.75e-01       1.56e-06
+## 4        Sexo:Endulzante   2  98  1.738 1.81e-01       3.40e-02
+## 5            Sexo:Tiempo   1  98  1.195 2.77e-01       7.46e-05
+## 6      Endulzante:Tiempo   2  98  8.477 4.02e-04     * 1.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  98  0.183 8.33e-01       2.28e-05</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05      ges
+## 1                   Sexo   1  98 0.090 0.764       8.88e-04
+## 2             Endulzante   2  98 4.922 0.009     * 8.80e-02
+## 3                 Tiempo   1  98 0.047 0.829       1.76e-05
+## 4        Sexo:Endulzante   2  98 2.725 0.070       5.10e-02
+## 5            Sexo:Tiempo   1  98 0.249 0.619       9.34e-05
+## 6      Endulzante:Tiempo   2  98 4.041 0.021     * 3.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  98 1.359 0.262       1.00e-03</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd       F        p p&lt;.05   ges
+## 1                   Sexo   1  98 169.821 4.05e-23     * 0.603
+## 2             Endulzante   2  98   0.920 4.02e-01       0.016
+## 3                 Tiempo   1  98   7.516 7.00e-03     * 0.009
+## 4        Sexo:Endulzante   2  98   0.307 7.37e-01       0.005
+## 5            Sexo:Tiempo   1  98   3.830 5.30e-02       0.005
+## 6      Endulzante:Tiempo   2  98   9.299 2.01e-04     * 0.023
+## 7 Sexo:Endulzante:Tiempo   2  98   3.729 2.80e-02     * 0.009</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05   ges
+## 1                   Sexo   1  98 49.959 2.32e-10     * 0.305
+## 2             Endulzante   2  98  1.286 2.81e-01       0.022
+## 3                 Tiempo   1  98 11.522 9.94e-04     * 0.016
+## 4        Sexo:Endulzante   2  98  0.597 5.52e-01       0.010
+## 5            Sexo:Tiempo   1  98  4.005 4.80e-02     * 0.006
+## 6      Endulzante:Tiempo   2  98  2.175 1.19e-01       0.006
+## 7 Sexo:Endulzante:Tiempo   2  98  0.929 3.99e-01       0.003</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  98 18.753 0.000036     * 1.32e-01
+## 2             Endulzante   2  98  0.197 0.822000       3.00e-03
+## 3                 Tiempo   1  98  3.087 0.082000       6.00e-03
+## 4        Sexo:Endulzante   2  98  0.084 0.920000       1.00e-03
+## 5            Sexo:Tiempo   1  98  0.006 0.939000       1.25e-05
+## 6      Endulzante:Tiempo   2  98  0.680 0.509000       3.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  98  2.109 0.127000       9.00e-03</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05   ges
+## 1                   Sexo   1  98 21.745 9.85e-06     * 0.151
+## 2             Endulzante   2  98  0.860 4.27e-01       0.014
+## 3                 Tiempo   1  98  2.491 1.18e-01       0.005
+## 4        Sexo:Endulzante   2  98  0.594 5.54e-01       0.010
+## 5            Sexo:Tiempo   1  98  0.610 4.37e-01       0.001
+## 6      Endulzante:Tiempo   2  98  2.558 8.30e-02       0.010
+## 7 Sexo:Endulzante:Tiempo   2  98  3.066 5.10e-02       0.012</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  98 12.407 0.000651     * 0.092000
+## 2             Endulzante   2  98  0.528 0.591000       0.009000
+## 3                 Tiempo   1  98  0.445 0.506000       0.000928
+## 4        Sexo:Endulzante   2  98  0.179 0.836000       0.003000
+## 5            Sexo:Tiempo   1  98  2.438 0.122000       0.005000
+## 6      Endulzante:Tiempo   2  98  1.093 0.339000       0.005000
+## 7 Sexo:Endulzante:Tiempo   2  98  0.711 0.494000       0.003000</code></pre>
+<pre class="r"><code>aov_loop(plasmaAnt)</code></pre>
+<pre><code>## Tabla analizada:  plasmaAnt</code></pre>
+<pre><code>## Variable analizada:  Ácido.Caféico..CA.</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05   ges
+## 1                   Sexo   1  86  1.941 1.67e-01       0.011
+## 2             Endulzante   2  86  0.520 5.96e-01       0.006
+## 3                 Tiempo   1  86 40.989 7.78e-09     * 0.199
+## 4        Sexo:Endulzante   2  86  0.943 3.93e-01       0.010
+## 5            Sexo:Tiempo   1  86  0.630 4.29e-01       0.004
+## 6      Endulzante:Tiempo   2  86  1.494 2.30e-01       0.018
+## 7 Sexo:Endulzante:Tiempo   2  86  2.087 1.30e-01       0.025</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05   ges
+## 1                   Sexo   1  86 5.596 0.020     * 0.029
+## 2             Endulzante   2  86 0.584 0.560       0.006
+## 3                 Tiempo   1  86 4.257 0.042     * 0.026
+## 4        Sexo:Endulzante   2  86 0.610 0.546       0.006
+## 5            Sexo:Tiempo   1  86 4.369 0.040     * 0.027
+## 6      Endulzante:Tiempo   2  86 1.214 0.302       0.015
+## 7 Sexo:Endulzante:Tiempo   2  86 0.534 0.588       0.007</code></pre>
+<pre><code>## Variable analizada:  X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05     ges
+## 1                   Sexo   1  86  0.712 0.401000       0.00400
+## 2             Endulzante   2  86  3.521 0.034000     * 0.03900
+## 3                 Tiempo   1  86 12.232 0.000746     * 0.06600
+## 4        Sexo:Endulzante   2  86  0.210 0.811000       0.00200
+## 5            Sexo:Tiempo   1  86 12.608 0.000626     * 0.06800
+## 6      Endulzante:Tiempo   2  86  0.023 0.977000       0.00027
+## 7 Sexo:Endulzante:Tiempo   2  86  0.352 0.704000       0.00400</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  86  1.481 0.227000       0.011000
+## 2             Endulzante   2  86  9.412 0.000201     * 0.119000
+## 3                 Tiempo   1  86 21.234 0.000014     * 0.086000
+## 4        Sexo:Endulzante   2  86  0.015 0.985000       0.000222
+## 5            Sexo:Tiempo   1  86  5.247 0.024000     * 0.023000
+## 6      Endulzante:Tiempo   2  86  6.934 0.002000     * 0.058000
+## 7 Sexo:Endulzante:Tiempo   2  86  2.241 0.112000       0.020000</code></pre>
+<pre><code>## Variable analizada:  VA.GG</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  86  0.515 4.75e-01       3.00e-03
+## 2             Endulzante   2  86 11.215 4.70e-05     * 1.18e-01
+## 3                 Tiempo   1  86 57.068 4.18e-11     * 2.44e-01
+## 4        Sexo:Endulzante   2  86  1.585 2.11e-01       1.90e-02
+## 5            Sexo:Tiempo   1  86  0.002 9.66e-01       1.02e-05
+## 6      Endulzante:Tiempo   2  86 19.699 9.06e-08     * 1.82e-01
+## 7 Sexo:Endulzante:Tiempo   2  86  0.391 6.78e-01       4.00e-03</code></pre>
+<pre><code>## Variable analizada:  VA.Gluc.sulfate</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F     p p&lt;.05      ges
+## 1                   Sexo   1  86  1.538 0.218       0.009000
+## 2             Endulzante   2  86  3.547 0.033     * 0.041000
+## 3                 Tiempo   1  86 10.284 0.002     * 0.054000
+## 4        Sexo:Endulzante   2  86  1.236 0.296       0.015000
+## 5            Sexo:Tiempo   1  86  1.180 0.280       0.007000
+## 6      Endulzante:Tiempo   2  86  2.658 0.076       0.029000
+## 7 Sexo:Endulzante:Tiempo   2  86  0.046 0.955       0.000511</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  86 38.625 1.78e-08     * 3.08e-01
+## 2             Endulzante   2  86  1.656 1.97e-01       3.70e-02
+## 3                 Tiempo   1  86  0.170 6.81e-01       1.53e-05
+## 4        Sexo:Endulzante   2  86  1.313 2.74e-01       2.90e-02
+## 5            Sexo:Tiempo   1  86  0.613 4.36e-01       5.52e-05
+## 6      Endulzante:Tiempo   2  86  5.710 5.00e-03     * 1.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  86  0.325 7.24e-01       5.85e-05</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd     F     p p&lt;.05      ges
+## 1                   Sexo   1  86 0.078 0.781       8.73e-04
+## 2             Endulzante   2  86 4.590 0.013     * 9.30e-02
+## 3                 Tiempo   1  86 0.024 0.877       1.01e-05
+## 4        Sexo:Endulzante   2  86 1.933 0.151       4.20e-02
+## 5            Sexo:Tiempo   1  86 1.643 0.203       6.86e-04
+## 6      Endulzante:Tiempo   2  86 4.537 0.013     * 4.00e-03
+## 7 Sexo:Endulzante:Tiempo   2  86 0.565 0.571       4.72e-04</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd       F        p p&lt;.05   ges
+## 1                   Sexo   1  86 166.735 7.76e-22     * 0.624
+## 2             Endulzante   2  86   0.076 9.27e-01       0.002
+## 3                 Tiempo   1  86   8.386 5.00e-03     * 0.014
+## 4        Sexo:Endulzante   2  86   0.099 9.06e-01       0.002
+## 5            Sexo:Tiempo   1  86   2.116 1.49e-01       0.004
+## 6      Endulzante:Tiempo   2  86   5.187 7.00e-03     * 0.017
+## 7 Sexo:Endulzante:Tiempo   2  86   2.875 6.20e-02       0.009</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05   ges
+## 1                   Sexo   1  86 52.676 1.63e-10     * 0.343
+## 2             Endulzante   2  86  0.485 6.17e-01       0.010
+## 3                 Tiempo   1  86  8.727 4.00e-03     * 0.015
+## 4        Sexo:Endulzante   2  86  0.148 8.63e-01       0.003
+## 5            Sexo:Tiempo   1  86  5.683 1.90e-02     * 0.010
+## 6      Endulzante:Tiempo   2  86  2.515 8.70e-02       0.009
+## 7 Sexo:Endulzante:Tiempo   2  86  0.568 5.69e-01       0.002</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05      ges
+## 1                   Sexo   1  86 19.743 2.62e-05     * 0.158000
+## 2             Endulzante   2  86  0.642 5.29e-01       0.012000
+## 3                 Tiempo   1  86  1.330 2.52e-01       0.003000
+## 4        Sexo:Endulzante   2  86  0.006 9.94e-01       0.000118
+## 5            Sexo:Tiempo   1  86  0.066 7.97e-01       0.000141
+## 6      Endulzante:Tiempo   2  86  1.213 3.02e-01       0.005000
+## 7 Sexo:Endulzante:Tiempo   2  86  2.527 8.60e-02       0.011000</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F        p p&lt;.05   ges
+## 1                   Sexo   1  86 18.868 3.82e-05     * 0.144
+## 2             Endulzante   2  86  0.992 3.75e-01       0.017
+## 3                 Tiempo   1  86  2.809 9.70e-02       0.008
+## 4        Sexo:Endulzante   2  86  0.143 8.67e-01       0.003
+## 5            Sexo:Tiempo   1  86  1.450 2.32e-01       0.004
+## 6      Endulzante:Tiempo   2  86  1.153 3.20e-01       0.006
+## 7 Sexo:Endulzante:Tiempo   2  86  1.463 2.37e-01       0.008</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>## ANOVA Table (type III tests)
+## 
+##                   Effect DFn DFd      F       p p&lt;.05    ges
+## 1                   Sexo   1  86 15.747 0.00015     * 0.1280
+## 2             Endulzante   2  86  1.049 0.35500       0.0190
+## 3                 Tiempo   1  86  0.305 0.58200       0.0007
+## 4        Sexo:Endulzante   2  86  0.315 0.73100       0.0060
+## 5            Sexo:Tiempo   1  86  3.049 0.08400       0.0070
+## 6      Endulzante:Tiempo   2  86  2.772 0.06800       0.0130
+## 7 Sexo:Endulzante:Tiempo   2  86  0.644 0.52800       0.0030</code></pre>
 
 
 

@@ -10,6 +10,9 @@ library(cluster)
 library(mclust)
 library(reshape2)
 library(gridExtra)
+library(QuantPsyc)
+library(energy)
+
 
 preprocessTablas <- function(root, nombreTabla) {
   
@@ -2120,11 +2123,117 @@ return()
 
 }
 
-
-
 orinaFlavNorm <- checkNorm(orinaFlav, 'ES')
 
 orinaFlavNormES <- orinaFlavNorm %>% select(numVol, Tiempo, Endulzante, Sexo, ES)
+
+
+
+res_norm <- nortest::lillie.test(orinaFlav$tablaFactors[, "ES"])
+
+res_norm$p.value
+
+res_norm <- ks.test(orinaFlav$tablaFactors[, "ES"], "pnorm", 
+                    mean(orinaFlav$tablaFactors[, "ES"]),
+                    sd(orinaFlav$tablaFactors[, "ES"]))
+
+re_norm <- function(datos, var){
+  
+  Q <- quantile(datos[,var], probs=c(.25, .75), na.rm = FALSE)
+  
+  iqr <- IQR(datos[,var])
+  
+  resultado$p.value <- 0
+  valIQR <- 1.5
+  
+  while (resultado$p.value < 0.05) {
+    
+    
+  datosNorm <- subset(datos, datos[,var] > (Q[1] - valIQR*iqr) & 
+                         datos[,var] < (Q[2] + valIQR*iqr))
+  
+  # resultado <- ks.test(datosNorm[, var], "pnorm",
+  #                      mean(datosNorm[, var]),
+  #                      sd(datosNorm[, var]))
+  # 
+  
+  resultado <- nortest::lillie.test(datos[,var])
+  
+  print(nrow(datosNorm))
+  print(valIQR)
+  valIQR <- valIQR - 0.05
+  
+    }
+  
+  return(list(pval = resultado$p.value, dataset =datosNorm))
+}
+
+uwu <- re_norm(orinaFlav$tablaFactors, "ES")
+
+hist(orinaFlav$tablaFactors[,"IRCV"])
+
+plot(orinaFlav$tablaFactors)
+
+batchNorm <- function(tabla){
+  
+  for (i in seq(ncol(tabla))) {
+    
+    print(names(tabla)[i])
+    
+    if (is.numeric(tabla[,i])){
+        
+      resultado <- re_norm(datos = tabla, var = names(tabla)[i])
+      
+      print(names(tabla[i]))
+      
+      }
+  print(nrow(resultado$dataset))
+  print(ncol(resultado$dataset))  
+  } 
+  return(resultado)
+}
+
+
+uwu4 <- batchNorm(orinaFlav$tablaFactors)
+
+re_norm(orinaFlav$tablaFactors, )
+
+
+checkMultVar(uwu4$dataset)
+
+
+
+checkMultVar <- function(listaTablas) {
+  
+  
+  tablaNumMet1 <- listaTablas %>% 
+   dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante,
+                    Tiempo, Sexo, numVol))
+  
+  multivarTest <- QuantPsyc::mult.norm(tablaNumMet1)$mult.test
+  print(multivarTest)
+  print (energy::mvnorm.etest(tablaNumMet1, R=1000))
+  
+}
+
+checkMultVar(orinaAnt)
+clusterNPlot(uwu4$dataset)
+
+checkMultVar(orinaFlav)
+clusterNPlot(orinaFlav)
+
+checkMultVar(plasmaAnt)
+clusterNPlot(plasmaAnt)
+
+
+
+
+
+
+
+
+
+
 
 
 aov_todo <- function (tablaFactors) {
