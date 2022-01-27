@@ -2326,18 +2326,42 @@ aov_results2 <- lapply(tabla_Dupl, function(x) anova_test(tabla_Dupl,
 aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
                                                          Error(numVol/Tiempo),
                                                        data = tabla_Dupl))
+
+
 aov_test <- function(tabla, variable){
   
-  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  tablaVar <- tabla %>% dplyr::select(numVol, Endulzante, Sexo, Tiempo, variable)
+  
+  tablaVar <- tablaVar[!tablaVar[,variable] %in% boxplot.stats(tablaVar[,variable])$out,]
+  
   res.aov <- anova_test(data = tablaVar, dv=variable, wid=numVol, 
                         between = c(Sexo, Endulzante), within= Tiempo)
   
   tablaAnova <- get_anova_table(res.aov, correction = "auto")
   
   print(tablaAnova)
+
 }
 
 aov_test(orinaFlav$tablaFactors, "ES")
+
+
+tablaVar <- orinaFlav$tablaFactors %>% dplyr::select(numVol, Endulzante, Sexo, Tiempo, ES)
+
+tablaVar <- tablaVar[!tablaVar$ES %in% boxplot.stats(tablaVar$ES)$out,]
+
+length(tablaVar$numVol)
+
+
+counts <- data.frame(table(tablaVar$numVol))
+
+tablaVarDupl <- tablaVar[tablaVar$numVol %in% counts$Var1[counts$Freq > 1],]
+
+
+
+
+
+
 
 tablaVar <- orinaFlav$tablaFactors %>% select(numVol, Endulzante, Sexo, Tiempo, "ES")
 

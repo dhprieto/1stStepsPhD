@@ -96,6 +96,9 @@ plasmaFlav <- preprocessTablas1("data/", "tablaplasmaFlav.csv")
 aov_test <- function(tabla, variable){
   
   tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  
+  tablaVar <- tablaVar[!tablaVar[,variable] %in% boxplot.stats(tablaVar[,variable])$out,]
+    
   res.aov <- anova_test(data = tablaVar, dv=variable, wid=numVol, 
                          between = c(Sexo, Endulzante), within= Tiempo)
 
