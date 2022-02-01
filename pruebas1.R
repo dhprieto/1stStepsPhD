@@ -54,11 +54,13 @@ preprocessTables1 <- function(root, nombreTabla) {
   
   # Only numerical features
   
-  set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo, numVol))
+  #set.A_num <- subset(set.A, select=-c(Endulzante, Sexo, Tiempo, numVol))
   
 }
 
 listaTablas1 <- preprocessTables1(root = "data/", nombreTabla = "tablaOrinaAnt.csv")
+
+write.csv(x = listaTablas1, "data/OrinaAntLimpio.csv")
 
 scale(listaTablas1)
 

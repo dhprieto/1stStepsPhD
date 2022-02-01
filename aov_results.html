@@ -168,44 +168,7 @@ pre code {
 </div>
 
 
-<pre class="r"><code>orinaFlav &lt;- preprocessTablas1(&quot;data/&quot;, &quot;tablaOrinaFlav.csv&quot;)</code></pre>
-<pre><code>## Warning: `mutate_each_()` was deprecated in dplyr 0.7.0.
-## Please use `across()` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</code></pre>
-<pre class="r"><code>orinaAnt &lt;- preprocessTablas1(&quot;data/&quot;, &quot;tablaorinaAnt.csv&quot;)
-plasmaAnt &lt;- preprocessTablas1(&quot;data/&quot;, &quot;tablaplasmaAnt.csv&quot;)
-plasmaFlav &lt;- preprocessTablas1(&quot;data/&quot;, &quot;tablaplasmaFlav.csv&quot;)</code></pre>
-<pre class="r"><code>aov_test &lt;- function(tabla, variable){
-  
-  tablaVar &lt;- tabla %&gt;% select(numVol, Endulzante, Sexo, Tiempo, variable)
-  
-  tablaVar &lt;- tablaVar[!tablaVar[,variable] %in% boxplot.stats(tablaVar[,variable])$out,]
-    
-  res.aov &lt;- anova_test(data = tablaVar, dv=variable, wid=numVol, 
-                         between = c(Sexo, Endulzante), within= Tiempo)
-
-  tablaAnova &lt;- get_anova_table(res.aov, correction = &quot;auto&quot;)
-  
-  print(tablaAnova)
-}
-
-aov_loop &lt;- function(tabla){
-   
-  message(paste(&quot;Tabla analizada: &quot;, deparse(substitute(tabla))))
-  for (i in seq(1,ncol(tabla))){
-  
-    if (is.numeric(tabla[,i])){
-        message(paste(&quot;Variable analizada: &quot;, names(tabla)[i]))
-        aov_test(tabla,
-           names(tabla)[i])
-    }
-  
-  
-  }
-}
-
-aov_loop(orinaFlav)</code></pre>
+<pre class="r"><code>aov_loop(orinaFlav)</code></pre>
 <pre><code>## Tabla analizada:  orinaFlav</code></pre>
 <pre><code>## Variable analizada:  EG</code></pre>
 <pre><code>## Note: Using an external vector in selections is ambiguous.
@@ -622,6 +585,1082 @@ aov_loop(orinaFlav)</code></pre>
 ## 5            Sexo:Tiempo   1  86  3.049 0.08400       0.0070
 ## 6      Endulzante:Tiempo   2  86  2.772 0.06800       0.0130
 ## 7 Sexo:Endulzante:Tiempo   2  86  0.644 0.52800       0.0030</code></pre>
+<pre class="r"><code>pairwiseTTest(orinaFlav)</code></pre>
+<pre><code>## Variable analizada:  EG</code></pre>
+<pre><code>## Comparaciones Tiempo  EG</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 EG    0      Final     91    91 0.985 0.985 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  EG</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE EG    0      Final     19    19 0.074 0.074 ns          
+## 2 SA         MUJER  EG    0      Final     14    14 0.241 0.241 ns          
+## 3 ST         HOMBRE EG    0      Final     18    18 0.965 0.965 ns          
+## 4 ST         MUJER  EG    0      Final      8     8 0.973 0.973 ns          
+## 5 SU         HOMBRE EG    0      Final     19    19 0.311 0.311 ns          
+## 6 SU         MUJER  EG    0      Final     13    13 0.433 0.433 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante EG</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         EG    0      Final     33    33 0.034 0.034 *           
+## 2 ST         EG    0      Final     26    26 0.99  0.99  ns          
+## 3 SU         EG    0      Final     32    32 0.557 0.557 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo EG</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE EG    0      Final     56    56 0.084 0.084 ns          
+## 2 MUJER  EG    0      Final     35    35 0.619 0.619 ns</code></pre>
+<pre><code>## Variable analizada:  ES</code></pre>
+<pre><code>## Comparaciones Tiempo  ES</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 ES    0      Final     91    91 0.966 0.966 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  ES</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE ES    0      Final     19    19 0.165 0.165 ns          
+## 2 SA         MUJER  ES    0      Final     14    14 0.084 0.084 ns          
+## 3 ST         HOMBRE ES    0      Final     18    18 0.191 0.191 ns          
+## 4 ST         MUJER  ES    0      Final      8     8 0.074 0.074 ns          
+## 5 SU         HOMBRE ES    0      Final     19    19 0.08  0.08  ns          
+## 6 SU         MUJER  ES    0      Final     13    13 0.092 0.092 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante ES</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         ES    0      Final     33    33 0.337 0.337 ns          
+## 2 ST         ES    0      Final     26    26 0.048 0.048 *           
+## 3 SU         ES    0      Final     32    32 0.338 0.338 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo ES</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE ES    0      Final     56    56 0.266 0.266 ns          
+## 2 MUJER  ES    0      Final     35    35 0.002 0.002 **</code></pre>
+<pre><code>## Variable analizada:  HE.G</code></pre>
+<pre><code>## Comparaciones Tiempo  HE.G</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2          p      p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
+## 1 HE.G  0      Final     91    91 0.00000433 0.00000433 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  HE.G</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE HE.G  0      Final     19    19 0.02  0.02  *           
+## 2 SA         MUJER  HE.G  0      Final     14    14 0.055 0.055 ns          
+## 3 ST         HOMBRE HE.G  0      Final     18    18 0.031 0.031 *           
+## 4 ST         MUJER  HE.G  0      Final      8     8 0.065 0.065 ns          
+## 5 SU         HOMBRE HE.G  0      Final     19    19 0.122 0.122 ns          
+## 6 SU         MUJER  HE.G  0      Final     13    13 0.031 0.031 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante HE.G</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HE.G  0      Final     33    33 0.004 0.004 **          
+## 2 ST         HE.G  0      Final     26    26 0.006 0.006 **          
+## 3 SU         HE.G  0      Final     32    32 0.007 0.007 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo HE.G</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE HE.G  0      Final     56    56 0.002    0.002    **          
+## 2 MUJER  HE.G  0      Final     35    35 0.000539 0.000539 ***</code></pre>
+<pre><code>## Variable analizada:  NG</code></pre>
+<pre><code>## Comparaciones Tiempo  NG</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2          p      p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
+## 1 NG    0      Final     91    91 0.00000113 0.00000113 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  NG</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE NG    0      Final     19    19 0.008 0.008 **          
+## 2 SA         MUJER  NG    0      Final     14    14 0.001 0.001 **          
+## 3 ST         HOMBRE NG    0      Final     18    18 0.003 0.003 **          
+## 4 ST         MUJER  NG    0      Final      8     8 0.034 0.034 *           
+## 5 SU         HOMBRE NG    0      Final     19    19 0.616 0.616 ns          
+## 6 SU         MUJER  NG    0      Final     13    13 0.001 0.001 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante NG</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         NG    0      Final     33    33 0.0000428 0.0000428 ****        
+## 2 ST         NG    0      Final     26    26 0.000169  0.000169  ***         
+## 3 SU         NG    0      Final     32    32 0.175     0.175     ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo NG</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2           p       p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE NG    0      Final     56    56 0.038       0.038       *           
+## 2 MUJER  NG    0      Final     35    35 0.000000588 0.000000588 ****</code></pre>
+<pre><code>## Variable analizada:  NS</code></pre>
+<pre><code>## Comparaciones Tiempo  NS</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 NS    0      Final     91    91 0.541 0.541 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  NS</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE NS    0      Final     19    19 0.029 0.029 *           
+## 2 SA         MUJER  NS    0      Final     14    14 0.476 0.476 ns          
+## 3 ST         HOMBRE NS    0      Final     18    18 0.063 0.063 ns          
+## 4 ST         MUJER  NS    0      Final      8     8 0.215 0.215 ns          
+## 5 SU         HOMBRE NS    0      Final     19    19 0.068 0.068 ns          
+## 6 SU         MUJER  NS    0      Final     13    13 0.34  0.34  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante NS</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         NS    0      Final     33    33 0.442 0.442 ns          
+## 2 ST         NS    0      Final     26    26 0.023 0.023 *           
+## 3 SU         NS    0      Final     32    32 0.999 0.999 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo NS</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE NS    0      Final     56    56 0.433 0.433 ns          
+## 2 MUJER  NS    0      Final     35    35 0.119 0.119 ns</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>## Comparaciones Tiempo  Peso</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Peso  0      Final     91    91 0.374 0.374 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Peso</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Peso  0      Final     19    19 0.048 0.048 *           
+## 2 SA         MUJER  Peso  0      Final     14    14 0.032 0.032 *           
+## 3 ST         HOMBRE Peso  0      Final     18    18 0.1   0.1   ns          
+## 4 ST         MUJER  Peso  0      Final      8     8 0.363 0.363 ns          
+## 5 SU         HOMBRE Peso  0      Final     19    19 0.813 0.813 ns          
+## 6 SU         MUJER  Peso  0      Final     13    13 0.139 0.139 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Peso</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Peso  0      Final     33    33 0.003 0.003 **          
+## 2 ST         Peso  0      Final     26    26 0.055 0.055 ns          
+## 3 SU         Peso  0      Final     32    32 0.266 0.266 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Peso</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Peso  0      Final     56    56 0.973 0.973 ns          
+## 2 MUJER  Peso  0      Final     35    35 0.171 0.171 ns</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>## Comparaciones Tiempo  IMC</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 IMC   0      Final     91    91 0.301 0.301 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IMC</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IMC   0      Final     19    19 0.069 0.069 ns          
+## 2 SA         MUJER  IMC   0      Final     14    14 1     1     ns          
+## 3 ST         HOMBRE IMC   0      Final     18    18 0.072 0.072 ns          
+## 4 ST         MUJER  IMC   0      Final      8     8 0.416 0.416 ns          
+## 5 SU         HOMBRE IMC   0      Final     19    19 0.563 0.563 ns          
+## 6 SU         MUJER  IMC   0      Final     13    13 0.298 0.298 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IMC</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IMC   0      Final     33    33 0.118 0.118 ns          
+## 2 ST         IMC   0      Final     26    26 0.047 0.047 *           
+## 3 SU         IMC   0      Final     32    32 0.223 0.223 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IMC</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IMC   0      Final     56    56 0.35  0.35  ns          
+## 2 MUJER  IMC   0      Final     35    35 0.623 0.623 ns</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>## Comparaciones Tiempo  Grasa</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Grasa 0      Final     91    91 0.029 0.029 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Grasa</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Grasa 0      Final     19    19 0.035    0.035    *           
+## 2 SA         MUJER  Grasa 0      Final     14    14 0.071    0.071    ns          
+## 3 ST         HOMBRE Grasa 0      Final     18    18 0.000967 0.000967 ***         
+## 4 ST         MUJER  Grasa 0      Final      8     8 0.694    0.694    ns          
+## 5 SU         HOMBRE Grasa 0      Final     19    19 0.672    0.672    ns          
+## 6 SU         MUJER  Grasa 0      Final     13    13 0.039    0.039    *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Grasa</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Grasa 0      Final     33    33 0.009 0.009 **          
+## 2 ST         Grasa 0      Final     26    26 0.002 0.002 **          
+## 3 SU         Grasa 0      Final     32    32 0.196 0.196 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Grasa</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Grasa 0      Final     56    56 0.000937 0.000937 ***         
+## 2 MUJER  Grasa 0      Final     35    35 0.976    0.976    ns</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>## Comparaciones Tiempo  IRCV</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 IRCV  0      Final     91    91 0.001 0.001 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IRCV</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IRCV  0      Final     19    19 0.011 0.011 *           
+## 2 SA         MUJER  IRCV  0      Final     14    14 0.435 0.435 ns          
+## 3 ST         HOMBRE IRCV  0      Final     18    18 0.002 0.002 **          
+## 4 ST         MUJER  IRCV  0      Final      8     8 0.186 0.186 ns          
+## 5 SU         HOMBRE IRCV  0      Final     19    19 0.269 0.269 ns          
+## 6 SU         MUJER  IRCV  0      Final     13    13 0.928 0.928 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IRCV</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IRCV  0      Final     33    33 0.026 0.026 *           
+## 2 ST         IRCV  0      Final     26    26 0.001 0.001 **          
+## 3 SU         IRCV  0      Final     32    32 0.43  0.43  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IRCV</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IRCV  0      Final     56    56 0.000201 0.000201 ***         
+## 2 MUJER  IRCV  0      Final     35    35 0.574    0.574    ns</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmin</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmin 0      Final     91    91 0.173 0.173 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmin</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmin 0      Final     19    19 0.495 0.495 ns          
+## 2 SA         MUJER  Bpmin 0      Final     14    14 0.084 0.084 ns          
+## 3 ST         HOMBRE Bpmin 0      Final     18    18 0.739 0.739 ns          
+## 4 ST         MUJER  Bpmin 0      Final      8     8 0.148 0.148 ns          
+## 5 SU         HOMBRE Bpmin 0      Final     19    19 0.546 0.546 ns          
+## 6 SU         MUJER  Bpmin 0      Final     13    13 0.264 0.264 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmin</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmin 0      Final     33    33 0.088 0.088 ns          
+## 2 ST         Bpmin 0      Final     26    26 0.388 0.388 ns          
+## 3 SU         Bpmin 0      Final     32    32 0.9   0.9   ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmin</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmin 0      Final     56    56 0.363 0.363 ns          
+## 2 MUJER  Bpmin 0      Final     35    35 0.243 0.243 ns</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmax</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmax 0      Final     91    91 0.336 0.336 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmax</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmax 0      Final     19    19 0.807 0.807 ns          
+## 2 SA         MUJER  Bpmax 0      Final     14    14 0.725 0.725 ns          
+## 3 ST         HOMBRE Bpmax 0      Final     18    18 0.321 0.321 ns          
+## 4 ST         MUJER  Bpmax 0      Final      8     8 0.034 0.034 *           
+## 5 SU         HOMBRE Bpmax 0      Final     19    19 0.35  0.35  ns          
+## 6 SU         MUJER  Bpmax 0      Final     13    13 0.036 0.036 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmax</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmax 0      Final     33    33 0.884 0.884 ns          
+## 2 ST         Bpmax 0      Final     26    26 0.064 0.064 ns          
+## 3 SU         Bpmax 0      Final     32    32 0.82  0.82  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmax</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmax 0      Final     56    56 0.228 0.228 ns          
+## 2 MUJER  Bpmax 0      Final     35    35 0.978 0.978 ns</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>## Comparaciones Tiempo  Frec</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Frec  0      Final     91    91 0.966 0.966 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Frec</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Frec  0      Final     19    19 0.266 0.266 ns          
+## 2 SA         MUJER  Frec  0      Final     14    14 0.204 0.204 ns          
+## 3 ST         HOMBRE Frec  0      Final     18    18 0.127 0.127 ns          
+## 4 ST         MUJER  Frec  0      Final      8     8 0.835 0.835 ns          
+## 5 SU         HOMBRE Frec  0      Final     19    19 0.637 0.637 ns          
+## 6 SU         MUJER  Frec  0      Final     13    13 0.481 0.481 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Frec</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Frec  0      Final     33    33 0.094 0.094 ns          
+## 2 ST         Frec  0      Final     26    26 0.149 0.149 ns          
+## 3 SU         Frec  0      Final     32    32 0.801 0.801 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Frec</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Frec  0      Final     56    56 0.422 0.422 ns          
+## 2 MUJER  Frec  0      Final     35    35 0.336 0.336 ns</code></pre>
+<pre class="r"><code>pairwiseTTest(orinaAnt)</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc</code></pre>
+<pre><code>## Comparaciones Tiempo  CA.Gluc</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 CA.Gluc 0      Final    104   104 0.947 0.947 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  CA.Gluc</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE CA.Gluc 0      Final     21    21 0.777 0.777 ns          
+## 2 SA         MUJER  CA.Gluc 0      Final     14    14 0.983 0.983 ns          
+## 3 ST         HOMBRE CA.Gluc 0      Final     22    22 0.729 0.729 ns          
+## 4 ST         MUJER  CA.Gluc 0      Final     11    11 0.777 0.777 ns          
+## 5 SU         HOMBRE CA.Gluc 0      Final     22    22 0.236 0.236 ns          
+## 6 SU         MUJER  CA.Gluc 0      Final     14    14 0.74  0.74  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante CA.Gluc</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         CA.Gluc 0      Final     35    35 0.811 0.811 ns          
+## 2 ST         CA.Gluc 0      Final     33    33 0.646 0.646 ns          
+## 3 SU         CA.Gluc 0      Final     36    36 0.463 0.463 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo CA.Gluc</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE CA.Gluc 0      Final     65    65 0.877 0.877 ns          
+## 2 MUJER  CA.Gluc 0      Final     39    39 0.946 0.946 ns</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc</code></pre>
+<pre><code>## Comparaciones Tiempo  DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.        group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 DHPAA.Gluc 0      Final    104   104 0.388 0.388 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.        group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE DHPAA.Gluc 0      Final     21    21 0.711 0.711 ns          
+## 2 SA         MUJER  DHPAA.Gluc 0      Final     14    14 0.854 0.854 ns          
+## 3 ST         HOMBRE DHPAA.Gluc 0      Final     22    22 0.491 0.491 ns          
+## 4 ST         MUJER  DHPAA.Gluc 0      Final     11    11 0.416 0.416 ns          
+## 5 SU         HOMBRE DHPAA.Gluc 0      Final     22    22 0.58  0.58  ns          
+## 6 SU         MUJER  DHPAA.Gluc 0      Final     14    14 0.145 0.145 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.        group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         DHPAA.Gluc 0      Final     35    35 0.943 0.943 ns          
+## 2 ST         DHPAA.Gluc 0      Final     33    33 0.274 0.274 ns          
+## 3 SU         DHPAA.Gluc 0      Final     36    36 0.17  0.17  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.        group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE DHPAA.Gluc 0      Final     65    65 0.8   0.8   ns          
+## 2 MUJER  DHPAA.Gluc 0      Final     39    39 0.367 0.367 ns</code></pre>
+<pre><code>## Variable analizada:  TFA.Gluc</code></pre>
+<pre><code>## Comparaciones Tiempo  TFA.Gluc</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.      group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 TFA.Gluc 0      Final    104   104  0.64  0.64 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  TFA.Gluc</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.      group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE TFA.Gluc 0      Final     21    21 0.909 0.909 ns          
+## 2 SA         MUJER  TFA.Gluc 0      Final     14    14 0.43  0.43  ns          
+## 3 ST         HOMBRE TFA.Gluc 0      Final     22    22 0.24  0.24  ns          
+## 4 ST         MUJER  TFA.Gluc 0      Final     11    11 0.314 0.314 ns          
+## 5 SU         HOMBRE TFA.Gluc 0      Final     22    22 0.596 0.596 ns          
+## 6 SU         MUJER  TFA.Gluc 0      Final     14    14 0.453 0.453 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante TFA.Gluc</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.      group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         TFA.Gluc 0      Final     35    35 0.636 0.636 ns          
+## 2 ST         TFA.Gluc 0      Final     33    33 0.115 0.115 ns          
+## 3 SU         TFA.Gluc 0      Final     36    36 0.411 0.411 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo TFA.Gluc</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.      group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE TFA.Gluc 0      Final     65    65 0.584 0.584 ns          
+## 2 MUJER  TFA.Gluc 0      Final     39    39 0.56  0.56  ns</code></pre>
+<pre><code>## Variable analizada:  TFA.Sulfate</code></pre>
+<pre><code>## Comparaciones Tiempo  TFA.Sulfate</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.         group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 TFA.Sulfate 0      Final    104   104 0.555 0.555 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  TFA.Sulfate</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.         group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE TFA.Sulfate 0      Final     21    21 0.573 0.573 ns          
+## 2 SA         MUJER  TFA.Sulfate 0      Final     14    14 0.198 0.198 ns          
+## 3 ST         HOMBRE TFA.Sulfate 0      Final     22    22 0.256 0.256 ns          
+## 4 ST         MUJER  TFA.Sulfate 0      Final     11    11 0.706 0.706 ns          
+## 5 SU         HOMBRE TFA.Sulfate 0      Final     22    22 0.105 0.105 ns          
+## 6 SU         MUJER  TFA.Sulfate 0      Final     14    14 0.063 0.063 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante TFA.Sulfate</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.         group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         TFA.Sulfate 0      Final     35    35 0.816 0.816 ns          
+## 2 ST         TFA.Sulfate 0      Final     33    33 0.25  0.25  ns          
+## 3 SU         TFA.Sulfate 0      Final     36    36 0.706 0.706 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo TFA.Sulfate</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.         group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE TFA.Sulfate 0      Final     65    65 0.574 0.574 ns          
+## 2 MUJER  TFA.Sulfate 0      Final     39    39 0.057 0.057 ns</code></pre>
+<pre><code>## Variable analizada:  Ácido.Vanílico..VA.</code></pre>
+<pre><code>## Comparaciones Tiempo  Ácido.Vanílico..VA.</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.                 group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Ácido.Vanílico..VA. 0      Final    104   104 0.068 0.068 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Ácido.Vanílico..VA.</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.       group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Ácido.Va~ 0      Final     21    21 0.791 0.791 ns          
+## 2 SA         MUJER  Ácido.Va~ 0      Final     14    14 0.348 0.348 ns          
+## 3 ST         HOMBRE Ácido.Va~ 0      Final     22    22 0.531 0.531 ns          
+## 4 ST         MUJER  Ácido.Va~ 0      Final     11    11 0.224 0.224 ns          
+## 5 SU         HOMBRE Ácido.Va~ 0      Final     22    22 0.839 0.839 ns          
+## 6 SU         MUJER  Ácido.Va~ 0      Final     14    14 0.237 0.237 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Ácido.Vanílico..VA.</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.                 group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Ácido.Vanílico..VA. 0      Final     35    35 0.337 0.337 ns          
+## 2 ST         Ácido.Vanílico..VA. 0      Final     33    33 0.162 0.162 ns          
+## 3 SU         Ácido.Vanílico..VA. 0      Final     36    36 0.243 0.243 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Ácido.Vanílico..VA.</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.                 group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;               &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Ácido.Vanílico..VA. 0      Final     65    65 0.562 0.562 ns          
+## 2 MUJER  Ácido.Vanílico..VA. 0      Final     39    39 0.076 0.076 ns</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>## Comparaciones Tiempo  Peso</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Peso  0      Final    104   104 0.972 0.972 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Peso</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Peso  0      Final     21    21 0.123 0.123 ns          
+## 2 SA         MUJER  Peso  0      Final     14    14 0.032 0.032 *           
+## 3 ST         HOMBRE Peso  0      Final     22    22 0.037 0.037 *           
+## 4 ST         MUJER  Peso  0      Final     11    11 0.179 0.179 ns          
+## 5 SU         HOMBRE Peso  0      Final     22    22 0.886 0.886 ns          
+## 6 SU         MUJER  Peso  0      Final     14    14 0.081 0.081 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Peso</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Peso  0      Final     35    35 0.009 0.009 **          
+## 2 ST         Peso  0      Final     33    33 0.011 0.011 *           
+## 3 SU         Peso  0      Final     36    36 0.221 0.221 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Peso</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Peso  0      Final     65    65 0.456 0.456 ns          
+## 2 MUJER  Peso  0      Final     39    39 0.284 0.284 ns</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>## Comparaciones Tiempo  IMC</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 IMC   0      Final    104   104 0.763 0.763 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IMC</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IMC   0      Final     21    21 0.125 0.125 ns          
+## 2 SA         MUJER  IMC   0      Final     14    14 1     1     ns          
+## 3 ST         HOMBRE IMC   0      Final     22    22 0.064 0.064 ns          
+## 4 ST         MUJER  IMC   0      Final     11    11 0.182 0.182 ns          
+## 5 SU         HOMBRE IMC   0      Final     22    22 0.566 0.566 ns          
+## 6 SU         MUJER  IMC   0      Final     14    14 0.236 0.236 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IMC</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IMC   0      Final     35    35 0.183 0.183 ns          
+## 2 ST         IMC   0      Final     33    33 0.031 0.031 *           
+## 3 SU         IMC   0      Final     36    36 0.179 0.179 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IMC</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IMC   0      Final     65    65 0.58  0.58  ns          
+## 2 MUJER  IMC   0      Final     39    39 0.711 0.711 ns</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>## Comparaciones Tiempo  Grasa</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Grasa 0      Final    104   104 0.004 0.004 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Grasa</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Grasa 0      Final     21    21 0.019     0.019     *           
+## 2 SA         MUJER  Grasa 0      Final     14    14 0.071     0.071     ns          
+## 3 ST         HOMBRE Grasa 0      Final     22    22 0.0000772 0.0000772 ****        
+## 4 ST         MUJER  Grasa 0      Final     11    11 0.332     0.332     ns          
+## 5 SU         HOMBRE Grasa 0      Final     22    22 0.759     0.759     ns          
+## 6 SU         MUJER  Grasa 0      Final     14    14 0.066     0.066     ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Grasa</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Grasa 0      Final     35    35 0.006     0.006     **          
+## 2 ST         Grasa 0      Final     33    33 0.0000995 0.0000995 ****        
+## 3 SU         Grasa 0      Final     36    36 0.211     0.211     ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Grasa</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Grasa 0      Final     65    65 0.000121 0.000121 ***         
+## 2 MUJER  Grasa 0      Final     39    39 0.762    0.762    ns</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>## Comparaciones Tiempo  IRCV</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 IRCV  0      Final    104   104 0.000234 0.000234 ***</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IRCV</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IRCV  0      Final     21    21 0.007 0.007 **          
+## 2 SA         MUJER  IRCV  0      Final     14    14 0.435 0.435 ns          
+## 3 ST         HOMBRE IRCV  0      Final     22    22 0.001 0.001 **          
+## 4 ST         MUJER  IRCV  0      Final     11    11 0.107 0.107 ns          
+## 5 SU         HOMBRE IRCV  0      Final     22    22 0.432 0.432 ns          
+## 6 SU         MUJER  IRCV  0      Final     14    14 0.928 0.928 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IRCV</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IRCV  0      Final     35    35 0.017    0.017    *           
+## 2 ST         IRCV  0      Final     33    33 0.000233 0.000233 ***         
+## 3 SU         IRCV  0      Final     36    36 0.563    0.563    ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IRCV</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IRCV  0      Final     65    65 0.0000524 0.0000524 ****        
+## 2 MUJER  IRCV  0      Final     39    39 0.474     0.474     ns</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmin</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmin 0      Final    104   104 0.085 0.085 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmin</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmin 0      Final     21    21 0.589 0.589 ns          
+## 2 SA         MUJER  Bpmin 0      Final     14    14 0.084 0.084 ns          
+## 3 ST         HOMBRE Bpmin 0      Final     22    22 0.611 0.611 ns          
+## 4 ST         MUJER  Bpmin 0      Final     11    11 0.061 0.061 ns          
+## 5 SU         HOMBRE Bpmin 0      Final     22    22 0.324 0.324 ns          
+## 6 SU         MUJER  Bpmin 0      Final     14    14 0.183 0.183 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmin</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmin 0      Final     35    35 0.112 0.112 ns          
+## 2 ST         Bpmin 0      Final     33    33 0.205 0.205 ns          
+## 3 SU         Bpmin 0      Final     36    36 0.7   0.7   ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmin</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmin 0      Final     65    65 0.217 0.217 ns          
+## 2 MUJER  Bpmin 0      Final     39    39 0.192 0.192 ns</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmax</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmax 0      Final    104   104 0.102 0.102 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmax</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmax 0      Final     21    21 0.704 0.704 ns          
+## 2 SA         MUJER  Bpmax 0      Final     14    14 0.725 0.725 ns          
+## 3 ST         HOMBRE Bpmax 0      Final     22    22 0.204 0.204 ns          
+## 4 ST         MUJER  Bpmax 0      Final     11    11 0.007 0.007 **          
+## 5 SU         HOMBRE Bpmax 0      Final     22    22 0.208 0.208 ns          
+## 6 SU         MUJER  Bpmax 0      Final     14    14 0.036 0.036 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmax</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmax 0      Final     35    35 0.598 0.598 ns          
+## 2 ST         Bpmax 0      Final     33    33 0.019 0.019 *           
+## 3 SU         Bpmax 0      Final     36    36 0.944 0.944 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmax</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmax 0      Final     65    65 0.068 0.068 ns          
+## 2 MUJER  Bpmax 0      Final     39    39 0.81  0.81  ns</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>## Comparaciones Tiempo  Frec</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Frec  0      Final    104   104 0.786 0.786 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Frec</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Frec  0      Final     21    21 0.176 0.176 ns          
+## 2 SA         MUJER  Frec  0      Final     14    14 0.204 0.204 ns          
+## 3 ST         HOMBRE Frec  0      Final     22    22 0.169 0.169 ns          
+## 4 ST         MUJER  Frec  0      Final     11    11 0.563 0.563 ns          
+## 5 SU         HOMBRE Frec  0      Final     22    22 0.413 0.413 ns          
+## 6 SU         MUJER  Frec  0      Final     14    14 0.401 0.401 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Frec</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Frec  0      Final     35    35 0.062 0.062 ns          
+## 2 ST         Frec  0      Final     33    33 0.313 0.313 ns          
+## 3 SU         Frec  0      Final     36    36 0.946 0.946 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Frec</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Frec  0      Final     65    65 0.46  0.46  ns          
+## 2 MUJER  Frec  0      Final     39    39 0.126 0.126 ns</code></pre>
+<pre class="r"><code>pairwiseTTest(plasmaAnt)</code></pre>
+<pre><code>## Variable analizada:  Ácido.Caféico..CA.</code></pre>
+<pre><code>## Comparaciones Tiempo  Ácido.Caféico..CA.</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.                group1 group2    n1    n2            p        p.adj p.adj.signif
+##   &lt;chr&gt;              &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;       
+## 1 Ácido.Caféico..CA. 0      Final     92    92 0.0000000103 0.0000000103 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Ácido.Caféico..CA.</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2       p   p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Ácid~ 0      Final     16    16 5.97e-4 5.97e-4 ***         
+## 2 SA         MUJER  Ácid~ 0      Final     11    11 2.9 e-2 2.9 e-2 *           
+## 3 ST         HOMBRE Ácid~ 0      Final     22    22 1.78e-1 1.78e-1 ns          
+## 4 ST         MUJER  Ácid~ 0      Final     14    14 1.3 e-2 1.3 e-2 *           
+## 5 SU         HOMBRE Ácid~ 0      Final     17    17 6   e-3 6   e-3 **          
+## 6 SU         MUJER  Ácid~ 0      Final     12    12 2   e-1 2   e-1 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Ácido.Caféico..CA.</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.                group1 group2    n1    n2       p   p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;              &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Ácido.Caféico..CA. 0      Final     27    27 3.64e-5 3.64e-5 ****        
+## 2 ST         Ácido.Caféico..CA. 0      Final     36    36 7   e-3 7   e-3 **          
+## 3 SU         Ácido.Caféico..CA. 0      Final     29    29 2   e-3 2   e-3 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Ácido.Caféico..CA.</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.                group1 group2    n1    n2          p   p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;              &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Ácido.Caféico..CA. 0      Final     55    55 0.00000867 8.67e-6 ****        
+## 2 MUJER  Ácido.Caféico..CA. 0      Final     37    37 0.000374   3.74e-4 ***</code></pre>
+<pre><code>## Variable analizada:  CA.Gluc</code></pre>
+<pre><code>## Comparaciones Tiempo  CA.Gluc</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 CA.Gluc 0      Final     92    92 0.015 0.015 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  CA.Gluc</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE CA.Gluc 0      Final     16    16 0.012 0.012 *           
+## 2 SA         MUJER  CA.Gluc 0      Final     11    11 0.324 0.324 ns          
+## 3 ST         HOMBRE CA.Gluc 0      Final     22    22 0.308 0.308 ns          
+## 4 ST         MUJER  CA.Gluc 0      Final     14    14 0.327 0.327 ns          
+## 5 SU         HOMBRE CA.Gluc 0      Final     17    17 0.079 0.079 ns          
+## 6 SU         MUJER  CA.Gluc 0      Final     12    12 0.24  0.24  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante CA.Gluc</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         CA.Gluc 0      Final     27    27 0.544 0.544 ns          
+## 2 ST         CA.Gluc 0      Final     36    36 0.205 0.205 ns          
+## 3 SU         CA.Gluc 0      Final     29    29 0.046 0.046 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo CA.Gluc</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.     group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE CA.Gluc 0      Final     55    55 0.009 0.009 **          
+## 2 MUJER  CA.Gluc 0      Final     37    37 0.916 0.916 ns</code></pre>
+<pre><code>## Variable analizada:  X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## Comparaciones Tiempo  X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.                    group1 group2    n1    n2        p   p.adj p.adj.signif
+##   &lt;chr&gt;                  &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 X3.4.Ácido.Dihidroxif~ 0      Final     92    92  8.79e-5 8.79e-5 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.       group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE X3.4.Áci~ 0      Final     16    16 0.012 0.012 *           
+## 2 SA         MUJER  X3.4.Áci~ 0      Final     11    11 0.803 0.803 ns          
+## 3 ST         HOMBRE X3.4.Áci~ 0      Final     22    22 0.002 0.002 **          
+## 4 ST         MUJER  X3.4.Áci~ 0      Final     14    14 0.589 0.589 ns          
+## 5 SU         HOMBRE X3.4.Áci~ 0      Final     17    17 0.009 0.009 **          
+## 6 SU         MUJER  X3.4.Áci~ 0      Final     12    12 0.85  0.85  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.              group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;            &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         X3.4.Ácido.Dihi~ 0      Final     27    27 0.067 0.067 ns          
+## 2 ST         X3.4.Ácido.Dihi~ 0      Final     36    36 0.004 0.004 **          
+## 3 SU         X3.4.Ácido.Dihi~ 0      Final     29    29 0.036 0.036 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo X3.4.Ácido.Dihidroxifenilacético..DHPAA.</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.             group1 group2    n1    n2        p   p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE X3.4.Ácido.Dih~ 0      Final     55    55  1.09e-6 1.09e-6 ****        
+## 2 MUJER  X3.4.Ácido.Dih~ 0      Final     37    37  9.81e-1 9.81e-1 ns</code></pre>
+<pre><code>## Variable analizada:  DHPAA.Gluc</code></pre>
+<pre><code>## Comparaciones Tiempo  DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.        group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 DHPAA.Gluc 0      Final     92    92 0.0000678 0.0000678 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.        group1 group2    n1    n2       p   p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE DHPAA.Gluc 0      Final     16    16 4.43e-4 4.43e-4 ***         
+## 2 SA         MUJER  DHPAA.Gluc 0      Final     11    11 3.29e-1 3.29e-1 ns          
+## 3 ST         HOMBRE DHPAA.Gluc 0      Final     22    22 6.26e-1 6.26e-1 ns          
+## 4 ST         MUJER  DHPAA.Gluc 0      Final     14    14 7.3 e-1 7.3 e-1 ns          
+## 5 SU         HOMBRE DHPAA.Gluc 0      Final     17    17 5.62e-4 5.62e-4 ***         
+## 6 SU         MUJER  DHPAA.Gluc 0      Final     12    12 5.38e-1 5.38e-1 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.        group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         DHPAA.Gluc 0      Final     27    27 0.002 0.002 **          
+## 2 ST         DHPAA.Gluc 0      Final     36    36 0.878 0.878 ns          
+## 3 SU         DHPAA.Gluc 0      Final     29    29 0.001 0.001 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo DHPAA.Gluc</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.        group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE DHPAA.Gluc 0      Final     55    55 0.0000357 0.0000357 ****        
+## 2 MUJER  DHPAA.Gluc 0      Final     37    37 0.223     0.223     ns</code></pre>
+<pre><code>## Variable analizada:  VA.GG</code></pre>
+<pre><code>## Comparaciones Tiempo  VA.GG</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2            p        p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;       
+## 1 VA.GG 0      Final     92    92 0.0000000378 0.0000000378 ****</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  VA.GG</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE VA.GG 0      Final     16    16 0.0000413 0.0000413 ****        
+## 2 SA         MUJER  VA.GG 0      Final     11    11 0.004     0.004     **          
+## 3 ST         HOMBRE VA.GG 0      Final     22    22 0.196     0.196     ns          
+## 4 ST         MUJER  VA.GG 0      Final     14    14 0.251     0.251     ns          
+## 5 SU         HOMBRE VA.GG 0      Final     17    17 0.011     0.011     *           
+## 6 SU         MUJER  VA.GG 0      Final     12    12 0.107     0.107     ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante VA.GG</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2           p       p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         VA.GG 0      Final     27    27 0.000000342 0.000000342 ****        
+## 2 ST         VA.GG 0      Final     36    36 0.091       0.091       ns          
+## 3 SU         VA.GG 0      Final     29    29 0.002       0.002       **</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo VA.GG</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2          p      p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE VA.GG 0      Final     55    55 0.00000648 0.00000648 ****        
+## 2 MUJER  VA.GG 0      Final     37    37 0.001      0.001      **</code></pre>
+<pre><code>## Variable analizada:  VA.Gluc.sulfate</code></pre>
+<pre><code>## Comparaciones Tiempo  VA.Gluc.sulfate</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.             group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 VA.Gluc.sulfate 0      Final     92    92 0.002 0.002 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  VA.Gluc.sulfate</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.             group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE VA.Gluc.sulfate 0      Final     16    16 0.026 0.026 *           
+## 2 SA         MUJER  VA.Gluc.sulfate 0      Final     11    11 0.086 0.086 ns          
+## 3 ST         HOMBRE VA.Gluc.sulfate 0      Final     22    22 0.141 0.141 ns          
+## 4 ST         MUJER  VA.Gluc.sulfate 0      Final     14    14 0.993 0.993 ns          
+## 5 SU         HOMBRE VA.Gluc.sulfate 0      Final     17    17 0.279 0.279 ns          
+## 6 SU         MUJER  VA.Gluc.sulfate 0      Final     12    12 0.709 0.709 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante VA.Gluc.sulfate</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.             group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         VA.Gluc.sulfate 0      Final     27    27 0.004 0.004 **          
+## 2 ST         VA.Gluc.sulfate 0      Final     36    36 0.211 0.211 ns          
+## 3 SU         VA.Gluc.sulfate 0      Final     29    29 0.273 0.273 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo VA.Gluc.sulfate</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.             group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE VA.Gluc.sulfate 0      Final     55    55 0.004 0.004 **          
+## 2 MUJER  VA.Gluc.sulfate 0      Final     37    37 0.178 0.178 ns</code></pre>
+<pre><code>## Variable analizada:  Peso</code></pre>
+<pre><code>## Comparaciones Tiempo  Peso</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Peso  0      Final     92    92 0.912 0.912 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Peso</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Peso  0      Final     16    16 0.312 0.312 ns          
+## 2 SA         MUJER  Peso  0      Final     11    11 0.247 0.247 ns          
+## 3 ST         HOMBRE Peso  0      Final     22    22 0.124 0.124 ns          
+## 4 ST         MUJER  Peso  0      Final     14    14 0.14  0.14  ns          
+## 5 SU         HOMBRE Peso  0      Final     17    17 0.611 0.611 ns          
+## 6 SU         MUJER  Peso  0      Final     12    12 0.036 0.036 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Peso</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Peso  0      Final     27    27 0.117 0.117 ns          
+## 2 ST         Peso  0      Final     36    36 0.032 0.032 *           
+## 3 SU         Peso  0      Final     29    29 0.078 0.078 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Peso</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Peso  0      Final     55    55 0.576 0.576 ns          
+## 2 MUJER  Peso  0      Final     37    37 0.578 0.578 ns</code></pre>
+<pre><code>## Variable analizada:  IMC</code></pre>
+<pre><code>## Comparaciones Tiempo  IMC</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 IMC   0      Final     92    92 0.667 0.667 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IMC</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IMC   0      Final     16    16 0.288 0.288 ns          
+## 2 SA         MUJER  IMC   0      Final     11    11 0.579 0.579 ns          
+## 3 ST         HOMBRE IMC   0      Final     22    22 0.115 0.115 ns          
+## 4 ST         MUJER  IMC   0      Final     14    14 0.143 0.143 ns          
+## 5 SU         HOMBRE IMC   0      Final     17    17 0.62  0.62  ns          
+## 6 SU         MUJER  IMC   0      Final     12    12 0.046 0.046 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IMC</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IMC   0      Final     27    27 0.235 0.235 ns          
+## 2 ST         IMC   0      Final     36    36 0.054 0.054 ns          
+## 3 SU         IMC   0      Final     29    29 0.048 0.048 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IMC</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IMC   0      Final     55    55 0.293 0.293 ns          
+## 2 MUJER  IMC   0      Final     37    37 0.304 0.304 ns</code></pre>
+<pre><code>## Variable analizada:  Grasa</code></pre>
+<pre><code>## Comparaciones Tiempo  Grasa</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Grasa 0      Final     92    92 0.001 0.001 **</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Grasa</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Grasa 0      Final     16    16 0.25     0.25     ns          
+## 2 SA         MUJER  Grasa 0      Final     11    11 0.181    0.181    ns          
+## 3 ST         HOMBRE Grasa 0      Final     22    22 0.000102 0.000102 ***         
+## 4 ST         MUJER  Grasa 0      Final     14    14 0.126    0.126    ns          
+## 5 SU         HOMBRE Grasa 0      Final     17    17 0.392    0.392    ns          
+## 6 SU         MUJER  Grasa 0      Final     12    12 0.189    0.189    ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Grasa</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2         p     p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Grasa 0      Final     27    27 0.078     0.078     ns          
+## 2 ST         Grasa 0      Final     36    36 0.0000425 0.0000425 ****        
+## 3 SU         Grasa 0      Final     29    29 0.696     0.696     ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Grasa</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Grasa 0      Final     55    55 0.000192 0.000192 ***         
+## 2 MUJER  Grasa 0      Final     37    37 0.45     0.45     ns</code></pre>
+<pre><code>## Variable analizada:  IRCV</code></pre>
+<pre><code>## Comparaciones Tiempo  IRCV</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 IRCV  0      Final     92    92 0.000544 0.000544 ***</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  IRCV</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE IRCV  0      Final     16    16 0.068 0.068 ns          
+## 2 SA         MUJER  IRCV  0      Final     11    11 0.192 0.192 ns          
+## 3 ST         HOMBRE IRCV  0      Final     22    22 0.004 0.004 **          
+## 4 ST         MUJER  IRCV  0      Final     14    14 0.047 0.047 *           
+## 5 SU         HOMBRE IRCV  0      Final     17    17 0.332 0.332 ns          
+## 6 SU         MUJER  IRCV  0      Final     12    12 0.389 0.389 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante IRCV</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         IRCV  0      Final     27    27 0.134    0.134    ns          
+## 2 ST         IRCV  0      Final     36    36 0.000406 0.000406 ***         
+## 3 SU         IRCV  0      Final     29    29 0.573    0.573    ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo IRCV</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2        p    p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE IRCV  0      Final     55    55 0.000556 0.000556 ***         
+## 2 MUJER  IRCV  0      Final     37    37 0.422    0.422    ns</code></pre>
+<pre><code>## Variable analizada:  Bpmin</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmin</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmin 0      Final     92    92 0.326 0.326 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmin</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmin 0      Final     16    16 0.393 0.393 ns          
+## 2 SA         MUJER  Bpmin 0      Final     11    11 0.072 0.072 ns          
+## 3 ST         HOMBRE Bpmin 0      Final     22    22 0.509 0.509 ns          
+## 4 ST         MUJER  Bpmin 0      Final     14    14 0.137 0.137 ns          
+## 5 SU         HOMBRE Bpmin 0      Final     17    17 0.534 0.534 ns          
+## 6 SU         MUJER  Bpmin 0      Final     12    12 0.063 0.063 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmin</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmin 0      Final     27    27 0.055 0.055 ns          
+## 2 ST         Bpmin 0      Final     36    36 0.799 0.799 ns          
+## 3 SU         Bpmin 0      Final     29    29 0.96  0.96  ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmin</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmin 0      Final     55    55 0.629 0.629 ns          
+## 2 MUJER  Bpmin 0      Final     37    37 0.274 0.274 ns</code></pre>
+<pre><code>## Variable analizada:  Bpmax</code></pre>
+<pre><code>## Comparaciones Tiempo  Bpmax</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Bpmax 0      Final     92    92 0.047 0.047 *</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Bpmax</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Bpmax 0      Final     16    16 0.052 0.052 ns          
+## 2 SA         MUJER  Bpmax 0      Final     11    11 0.65  0.65  ns          
+## 3 ST         HOMBRE Bpmax 0      Final     22    22 0.195 0.195 ns          
+## 4 ST         MUJER  Bpmax 0      Final     14    14 0.118 0.118 ns          
+## 5 SU         HOMBRE Bpmax 0      Final     17    17 0.291 0.291 ns          
+## 6 SU         MUJER  Bpmax 0      Final     12    12 0.157 0.157 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Bpmax</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Bpmax 0      Final     27    27 0.145 0.145 ns          
+## 2 ST         Bpmax 0      Final     36    36 0.045 0.045 *           
+## 3 SU         Bpmax 0      Final     29    29 0.896 0.896 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Bpmax</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Bpmax 0      Final     55    55 0.025 0.025 *           
+## 2 MUJER  Bpmax 0      Final     37    37 0.694 0.694 ns</code></pre>
+<pre><code>## Variable analizada:  Frec</code></pre>
+<pre><code>## Comparaciones Tiempo  Frec</code></pre>
+<pre><code>## # A tibble: 1 x 8
+##   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 Frec  0      Final     92    92 0.956 0.956 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante-Sexo  Frec</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   Endulzante Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         HOMBRE Frec  0      Final     16    16 0.034 0.034 *           
+## 2 SA         MUJER  Frec  0      Final     11    11 0.038 0.038 *           
+## 3 ST         HOMBRE Frec  0      Final     22    22 0.088 0.088 ns          
+## 4 ST         MUJER  Frec  0      Final     14    14 0.698 0.698 ns          
+## 5 SU         HOMBRE Frec  0      Final     17    17 0.126 0.126 ns          
+## 6 SU         MUJER  Frec  0      Final     12    12 0.609 0.609 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Endulzante Frec</code></pre>
+<pre><code>## # A tibble: 3 x 9
+##   Endulzante .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;      &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 SA         Frec  0      Final     27    27 0.003 0.003 **          
+## 2 ST         Frec  0      Final     36    36 0.243 0.243 ns          
+## 3 SU         Frec  0      Final     29    29 0.565 0.565 ns</code></pre>
+<pre><code>## Comparaciones Tiempo-Sexo Frec</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Sexo   .y.   group1 group2    n1    n2     p p.adj p.adj.signif
+##   &lt;fct&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+## 1 HOMBRE Frec  0      Final     55    55 0.23  0.23  ns          
+## 2 MUJER  Frec  0      Final     37    37 0.172 0.172 ns</code></pre>
 
 
 
