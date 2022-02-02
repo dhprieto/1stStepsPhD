@@ -1768,10 +1768,21 @@ summary(anova_pareado_Frec)
 
 clusterNPlot <- function(listaTablas){
 
-tablaNumMet <- listaTablas$tablaNum %>%
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+#tablaNumMet <- listaTablas$tablaNum %>%
+#  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
-tablaFactorsAll <-listaTablas$tablaFactors
+for (i in colnames(listaTablas)) {
+  
+  if (is.numeric(listaTablas[,i])){
+    
+    listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
+  }
+} 
+
+tablaFactorsAll <- listaTablas
+  
+tablaNumMet <- listaTablas  %>% 
+  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
 
 model_clustering_OF <- Mclust(tablaNumMet)
 
@@ -1784,13 +1795,13 @@ p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
 ggarrange(p1,p2)
 
 
-tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$tablaNum$Peso, 
-                                                      IMC = listaTablas$tablaNum$IMC, 
-                                                      Grasa = listaTablas$tablaNum$Grasa, 
-                                                      IRCV = listaTablas$tablaNum$IRCV, 
-                                                      Bpmin = listaTablas$tablaNum$Bpmin, 
-                                                      Bpmax = listaTablas$tablaNum$Bpmax, 
-                                                      Frec = listaTablas$tablaNum$Frec,
+tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$Peso, 
+                                                      IMC = listaTablas$IMC, 
+                                                      Grasa = listaTablas$Grasa, 
+                                                      IRCV = listaTablas$IRCV, 
+                                                      Bpmin = listaTablas$Bpmin, 
+                                                      Bpmax = listaTablas$Bpmax, 
+                                                      Frec = listaTablas$Frec,
                                                       clusters = model_clustering_OF$classification,
                                                       Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
                                                       Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
@@ -1823,15 +1834,16 @@ ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),a
 
 }
 
+
 library(QuantPsyc)
 library(energy)
 
 
-checkMultVar <- function(listaTablas) {
+checkMultVar <- function(tablaNumMet1) {
     
 
-    tablaNumMet1 <- listaTablas$tablaNum %>% 
-    dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+    #tablaNumMet1 <- listaTablas$tablaNum %>% 
+    #dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
 multivarTest <- mult.norm(tablaNumMet1)$mult.test
 print(multivarTest)
@@ -1839,7 +1851,46 @@ print (mvnorm.etest(tablaNumMet1, R=1000))
 
 }
 
-checkMultVar(orinaAnt)
+lista1 <- preprocessTablas("data/", "tablaOrinaAnt.csv")
+
+tabla1 <- lista1$tablaFactors
+
+tabla1Num <- tabla1 %>% 
+  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
+
+colnames(tabla1Num)
+
+
+tablaVar <- tablaVar[!tablaVar[,variable] %in% boxplot.stats(tablaVar[,variable])$out,]
+
+
+
+
+
+
+checkMultVar(tabla1Num)
+
+batchNorm1 <- function(tabla){
+  
+  for (i in seq(ncol(tabla))) {
+    
+    tabla <- tabla[!tabla[,i] %in% boxplot.stats(tabla[,i])$out,]
+      
+  }  
+  return(tabla)
+}
+
+tabla1NumNorm <- batchNorm1(tabla1Num)
+
+clusterNPlot(tabla1)
+
+
+clusterNPlot(orinaFlav$tablaFactors)
+clusterNPlot(plasmaAnt$tablaFactors)
+
+checkMultVar(tabla1NumNorm)
+
+
 clusterNPlot(orinaAnt)
 
 checkMultVar(orinaFlav)
@@ -2370,8 +2421,7 @@ str(orinaFlav$tablaFactors)
 for (i in seq(1,ncol(orinaFlav$tablaFactors))){
   
   if (is.numeric(orinaFlav$tablaFactors[,i])){
-  
-    aov_test(orinaFlav$tablaFactors,
+      aov_test(orinaFlav$tablaFactors,
            names(orinaFlav$tablaFactors)[i])
   }
   
@@ -2380,3 +2430,62 @@ for (i in seq(1,ncol(orinaFlav$tablaFactors))){
 
 
 anova_test()
+
+
+
+# COMPARACIONES MULTIPLES ----
+
+orinaFlav <- preprocessTablas("data/", "tablaOrinaFlav.csv")$tablaFactors
+
+counts <- data.frame(table(orinaFlav$numVol))
+
+orinaFlavDupl <- orinaFlav[orinaFlav$numVol %in% counts$Var1[counts$Freq > 1],]
+
+
+
+pwc <- orinaFlavDupl  %>%
+  group_by(Endulzante) %>% pairwise_t_test(ES ~ Tiempo, paired = TRUE, p.adjust.method = "bonferroni")
+pwc
+
+
+
+pairwiseTTest <- function(tabla){
+  
+  counts <- data.frame(table(tabla$numVol))
+  
+  tabla <- tabla[tabla$numVol %in% counts$Var1[counts$Freq > 1],]
+  
+  for (i in colnames(tabla)){
+    
+    if (is.numeric(tabla[,i])){
+      
+      
+      message(paste("Variable analizada: ", i))
+      
+      print(pairwise_t_test(data = tabla , formula = as.formula(paste(sym(i),"~ Tiempo")),
+                            paired = T, p.adjust.method = "bonferroni")
+            %>% dplyr::select(-df, -statistic))
+      
+      tablaGr <- group_by(tabla, Endulzante, Sexo)
+      
+      print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+      
+      
+      tablaGr <- group_by(tabla, Endulzante)
+      
+      print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+      
+      
+      tablaGr <- group_by(tabla, Sexo)
+      
+      print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+    }
+  }
+}
+
+
+pairwiseTTest(orinaFlavDupl)
+  

@@ -109,7 +109,6 @@ reading <- function(tablaPath, nasPercentageCol, nasRow){
     
 }
 
-
 preprocessTables <- function(root, nombreTabla) {
   
   # Getting data ready
@@ -238,18 +237,4 @@ preprocessTables <- function(root, nombreTabla) {
               tabla_FxSUx0=tabla_FxSUx0, tabla_FxSUxF=tabla_FxSUxF))
   
 }
-
-
-
-
-
-tablaName2 = "cronicoPlasmaFlavLimpio.csv"
-
-rootDir = "data/"
-
-tablaPath = paste0(rootDir,tablaName2)
-
-tabla1 <- preprocess (tablaPath, nasPercentageCol = 0.5, nasRow = T)
-
-write.csv(tabla1, "data/tablaPlasmaFlav_adjusted.csv")
 

@@ -1,37 +1,34 @@
 # CLustering
 
+library(tidyverse)
 library(factoextra)
-library(dplyr)
+library(ggpubr)
 library(scales)
+source("reading.R")
+
 # Lectura de tablas
 
 # Tablas crónico con datos antropométricos ----
 
-c_O_A.A <- read.csv("data/cronicoOrinaAnt_Antro.csv")
+listaTablas <- preprocessTables("data/", "tablaOrinaAnt.csv")$tablaFactors
 
-# Retiramos datos ordinales y texto
+for (i in colnames(listaTablas)) {
+  
+  if (is.numeric(listaTablas[,i])){
+    
+    listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
+  }
+} 
 
-c_O_A.A$Endulzante <- factor(c_O_A.A$Endulzante, levels = c("SA", "ST", "SU"))
-c_O_A.A$Sexo <- factor(c_O_A.A$Sexo, levels = c("HOMBRE", "MUJER"))
-c_O_A.A$Tiempo <- factor(c_O_A.A$Tiempo, levels = c("0", "Final"))
+tablaNum <- listaTablas  %>% 
+  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
 
-
-set.A <- c_O_A.A[,-c(1,2,4)]
-
-set.A_num <- set.A[,-c(1,7,26)]
-
-
-
-set.A_rescaled <- set.A_num %>% mutate_each_(list(~rescale(.) %>% as.vector), 
-                                         vars = colnames(set.A_num))
 
 # Validación de método de clustering ----
 
 ## Manual ----
 
-library(purrr)
-library(ggpubr)
-datos_simulados <- map_df(set.A_rescaled,
+datos_simulados <- map_df(tablaNum,
                           .f = function(x){runif(n = length(x),
                                                  min = min(x),
                                                  max = max(x))
@@ -39,9 +36,10 @@ datos_simulados <- map_df(set.A_rescaled,
 )
 
 
-pca_datos_A      <- prcomp(set.A_rescaled)
+pca_datos_A      <- prcomp(tablaNum)
 pca_datos_simulados <- prcomp(datos_simulados)
-p1 <- fviz_pca_ind(X = pca_datos_A, habillage = set.A$Sexo,
+
+p1 <- fviz_pca_ind(X = pca_datos_A, habillage = listaTablas$Sexo,
                    geom = "point", title = "PCA - datos sexo",
                    pallete = "jco") +
   theme_bw() + theme(legend.position = "bottom")
@@ -55,8 +53,8 @@ ggarrange(p1, p2)#, common.legend = TRUE)
 
 # K-means clustering
 
-km_datos_A <- kmeans(x = set.A_rescaled, centers = 2)
-p1 <- fviz_cluster(object = km_datos_A, data = set.A_rescaled,
+km_datos_A <- kmeans(x = tablaNum, centers = 2)
+p1 <- fviz_cluster(object = km_datos_A, data = tablaNum,
                    ellipse.type = "norm", geom = "point", main = "Datos sexo",
                    stand = FALSE, palette = "jco") +
   theme_bw() + theme(legend.position = "none")
@@ -67,7 +65,7 @@ p2 <- fviz_cluster(object = km_datos_simulados, data = datos_simulados,
   theme_bw() + theme(legend.position = "none")
 
 # Hierarchical clustering
-p3 <- fviz_dend(x = hclust(dist(set.A_rescaled)), k = 2, k_colors = "jco",
+p3 <- fviz_dend(x = hclust(dist(tablaNum)), k = 2, k_colors = "jco",
                 show_labels = FALSE, main = "Datos sexo")
 p4 <- fviz_dend(x = hclust(dist(datos_simulados)), k = 2, k_colors = "jco",
                 show_labels = FALSE, main = "Datos simulados")
@@ -81,12 +79,12 @@ ggarrange(p3, p4)
 library(clustertend)
 set.seed(101)
 
-hopkins(set.A_rescaled, n = nrow(set.A_rescaled)-1)
+hopkins(tablaNum, n = nrow(tablaNum)-1)
 hopkins(datos_simulados, n = nrow(datos_simulados)-1)
 
 ### VAT (Comparación visual) ----
 
-dist_datos_A      <- dist(set.A_rescaled, method = "euclidean")
+dist_datos_A      <- dist(tablaNum, method = "euclidean")
 dist_datos_simulados <- dist(datos_simulados, method = "euclidean")
 
 p1 <- fviz_dist(dist.obj = dist_datos_A, show_labels = FALSE) +
@@ -100,11 +98,11 @@ ggarrange(p1, p2)
 ## Automática ----
 
 library(clValid)
-
+library("kohonen")
 comparacion <- clValid(
-  obj        = set.A_rescaled,
-  nClust     = 2:6,
-  clMethods  = c("hierarchical", "kmeans", "pam"),
+  obj        = tablaNum,
+  nClust     = c(2,3,4,5,6),
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
   validation = c("stability", "internal")
 )
 summary(comparacion)
@@ -113,8 +111,8 @@ summary(comparacion)
 
 library(NbClust)
 
-numero_clusters <- NbClust(data = scale(set.A_num), distance = "euclidean", min.nc = 2,
-                           max.nc = 5, method = "kmeans", index = c("kl","ch","hartigan",  "cindex", "db"))
+numero_clusters <- NbClust(data = tablaNum, distance = "euclidean", min.nc = 2,
+                           max.nc = 5, method = "kmeans", index = c("kl","ch","hartigan", "cindex", "db"))
 
 fviz_nbclust(numero_clusters)
 
@@ -124,19 +122,19 @@ fviz_nbclust(numero_clusters)
 
 ### Number of centers
 
-fviz_nbclust(x = set.A_rescaled, FUNcluster = kmeans, method = "wss", k.max = 10, 
-             diss = get_dist(set.A_rescaled, method = "pearson"), nstart = 50)
+fviz_nbclust(x = tablaNum, FUNcluster = kmeans, method = "wss", k.max = 10, 
+             diss = get_dist(tablaNum, method = "pearson"), nstart = 50)
 
 ### Clustering
 
 set.seed(123)
 
-km_clusters <- kmeans(x = set.A_rescaled, centers = 5, nstart = 1000, )
+km_clusters <- kmeans(x = tablaNum, centers = 3, nstart = 1000, )
 
 
 ### Plotting
 
-fviz_cluster(object = km_clusters, data = set.A_rescaled,
+fviz_cluster(object = km_clusters, data = tablaNum,
              show.clust.cent = TRUE,
              ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
   labs(title = "K-means - Cronico Orina Antocianos + Datos Antropométricos") +
@@ -150,14 +148,14 @@ library(cluster)
 
 ### Number of centers
 
-fviz_nbclust(x = set.A_rescaled, FUNcluster = pam, method = "wss", k.max = 10, 
-             diss = get_dist(set.A_rescaled, method = "manhattan"), nstart = 50)
+fviz_nbclust(x = tablaNum, FUNcluster = pam, method = "wss", k.max = 10, 
+             diss = get_dist(tablaNum, method = "manhattan"), nstart = 50)
 
 ### Clustering
 
-pam_clusters <- pam(x = set.A_rescaled, k = 4, metric = "manhattan")
+pam_clusters <- pam(x = tablaNum, k = 4, metric = "manhattan")
 
-fviz_cluster(object = pam_clusters, data = set.A_rescaled, ellipse.type = "t",
+fviz_cluster(object = pam_clusters, data = tablaNum, ellipse.type = "t",
              repel = TRUE) +
   theme_bw() +
   labs(title = "PAM - Cronico Orina Antocianos + Datos Antropométricos") +
@@ -167,7 +165,8 @@ fviz_cluster(object = pam_clusters, data = set.A_rescaled, ellipse.type = "t",
 # Hiearchical clustering ----
 
 # Matriz de distancias euclídeas
-mat_dist <- dist(x = set.A_rescaled, method = "manhattan")
+
+mat_dist <- dist(x = tablaNum, method = "manhattan")
 # Dendrogramas con linkage complete y average
 hc_euclidea_complete <- hclust(d = mat_dist, method = "complete")
 hc_euclidea_average  <- hclust(d = mat_dist, method = "average")
@@ -177,8 +176,7 @@ cor(x = mat_dist, cophenetic(hc_euclidea_average))
 set.seed(101)
 
 fviz_dend(x = hc_euclidea_average, k = 2, cex = 0.6) +
-  geom_hline(yintercept = 5.5, linetype = "dashed") +
-  labs(title = "Herarchical clustering",
+       labs(title = "Herarchical clustering",
        subtitle = "Distancia euclídea, Linkage average, K=2")
 
 library("igraph")
@@ -193,25 +191,50 @@ fviz_dend(x = hc_euclidea_average,
 
 
 # Otros métodos ----
+
 ## DBSCAN ----
 
 library(fpc)
 library(dbscan)
 library(Rcpp)
 
-dbscan::kNNdistplot(set.A_rescaled, k=5) # no acaba
+dbscan::kNNdistplot(tablaNum, k=5) # no acaba
 
+
+set.seed(321)
+
+# DBSCAN con epsilon = 0.15 y minPts = 5
+dbscan_cluster <- fpc::dbscan(data = tablaNum, eps = 0.06, MinPts = 5)
+
+# Resultados de la asignación
+head(dbscan_cluster$cluster)
+
+fviz_cluster(object = dbscan_cluster, data = tablaNum, stand = FALSE,
+             geom = "point", ellipse = FALSE, show.clust.cent = FALSE,
+             pallete = "jco") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+
+
+##  SOM ----
+
+somObject <- som(as.matrix(tablaNum), somgrid(4,4,"hexagonal"))
+
+par(mfrow = c(1,2) )
+plot(somObject, type="codes")
+plot(somObject, type="mapping", col = listaTablas$Sexo, pch = 19)
 
 
 
 # HEATMAPS ----
 
-heatmap(x = as.matrix(set.A_rescaled), scale = "none",
+heatmap(x = as.matrix(tablaNum), scale = "none",
         distfun = function(x){dist(x, method = "euclidean")},
         hclustfun = function(x){hclust(x, method = "average")},
         cexRow = 0.7)
 
 library(pheatmap)
-pheatmap(mat = as.matrix(set.A_rescaled), scale = "none", clustering_distance_rows = "euclidean",
+pheatmap(mat = as.matrix(tablaNum), scale = "none", clustering_distance_rows = "euclidean",
          clustering_distance_cols = "euclidean", clustering_method = "average",
          cutree_rows = 4, fontsize = 6)
