@@ -4,7 +4,8 @@ library(tidyverse)
 library(factoextra)
 library(ggpubr)
 library(scales)
-source("reading.R")
+source("scripts/reading.R")
+
 
 # Lectura de tablas
 
@@ -129,7 +130,7 @@ fviz_nbclust(x = tablaNum, FUNcluster = kmeans, method = "wss", k.max = 10,
 
 set.seed(123)
 
-km_clusters <- kmeans(x = tablaNum, centers = 3, nstart = 1000, )
+km_clusters <- kmeans(x = tablaNum, centers = 3, nstart = 1000)
 
 
 ### Plotting
