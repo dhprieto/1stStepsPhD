@@ -1,32 +1,41 @@
+library(dummies)
+library(tidyverse)
+library(scales)
+library(caret)
+library(FNN)
+source("scripts/reading.R")
+
+
 # métodos regresión
+
 
 # Lectura tablas ----
 
-c_O_A.A <- read.csv("data/cronicoOrinaAnt_Antro.csv")
+listaTablas <- preprocessTables("data/", "tablaPlasmaAnt.csv")$tablaSinEsc
 
-# Retiramos texto y ordinales, transformamos categóricas a dummies
+for (i in colnames(listaTablas)) {
+  
+  if (is.numeric(listaTablas[,i])){
+    
+    listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
+  }
+} 
 
+endulzanteDum <- dummy(listaTablas$Endulzante, sep = "_")
+sexoDm <- dummy(listaTablas$Sexo, sep = "_")
+tiempoDm <- dummy(listaTablas$Tiempo, sep = "_")
 
-dms_endulzante <- dummy(c_O_A.A$Endulzante, sep = "_")
-dms_tiempo <- dummy(c_O_A.A$Tiempo, sep = "_")
-dms_sexo <- dummy(c_O_A.A$Sexo, sep= "_")
-
-set.A <- cbind(c_O_A.A[,-c(1,2,3,4,10,29)], dms_endulzante, dms_tiempo, dms_sexo)
+datos <- cbind(listaTablas, endulzanteDum, sexoDm, tiempoDm)
 
 
 # KNN ----
-
-library(FNN)
-library(scales)
-library(dummies)
-library(caret)
 
 # Reescalamos variables, usamos rescale por que tenemos las dummies en 0-1
 
 library(dplyr)
 
 set.A_rescaled <- set.A %>% mutate_each_(list(~rescale(.) %>% as.vector), 
-                                         vars = colnames(set.A)[c(1:7,9:23)])
+                                         vars = colnames(set.A)[which != "Peso"])
 
 #################### mutate_each_ deprecated, look for across()
 

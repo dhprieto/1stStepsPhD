@@ -219,7 +219,8 @@ preprocessTables <- function(root, nombreTabla) {
   tabla_FxSUxF <- subset(set.A_factors, Sexo == "MUJER" & Endulzante =="SU" & Tiempo == "Final",
                          select =-c(Tiempo, Sexo, Endulzante))
   
-  return(list(tablaFactors = set.A_factors, tablaNum = set.A_rescaled,
+  return(list(tablaSinEsc = set.A,
+              tablaFactors = set.A_factors, tablaNum = set.A_rescaled,
               tabla_Tiempo = tabla_Tiempo, tabla_Tiempo0 = tabla_Tiempo0,
               tabla_TiempoF = tabla_TiempoF,  tabla_Sexo=tabla_Sexo,
               tabla_SexoM=tabla_SexoM, tabla_SexoF=tabla_SexoF,
