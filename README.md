@@ -2,8 +2,32 @@
 
 This repository contains the first steps of my PhD process
 
+## scripts/
 
-## Code & Reports
+1. anova.R : Performs 
+2. benchmarkCluster.R
+3. Clustering.R
+4. Reading
+
+## data/
+
+The main tables have the agudo/cronico-Orina/Plasma-Ant/Flav-limpio, indicating in 
+that order, the procedure to suministrate the beverage, the biological sample 
+analyzed and the type of biomolecules measured. 
+
+The "Compuestos fenolicos*" files contain the measures from the life span of the 
+compounds *in vitro*
+
+## reports/
+
+
+
+## config/
+
+Now empty, it will contain files to provide aditional parameters to model
+
+
+## old files
 
 1. dataMetabolitos.pdf is the report of the analysis performed in the Vicente's 
 data. It is renewed every 1-2 days
@@ -21,20 +45,6 @@ are collected
 volunteers in clusters relying on their data. 
 
 
-## data/
-
-The main tables have the agudo/cronico-Orina/Plasma-Ant/Flav-limpio, indicating in 
-that order, the procedure to suministrate the beverage, the biological sample 
-analyzed and the type of biomolecules measured. 
-
-The "Compuestos fenolicos*" files contain the measures from the life span of the 
-compounds *in vitro*
-
-## Folders
-
-1. config: it will contain files to provide aditional parameters to model
-
-2. data: contains the tables in .csv format
 
 ## Pipeline
 
