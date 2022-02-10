@@ -5,6 +5,7 @@ library(caret)
 library(FNN)
 source("scripts/reading.R")
 
+set.seed(123)
 
 # métodos regresión
 
@@ -27,65 +28,64 @@ tiempoDm <- dummy(listaTablas$Tiempo, sep = "_")
 
 datos <- cbind(listaTablas, endulzanteDum, sexoDm, tiempoDm)
 
+for (i in colnames(datos)) {
+  
+  if (is.numeric(datos[,i]) && i != "Peso"){
+    
+    datos[,i] <- rescale(datos[,i])
+  }
+} 
+
+datosNum <- datos %>% select(-c(Sexo, Endulzante, Tiempo, numVol)) 
+datosNumMet <- datos %>% 
+  dplyr::select(-c(IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                   Endulzante, Sexo, numVol, Tiempo))
 
 # KNN ----
 
-# Reescalamos variables, usamos rescale por que tenemos las dummies en 0-1
-
-library(dplyr)
-
-set.A_rescaled <- set.A %>% mutate_each_(list(~rescale(.) %>% as.vector), 
-                                         vars = colnames(set.A)[which != "Peso"])
-
-#################### mutate_each_ deprecated, look for across()
-
-set.seed(123)
-
-t.id <- createDataPartition(set.A_rescaled$Delta.Peso, p=0.6, list = F)
-tr <- set.A_rescaled[t.id, ]
-temp <- set.A_rescaled[-t.id, ]
-v.id <- createDataPartition(temp$Delta.Peso, p=0.5, list = F)
+t.id <- createDataPartition(datosNumMet$Peso, p=0.6, list = F)
+tr <- datosNumMet[t.id, ]
+temp <- datosNumMet[-t.id, ]
+v.id <- createDataPartition(temp$Peso, p=0.5, list = F)
 val <- temp[v.id,]
 test <- temp[-v.id, ]
 
 # Pruebas con diferentes valores de K 
 
+reg1 <- knn.reg(tr[,-7], val[,-7], tr$Peso, k=1, algorithm = "brute")
 
-reg1 <- knn.reg(tr[,-8], val[,-8], tr$Delta.Peso, k=1, algorithm = "brute")
+sqrt(mean(reg1$pred - val$Peso)^2)
 
-sqrt(mean(reg1$pred - val$Delta.Peso)^2)
+reg2 <- knn.reg(tr[,-7], val[,-7], tr$Peso, k=2, algorithm = "brute")
 
-reg2 <- knn.reg(tr[,-8], val[,-8], tr$Delta.Peso, k=2, algorithm = "brute")
+sqrt(mean(reg2$pred - val$Peso)^2)
 
-sqrt(mean(reg2$pred - val$Delta.Peso)^2)
+reg3 <- knn.reg(tr[,-7], val[,-7], tr$Peso, k=3, algorithm = "brute")
 
-reg3 <- knn.reg(tr[,-8], val[,-8], tr$Delta.Peso, k=3, algorithm = "brute")
+sqrt(mean(reg3$pred - val$Peso)^2)
 
-sqrt(mean(reg3$pred - val$Delta.Peso)^2)
+reg4 <- knn.reg(tr[,-8], val[,-8], tr$Peso, k=4, algorithm = "brute")
 
-reg4 <- knn.reg(tr[,-8], val[,-8], tr$Delta.Peso, k=4, algorithm = "brute")
+sqrt(mean(reg4$pred - val$Peso)^2)
 
-sqrt(mean(reg4$pred - val$Delta.Peso)^2)
+reg5 <- knn.reg(tr[,-8], val[,-8], tr$Peso, k=5, algorithm = "brute")
 
-reg5 <- knn.reg(tr[,-8], val[,-8], tr$Delta.Peso, k=5, algorithm = "brute")
-
-sqrt(mean(reg5$pred - val$Delta.Peso)^2)
-
+sqrt(mean(reg5$pred - val$Peso)^2)
 
 # Vemos que para k = 4 obtenemos los mejores resultados si no reescalamos la variable respuesta
 
-reg.test <- knn.reg(tr[,-8], test[,-8], tr$Delta.Peso, k=4, algorithm = "brute")
+reg.test <- knn.reg(tr[,-7], test[,-7], tr$Peso, k=4, algorithm = "brute")
 
-sqrt(mean(reg.test$pred - test$Delta.Peso)^2)
+sqrt(mean(reg.test$pred - test$Peso)^2)
 
 
 # KNN sin partición de validación ----
 
-t.id <- createDataPartition(set.A_rescaled$Delta.Peso, p=0.7, list = F)
-tr <- set.A_rescaled[t.id, ]
-val <- set.A_rescaled[-t.id, ]
+t.id <- createDataPartition(datos$Peso, p=0.7, list = F)
+tr <- datos[t.id, ]
+val <- datos[-t.id, ]
 
-reg4 <- knn.reg(tr[,-8], NULL, tr$Delta.Peso, k=4, algorithm = "brute")
+reg4 <- knn.reg(tr[,-8], NULL, tr$Peso, k=4, algorithm = "brute")
 
 sqrt(mean(reg4$pred^2))
 
@@ -94,34 +94,34 @@ sqrt(mean(reg4$pred^2))
 
 library(caret)
 
-set.seed(2021)
+set.seed(123)
 
 # Transformamos a factor 
 
-c_O_A.A$Endulzante <- factor(c_O_A.A$Endulzante, levels = c("SA", "ST", "SU"))
-c_O_A.A$Sexo <- factor(c_O_A.A$Sexo, levels = c("HOMBRE", "MUJER"))
-c_O_A.A$Tiempo <- factor(c_O_A.A$Tiempo, levels = c("0", "Final"))
+datos <- listaTablas %>%
+         dplyr::select(-c(IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                        Endulzante, Sexo, numVol, Tiempo))
 
-set.A <- c_O_A.A[,-c(1,2,4)]
+for (i in colnames(datos)) {
+  
+  if (is.numeric(datos[,i]) && i != "Peso"){ 
+    
+    datos[,i] <- rescale(datos[,i])
+  }
+} 
 
-set.A_rescaled <- set.A %>% mutate_each_(list(~rescale(.) %>% as.vector), 
-                                         vars = colnames(set.A)[-c(1,7,10,26)])
+t.id <- createDataPartition(datos$Peso, p=0.7, list = F)
 
-
-t.id <- createDataPartition(set.A$Delta.Peso, p=0.7, list = F)
-
-reg1 <- lm(Delta.Peso ~ ., data = set.A[t.id, ])
+reg1 <- lm(Peso ~ ., data = datos[t.id, ])
 
 summary(reg1)
 
 boxplot(reg1$residuals)
 
-pred1 <- predict(reg1 , set.A_rescaled[-t.id,] )
+pred1 <- predict(reg1 , datos[-t.id, ] )
 
-sqrt(mean(pred1 - set.A_rescaled[-t.id,]$Delta.Peso)^2)
+sqrt(mean(pred1 - datos[-t.id, ]$Peso)^2)
 
-
-# Hay que reescalar o no?
 
 # Árboles de regresión ----
 
