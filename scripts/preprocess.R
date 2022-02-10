@@ -1,3 +1,7 @@
+library(tidyverse)
+library(scales)
+
+
 # lectura y conversion base ----
 
 reading <- function(tablaPath, nasPercentageCol, nasRow){
@@ -239,3 +243,30 @@ preprocessTables <- function(root, nombreTabla) {
   
 }
 
+
+removeOutliers <- function (tablaSinEscalar) {
+  
+  for (i in colnames(tablaSinEscalar)) {
+    
+    if (is.numeric(tablaSinEscalar[,i])){
+      
+      tablaSinEscalar <- tablaSinEscalar[!tablaSinEscalar[, i] %in% boxplot.stats(tablaSinEscalar[,i])$out,]
+    }
+  } 
+  
+  return(tablaSinEscalar)
+  
+}
+
+escaladoTablas <- function (tablaSinEscalar, varNoEscalar = NULL) {
+  
+  for (i in colnames(datos)) {
+    
+    if (is.numeric(datos[,i]) && i != varNoEscalar){
+      
+      datos[,i] <- rescale(datos[,i])
+    }
+  } 
+}
+
+  

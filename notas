@@ -23,6 +23,7 @@ posible
 - estudiar que pasa con los clusters a tiempo 0 en tiempo final
 - 
 - anotar resultados gráficas por tiempo
+- usar los datos a tiempo 0 como entrenamiento y ver si el modelo predice igual que la realidad
 
 REUNIÓN 29/11
 --------------
