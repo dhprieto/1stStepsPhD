@@ -258,15 +258,15 @@ removeOutliers <- function (tablaSinEscalar) {
   
 }
 
-escaladoTablas <- function (tablaSinEscalar, varNoEscalar = NULL) {
+escaladoTablas <- function (datos, varNoEscalar = "noEscalar") {
   
   for (i in colnames(datos)) {
-    
     if (is.numeric(datos[,i]) && i != varNoEscalar){
       
       datos[,i] <- rescale(datos[,i])
     }
-  } 
+  }
+  return(datos)
 }
 
   
