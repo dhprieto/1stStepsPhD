@@ -11,17 +11,17 @@ library(tidyverse)
 library(scales)
 library(stargazer)
 library(rstatix)
-source("scripts/reading.R")
-source("scripts/anova.R")
+source("../scripts/preprocess.R")
+source("../scripts/anova.R")
 
 ```
 
 ```{r reading and merging, include=FALSE}
 
-orinaFlav <- preprocessTables("data/", "tablaOrinaFlav.csv")
-orinaAnt <- preprocessTables("data/", "tablaorinaAnt.csv")
-plasmaAnt <- preprocessTables("data/", "tablaplasmaAnt.csv")
-plasmaFlav <- preprocessTables("data/", "tablaplasmaFlav.csv")
+orinaFlav <- preprocessTables("../data/", "tablaOrinaFlav.csv")
+orinaAnt <- preprocessTables("../data/", "tablaorinaAnt.csv")
+plasmaAnt <- preprocessTables("../data/", "tablaplasmaAnt.csv")
+plasmaFlav <- preprocessTables("../data/", "tablaplasmaFlav.csv")
 
 
 tabla1 <- orinaFlav$tablaFactors %>% 
