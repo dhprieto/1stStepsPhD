@@ -1,0 +1,54 @@
+---
+title: "boxplotsBias"
+author: "DHdez"
+date: "17/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+source("../scripts/preprocess.R")
+source("../scripts/boxplots.R")
+
+orinaFlav <- removeOutliers(preprocessTables("../data/", "tablaOrinaFlav.csv")$tablaFactors)
+orinaAnt <- removeOutliers(preprocessTables("../data/", "tablaorinaAnt.csv")$tablaFactors)
+plasmaAnt <- removeOutliers(preprocessTables("../data/", "tablaplasmaAnt.csv")$tablaFactors)
+plasmaFlav <- removeOutliers(preprocessTables("../data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors)
+
+
+```
+
+## Orina Flav boxplots
+
+
+```{r oF, fig.width= 15, fig.height= 10}
+boxplotBias(orinaFlav)
+
+
+```
+
+## Orina Ant boxplots
+
+
+```{r oA, fig.width= 15, fig.height= 10}
+boxplotBias(orinaAnt)
+
+
+```
+## Plasma Flav boxplots
+
+
+```{r pF, fig.width= 15, fig.height= 10}
+boxplotBias(plasmaFlav)
+
+
+```
+
+## Plasma Ant boxplots
+
+
+```{r pA, fig.width= 15, fig.height= 10}
+boxplotBias(plasmaAnt)
+
+
+```

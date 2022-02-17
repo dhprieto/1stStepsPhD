@@ -149,7 +149,7 @@ checkCluster <- function(tabla){
   
   set.A_rescaled <- tabla
   # Validación de método de clustering
-
+  
   ## Manual 
   
   datos_simulados <- map_df(set.A_rescaled,
@@ -184,7 +184,7 @@ checkCluster <- function(tabla){
   
   print(fviz_nbclust(set.A_rescaled, kmeans, method="wss"))
   print(fviz_nbclust(x = set.A_rescaled, FUNcluster = pam, method = "wss", k.max = 15,
-               diss = get_dist(set.A_rescaled, method = "manhattan")))
+                     diss = get_dist(set.A_rescaled, method = "manhattan")))
 }
 
 
@@ -440,7 +440,7 @@ clusterVarios <- function (tabla, nclust) {
   pam_clusters <- pam(x = tabla, k = nclust, metric = "manhattan")
   
   p2 <- fviz_cluster(object = pam_clusters, data = tabla, ellipse.type = "t",
-               repel = TRUE) +
+                     repel = TRUE) +
     theme_bw() +
     labs(title = "Resultados clustering PAM") +
     theme(legend.position = "none")
@@ -451,10 +451,10 @@ clusterVarios <- function (tabla, nclust) {
   
   p3 <- fviz_cluster(object = fuzzy_cluster, repel = TRUE, ellipse.type = "norm",
                      pallete = "jco") + theme_bw() + labs(title = "Fuzzy Cluster plot")
-
+  
   # Hierarchical clustering
   p4 <- fviz_dend(x = hclust(get_dist(tabla, method = "manhattan")), k = nclust, k_colors = "jco",
-                show_labels = T, main = paste("Datos ", nombreTabla))
+                  show_labels = T, main = paste("Datos ", nombreTabla))
   
   
   model_clustering <- Mclust(tabla)
@@ -463,7 +463,7 @@ clusterVarios <- function (tabla, nclust) {
     scale_x_discrete(limits = c(1:10))
   
   p6 <- fviz_mclust(model_clustering, what = "classification", geom = "point",
-              pallete = "jco")
+                    pallete = "jco")
   
   
   print(p1)
@@ -529,9 +529,9 @@ ggarrange(p1,p2)
 
 
 orinaFlav_clusters <- cbind(orinaFlav$tablaNum, clusters = as.factor(model_clustering_OF$classification),
-                                 Endulzante = orinaFlavFactors$Endulzante, 
-                                 Sexo = orinaFlavFactors$Sexo,
-                                 Tiempo = orinaFlavFactors$Tiempo)
+                            Endulzante = orinaFlavFactors$Endulzante, 
+                            Sexo = orinaFlavFactors$Sexo,
+                            Tiempo = orinaFlavFactors$Tiempo)
 
 tableSexoOF <- table(orinaFlav_clusters$Sexo,orinaFlav_clusters$clusters)
 tableEdulcoranteOF <- table(orinaFlav_clusters$Endulzante,orinaFlav_clusters$clusters)
@@ -644,16 +644,16 @@ ggplot(longtableT_F, aes(variable,as.numeric(value), fill=factor(clusters))) +
 
 p <- ggparcoord(data = orinaFlavNum_0_clusters[, colnames(orinaFlavT_0) != "numVol"], groupColumn = "clusters", 
                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
-               labs(x = "variables", 
-                    y = "value (in standard-deviation units)", 
-                    title = "Clustering Tiempo 0")
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo 0")
 
 
 p1 <- ggparcoord(data = orinaFlavNum_F_clusters[, colnames(orinaFlavT_F) != "numVol"], groupColumn = "clusters", 
-                scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
-                labs(x = "variables", 
-                y = "value (in standard-deviation units)", 
-                title = "Clustering Tiempo F")
+                 scale = "std", columns = c(1,2,3,4,5,6,7,8,9,10,11,12,14,15)) + 
+  labs(x = "variables", 
+       y = "value (in standard-deviation units)", 
+       title = "Clustering Tiempo F")
 
 ggarrange(p,p1)
 
@@ -667,8 +667,8 @@ orinaFlavDupl <- orinaFlavFactors[orinaFlavFactors$numVol %in% counts$Var1[count
 ### Datos metabólicos ----
 
 anova_pareado_EG <- aov(formula = EG ~ Sexo * Endulzante * Tiempo +
-                     Error(numVol/Tiempo),
-                     data = orinaFlavDupl)
+                          Error(numVol/Tiempo),
+                        data = orinaFlavDupl)
 
 summary(anova_pareado_EG)
 
@@ -681,7 +681,7 @@ summary(anova_pareado_ES)
 
 anova_pareado_HE.G <- aov(formula = HE.G ~Sexo * Endulzante * Tiempo +
                             Error(numVol/Tiempo),
-                        data = orinaFlavDupl)
+                          data = orinaFlavDupl)
 summary(anova_pareado_HE.G)
 
 anova_pareado_NG <- aov(formula = NG ~ Sexo * Endulzante * Tiempo +
@@ -702,34 +702,34 @@ summary(anova_pareado_NS)
 
 anova_pareado_Peso <- aov(formula = Peso ~ Sexo * Endulzante * Tiempo +
                             Error(numVol/Tiempo),
-                        data = orinaFlavDupl)
+                          data = orinaFlavDupl)
 
 
 summary(anova_pareado_Peso)
 
 anova_pareado_IMC <- aov(formula = IMC ~ Sexo * Endulzante * Tiempo +
                            Error(numVol/Tiempo),
-                          data = orinaFlavDupl)
+                         data = orinaFlavDupl)
 
 
 summary(anova_pareado_IMC)
 
 anova_pareado_Grasa <- aov(formula = Grasa ~ Sexo * Endulzante * Tiempo +
                              Error(numVol/Tiempo),
-                         data = orinaFlavDupl)
+                           data = orinaFlavDupl)
 
 
 summary(anova_pareado_Grasa)
 
 anova_pareado_IRCV <- aov(formula = IRCV ~ Sexo * Endulzante * Tiempo +
                             Error(numVol/Tiempo),
-                            data = orinaFlavDupl)
+                          data = orinaFlavDupl)
 
 
 summary(anova_pareado_IRCV)
 
 anova_pareado_Bpmin <- aov(formula = Bpmin ~ Sexo * Endulzante * Tiempo +
-                           Error(numVol/Tiempo),
+                             Error(numVol/Tiempo),
                            data = orinaFlavDupl)
 
 
@@ -744,7 +744,7 @@ summary(anova_pareado_Bpmax)
 
 anova_pareado_Frec <- aov(formula = Frec ~ Sexo * Endulzante * Tiempo +
                             Error(numVol/Tiempo),
-                           data = orinaFlavDupl)
+                          data = orinaFlavDupl)
 
 
 summary(anova_pareado_Frec)
@@ -797,9 +797,9 @@ ggarrange(p1,p2)
 
 
 orinaAnt_clusters <- cbind(orinaAnt$tablaNum, clusters = as.factor(model_clustering_OA$classification),
-                            Endulzante = orinaAntFactors$Endulzante, 
-                            Sexo = orinaAntFactors$Sexo,
-                            Tiempo = orinaAntFactors$Tiempo)
+                           Endulzante = orinaAntFactors$Endulzante, 
+                           Sexo = orinaAntFactors$Sexo,
+                           Tiempo = orinaAntFactors$Tiempo)
 
 tableSexoOA <- table(orinaAnt_clusters$Sexo,orinaAnt_clusters$clusters)
 tableEdulcoranteOA <- table(orinaAnt_clusters$Endulzante,orinaAnt_clusters$clusters)
@@ -851,11 +851,11 @@ ggarrange(p2,p4)
 ### Rejoining factors to dataframe
 
 orinaAntNum_0_clusters <- cbind(orinaAntT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                 Endulzante = orinaAnt_Factors_T0$Endulzante, 
-                                 Sexo = orinaAnt_Factors_T0$Sexo)
+                                Endulzante = orinaAnt_Factors_T0$Endulzante, 
+                                Sexo = orinaAnt_Factors_T0$Sexo)
 orinaAntNum_F_clusters <- cbind(orinaAntT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                 Endulzante = orinaAnt_Factors_TF$Endulzante, 
-                                 Sexo = orinaAnt_Factors_TF$Sexo)
+                                Endulzante = orinaAnt_Factors_TF$Endulzante, 
+                                Sexo = orinaAnt_Factors_TF$Sexo)
 
 ### Counting factors to plot them
 
@@ -934,31 +934,31 @@ orinaAntDupl <- orinaAntFactors[orinaAntFactors$numVol %in% counts$Var1[counts$F
 
 anova_pareado_CA.Gluc <- aov(formula = CA.Gluc~ Sexo * Endulzante * Tiempo +
                                Error(numVol/Tiempo),
-                        data = orinaAntDupl)
+                             data = orinaAntDupl)
 
 summary(anova_pareado_CA.Gluc)
 
 anova_pareado_DHPAA.Gluc <- aov(formula = DHPAA.Gluc ~ Sexo * Endulzante * Tiempo +
                                   Error(numVol/Tiempo),
-                        data = orinaAntDupl)
+                                data = orinaAntDupl)
 
 summary(anova_pareado_DHPAA.Gluc)
 
 anova_pareado_TFA.Gluc <- aov(formula = TFA.Gluc ~ Sexo * Endulzante * Tiempo +
                                 Error(numVol/Tiempo),
-                          data = orinaAntDupl)
+                              data = orinaAntDupl)
 
 summary(anova_pareado_TFA.Gluc)
 
 anova_pareado_TFA.Sulfate <- aov(formula = TFA.Sulfate  ~ Sexo * Endulzante * Tiempo +
                                    Error(numVol/Tiempo),
-                                data = orinaAntDupl)
+                                 data = orinaAntDupl)
 
 summary(anova_pareado_TFA.Sulfate)
 
 anova_pareado_Ácido.Vanílico..VA. <- aov(formula = Ácido.Vanílico..VA.  ~ Sexo * Endulzante * Tiempo +
                                            Error(numVol/Tiempo),
-                                        data = orinaAntDupl)
+                                         data = orinaAntDupl)
 
 
 summary(anova_pareado_Ácido.Vanílico..VA.)
@@ -1056,9 +1056,9 @@ ggarrange(p1,p2)
 
 
 plasmaAnt_clusters <- cbind(plasmaAnt$tablaNum, clusters = as.factor(model_clustering_PA$classification),
-                           Endulzante = plasmaAntFactors$Endulzante, 
-                           Sexo = plasmaAntFactors$Sexo,
-                           Tiempo = plasmaAntFactors$Tiempo)
+                            Endulzante = plasmaAntFactors$Endulzante, 
+                            Sexo = plasmaAntFactors$Sexo,
+                            Tiempo = plasmaAntFactors$Tiempo)
 
 tableSexoPA <- table(plasmaAnt_clusters$Sexo,plasmaAnt_clusters$clusters)
 tableEdulcorantePA <- table(plasmaAnt_clusters$Endulzante,plasmaAnt_clusters$clusters)
@@ -1112,11 +1112,11 @@ ggarrange(p2,p4)
 ### Rejoining factors to dataframe
 
 plasmaAntNum_0_clusters <- cbind(plasmaAntT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                Endulzante = plasmaAnt_Factors_T0$Endulzante, 
-                                Sexo = plasmaAnt_Factors_T0$Sexo)
+                                 Endulzante = plasmaAnt_Factors_T0$Endulzante, 
+                                 Sexo = plasmaAnt_Factors_T0$Sexo)
 plasmaAntNum_F_clusters <- cbind(plasmaAntT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                Endulzante = plasmaAnt_Factors_TF$Endulzante, 
-                                Sexo = plasmaAnt_Factors_TF$Sexo)
+                                 Endulzante = plasmaAnt_Factors_TF$Endulzante, 
+                                 Sexo = plasmaAnt_Factors_TF$Sexo)
 
 ### Counting factors to plot them
 
@@ -1195,38 +1195,38 @@ plasmaAntDupl <- plasmaAntFactors[plasmaAntFactors$numVol %in% counts$Var1[count
 
 anova_pareado_Ácido.Caféico..CA. <- aov(formula = Ácido.Caféico..CA.~ Sexo * Endulzante * Tiempo +
                                           Error(numVol/Tiempo),
-                             data = plasmaAntDupl)
+                                        data = plasmaAntDupl)
 
 summary(anova_pareado_Ácido.Caféico..CA.)
 
 anova_pareado_CA.Gluc <- aov(formula = CA.Gluc ~ Sexo * Endulzante * Tiempo +
                                Error(numVol/Tiempo),
-                                data = plasmaAntDupl)
+                             data = plasmaAntDupl)
 
 summary(anova_pareado_CA.Gluc)
 
 anova_pareado_X3.4.Ácido.Dihidroxifenilacético..DHPAA. <- aov(formula = X3.4.Ácido.Dihidroxifenilacético..DHPAA. 
                                                               ~ Sexo * Endulzante * Tiempo +
                                                                 Error(numVol/Tiempo),
-                                                            data = plasmaAntDupl)
+                                                              data = plasmaAntDupl)
 summary(anova_pareado_X3.4.Ácido.Dihidroxifenilacético..DHPAA.)
 
 anova_pareado_DHPAA.Gluc <- aov(formula = DHPAA.Gluc~ Sexo * Endulzante * Tiempo +
                                   Error(numVol/Tiempo),
-                                 data = plasmaAntDupl)
+                                data = plasmaAntDupl)
 
 summary(anova_pareado_DHPAA.Gluc)
 
 anova_pareado_VA.GG <- aov(formula = VA.GG ~ Sexo * Endulzante * Tiempo +
                              Error(numVol/Tiempo),
-                                         data = plasmaAntDupl)
+                           data = plasmaAntDupl)
 
 
 summary(anova_pareado_VA.GG)
 
 anova_pareado_VA.Gluc.sulfate <- aov(formula = VA.Gluc.sulfate ~ Sexo * Endulzante * Tiempo +
                                        Error(numVol/Tiempo),
-                           data = plasmaAntDupl)
+                                     data = plasmaAntDupl)
 
 
 summary(anova_pareado_VA.Gluc.sulfate)
@@ -1326,9 +1326,9 @@ ggarrange(p1,p2)
 
 
 plasmaFlav_clusters <- cbind(plasmaFlav$tablaNum, clusters = as.factor(model_clustering_PF$classification),
-                           Endulzante = plasmaFlavFactors$Endulzante, 
-                           Sexo = plasmaFlavFactors$Sexo,
-                           Tiempo = plasmaFlavFactors$Tiempo)
+                             Endulzante = plasmaFlavFactors$Endulzante, 
+                             Sexo = plasmaFlavFactors$Sexo,
+                             Tiempo = plasmaFlavFactors$Tiempo)
 
 tableSexoPF <- table(plasmaFlav_clusters$Sexo,plasmaFlav_clusters$clusters)
 tableEdulcorantePF <- table(plasmaFlav_clusters$Endulzante,plasmaFlav_clusters$clusters)
@@ -1382,11 +1382,11 @@ ggarrange(p2,p4)
 ### Rejoining factors to dataframe
 
 plasmaFlavNum_0_clusters <- cbind(plasmaFlavT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                 Endulzante = plasmaFlav_Factors_T0$Endulzante, 
-                                 Sexo = plasmaFlav_Factors_T0$Sexo)
+                                  Endulzante = plasmaFlav_Factors_T0$Endulzante, 
+                                  Sexo = plasmaFlav_Factors_T0$Sexo)
 plasmaFlavNum_F_clusters <- cbind(plasmaFlavT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                 Endulzante = plasmaFlav_Factors_TF$Endulzante, 
-                                 Sexo = plasmaFlav_Factors_TF$Sexo)
+                                  Endulzante = plasmaFlav_Factors_TF$Endulzante, 
+                                  Sexo = plasmaFlav_Factors_TF$Sexo)
 
 ### Counting factors to plot them
 
@@ -1557,9 +1557,9 @@ ggarrange(p1,p2)
 
 
 plasmaFlav_adjusted_clusters <- cbind(plasmaFlav_adjusted$tablaNum, clusters = as.factor(model_clustering_PF$classification),
-                             Endulzante = plasmaFlav_adjustedFactors$Endulzante, 
-                             Sexo = plasmaFlav_adjustedFactors$Sexo,
-                             Tiempo = plasmaFlav_adjustedFactors$Tiempo)
+                                      Endulzante = plasmaFlav_adjustedFactors$Endulzante, 
+                                      Sexo = plasmaFlav_adjustedFactors$Sexo,
+                                      Tiempo = plasmaFlav_adjustedFactors$Tiempo)
 
 tableSexoPF <- table(plasmaFlav_adjusted_clusters$Sexo,plasmaFlav_adjusted_clusters$clusters)
 tableEdulcorantePF <- table(plasmaFlav_adjusted_clusters$Endulzante,plasmaFlav_adjusted_clusters$clusters)
@@ -1613,11 +1613,11 @@ ggarrange(p2,p4)
 ### Rejoining factors to dataframe
 
 plasmaFlav_adjustedNum_0_clusters <- cbind(plasmaFlav_adjustedT_0, clusters = as.factor(model_clustering_OFT_0$classification),
-                                  Endulzante = plasmaFlav_adjusted_Factors_T0$Endulzante, 
-                                  Sexo = plasmaFlav_adjusted_Factors_T0$Sexo)
+                                           Endulzante = plasmaFlav_adjusted_Factors_T0$Endulzante, 
+                                           Sexo = plasmaFlav_adjusted_Factors_T0$Sexo)
 plasmaFlav_adjustedNum_F_clusters <- cbind(plasmaFlav_adjustedT_F, clusters = as.factor(model_clustering_OFT_F$classification),
-                                  Endulzante = plasmaFlav_adjusted_Factors_TF$Endulzante, 
-                                  Sexo = plasmaFlav_adjusted_Factors_TF$Sexo)
+                                           Endulzante = plasmaFlav_adjusted_Factors_TF$Endulzante, 
+                                           Sexo = plasmaFlav_adjusted_Factors_TF$Sexo)
 
 ### Counting factors to plot them
 
@@ -1767,71 +1767,71 @@ summary(anova_pareado_Frec)
 #### Cluster ----
 
 clusterNPlot <- function(listaTablas){
-
-#tablaNumMet <- listaTablas$tablaNum %>%
-#  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
-
-for (i in colnames(listaTablas)) {
   
-  if (is.numeric(listaTablas[,i])){
+  #tablaNumMet <- listaTablas$tablaNum %>%
+  #  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+  
+  for (i in colnames(listaTablas)) {
     
-    listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
-  }
-} 
-
-tablaFactorsAll <- listaTablas
+    if (is.numeric(listaTablas[,i])){
+      
+      listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
+    }
+  } 
   
-tablaNumMet <- listaTablas  %>% 
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
-
-model_clustering_OF <- Mclust(tablaNumMet)
-
-p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
-                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
-
-p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
-                  title = "Clusters Plot Orina Flav", pallete = "jco")
-
-ggarrange(p1,p2)
-
-
-tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$Peso, 
-                                                      IMC = listaTablas$IMC, 
-                                                      Grasa = listaTablas$Grasa, 
-                                                      IRCV = listaTablas$IRCV, 
-                                                      Bpmin = listaTablas$Bpmin, 
-                                                      Bpmax = listaTablas$Bpmax, 
-                                                      Frec = listaTablas$Frec,
-                                                      clusters = model_clustering_OF$classification,
-                                                      Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
-                                                      Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
-                                                      Tiempo = tablaFactorsAll$Tiempo) %>%
-                  select(everything(),Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, Tiempo, clusters)
-
-
-
-tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)#tabla_clusters %>% count(Sexo, clusters)  
-tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters) #tabla_clusters %>% count(Endulzante, clusters)
-
-tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
-tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
-
-longtableOF <- melt(tabla_clusters, id = c("clusters", "Tiempo"))
-
-longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
-
-ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
-  geom_boxplot()+
-  annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
-  annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
-  annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
-  annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
-  annotation_custom(grob = tableGrob(tableSexo, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
-  annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
-  ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(listaTablas))))+
-  labs(y = "standarized value", x = "variables/clusters")+
-  facet_wrap(~Tiempo)
-
+  tablaFactorsAll <- listaTablas
+  
+  tablaNumMet <- listaTablas  %>% 
+    dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
+  
+  model_clustering_OF <- Mclust(tablaNumMet)
+  
+  p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                    title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+  
+  p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                    title = "Clusters Plot Orina Flav", pallete = "jco")
+  
+  ggarrange(p1,p2)
+  
+  
+  tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$Peso, 
+                                                       IMC = listaTablas$IMC, 
+                                                       Grasa = listaTablas$Grasa, 
+                                                       IRCV = listaTablas$IRCV, 
+                                                       Bpmin = listaTablas$Bpmin, 
+                                                       Bpmax = listaTablas$Bpmax, 
+                                                       Frec = listaTablas$Frec,
+                                                       clusters = model_clustering_OF$classification,
+                                                       Endulzante = rescale(as.numeric(tablaFactorsAll$Endulzante)), 
+                                                       Sexo = rescale(as.numeric(tablaFactorsAll$Sexo)),
+                                                       Tiempo = tablaFactorsAll$Tiempo) %>%
+    select(everything(),Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, Tiempo, clusters)
+  
+  
+  
+  tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+  tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+  
+  tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
+  tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
+  
+  longtableOF <- melt(tabla_clusters, id = c("clusters", "Tiempo"))
+  
+  longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
+  
+  ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
+    geom_boxplot()+
+    annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
+    annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
+    annotation_custom(grob = tableGrob(tableSexo, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+    annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+    ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(listaTablas))))+
+    labs(y = "standarized value", x = "variables/clusters")+
+    facet_wrap(~Tiempo)
+  
 }
 
 
@@ -1840,15 +1840,15 @@ library(energy)
 
 
 checkMultVar <- function(tablaNumMet1) {
-    
-
-    #tablaNumMet1 <- listaTablas$tablaNum %>% 
-    #dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
-
-multivarTest <- mult.norm(tablaNumMet1)$mult.test
-print(multivarTest)
-print (mvnorm.etest(tablaNumMet1, R=1000))
-
+  
+  
+  #tablaNumMet1 <- listaTablas$tablaNum %>% 
+  #dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+  
+  multivarTest <- mult.norm(tablaNumMet1)$mult.test
+  print(multivarTest)
+  print (mvnorm.etest(tablaNumMet1, R=1000))
+  
 }
 
 lista1 <- preprocessTablas("data/", "tablaOrinaAnt.csv")
@@ -1875,7 +1875,7 @@ batchNorm1 <- function(tabla){
   for (i in seq(ncol(tabla))) {
     
     tabla <- tabla[!tabla[,i] %in% boxplot.stats(tabla[,i])$out,]
-      
+    
   }  
   return(tabla)
 }
@@ -1929,25 +1929,25 @@ plasmaAnt <- preprocessTablas("data/", "tablaplasmaAnt.csv")
 plasmaFlav <- preprocessTablas("data/", "tablaplasmaFlav.csv")
 
 tabla1 <- orinaFlav$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec))
 
 tabla2 <- orinaAnt$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
-                    Sexo, Tiempo))
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
+            Sexo, Tiempo))
 
 tabla3 <- plasmaAnt$tablaFactors %>% 
-          select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
-                    Sexo, Tiempo))
+  select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, 
+            Sexo, Tiempo))
 
 tabla_antro <- plasmaFlav$tablaFactors %>% 
-               select(c(numVol, Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec)) 
+  select(c(numVol, Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec)) 
 
 tabla_merge <- na.omit(full_join( full_join( full_join(
-               tabla_antro %>% group_by(numVol) %>% mutate(id = row_number()),
-               tabla1 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")), 
-               tabla2 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")),
-               tabla3 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")) )
-                                                    
+  tabla_antro %>% group_by(numVol) %>% mutate(id = row_number()),
+  tabla1 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")), 
+  tabla2 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")),
+  tabla3 %>% group_by(numVol) %>% mutate(id = row_number()), by = c("numVol", "id")) )
+
 
 model_clustering_OF <- Mclust(ungroup(tabla_merge) %>% select(-c(numVol, Endulzante, Sexo, Tiempo, id, Peso, IMC,
                                                                  Grasa, IRCV, Bpmin, Bpmax, Frec)))
@@ -2011,15 +2011,15 @@ summary(anova_pareado_ES)
 for(i in colnames(tabla_mergeDupl)) {
   
   if (i == "numVol"){
-   print("uwu") 
+    print("uwu") 
   } 
   else{
-  print(as.matrix(i))  
-  anova_paired <- aov(formula = as.matrix(i) ~ Sexo * Endulzante * Tiempo +
-                        Error(numVol/Tiempo),
-                      data = tabla_mergeDupl)
+    print(as.matrix(i))  
+    anova_paired <- aov(formula = as.matrix(i) ~ Sexo * Endulzante * Tiempo +
+                          Error(numVol/Tiempo),
+                        data = tabla_mergeDupl)
   }
-
+  
 }
 
 
@@ -2031,8 +2031,8 @@ anova_results[[1]]
 
 
 aov_results <- lapply(tabla_mergeDupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
-                                                               Error(numVol/Tiempo),
-                                                               data = tabla_mergeDupl))
+                                                         Error(numVol/Tiempo),
+                                                       data = tabla_mergeDupl))
 
 
 pruebaUwu <- summary(aov_results[[2]])
@@ -2046,24 +2046,24 @@ library(stargazer)
 
 stargazer(anova(aov_results[[1]]$`numVol:Tiempo`), type = "html")
 
-  
-  for (j in seq(1, length(aov_results))) {
-    print(paste("Variable analizada: ", names(aov_results)[j]))
-    
-    resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
-    
-    for (i in seq(1,4)){
-      
-      if (resultado[[1]][,5][i] < 0.05){
-        print(resultado[[1]][i,])
-      }
-      
-    }  
-    
-  }
-  
 
+for (j in seq(1, length(aov_results))) {
+  print(paste("Variable analizada: ", names(aov_results)[j]))
   
+  resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+  
+  for (i in seq(1,4)){
+    
+    if (resultado[[1]][,5][i] < 0.05){
+      print(resultado[[1]][i,])
+    }
+    
+  }  
+  
+}
+
+
+
 names(aov_results)[1]
 
 lapply(aov_results, print)
@@ -2088,7 +2088,7 @@ datosOwo <- orinaFlav$tablaFactors
 
 for (i in range(1,nrow(tabla))){
   if (tabla$clusters_0[i] != tabla$clusters_F[i]){
-      tabla_ =+ 
+    tabla_ =+ 
   }
 }
 
@@ -2129,49 +2129,49 @@ datos %>%
 res.aov <- anova_test(
   data = datos, dv = EG, wid = numVol,
   within = c(Endulzante, Tiempo)
-  )
+)
 
 ### 
 
 checkNorm <- function (listaTablas, var) {
-
-datos <- listaTablas$tablaFactors# %>% dplyr::select (numVol, Sexo, Endulzante, Tiempo, EG)
-
-Q <- quantile(datos[,var], probs=c(.25, .75), na.rm = FALSE)
-
-iqr <- IQR(datos[,var])
-
-datos <- subset(datos, 
-                datos[,var] > (Q[1] - 0.5*iqr) & 
-                  datos[,var] < (Q[2] + 0.5*iqr))
-
-
-#datos <- datos [-which(datos$ES > 0.2),]
-
-print(
-  ggplot(data = datos, aes(x = datos[,var])) +
-  geom_histogram(aes(y = ..density.., fill = ..count..)) +
-  scale_fill_gradient(low = "#DCDCDC", high = "#7C7C7C") +
-  stat_function(fun = dnorm, colour = "firebrick",
-                args = list(mean = mean(datos[,var]),
-                            sd = sd(datos[,var]))) +
-  ggtitle("Histograma con curva normal teórica") +
-  theme_bw()
+  
+  datos <- listaTablas$tablaFactors# %>% dplyr::select (numVol, Sexo, Endulzante, Tiempo, EG)
+  
+  Q <- quantile(datos[,var], probs=c(.25, .75), na.rm = FALSE)
+  
+  iqr <- IQR(datos[,var])
+  
+  datos <- subset(datos, 
+                  datos[,var] > (Q[1] - 0.5*iqr) & 
+                    datos[,var] < (Q[2] + 0.5*iqr))
+  
+  
+  #datos <- datos [-which(datos$ES > 0.2),]
+  
+  print(
+    ggplot(data = datos, aes(x = datos[,var])) +
+      geom_histogram(aes(y = ..density.., fill = ..count..)) +
+      scale_fill_gradient(low = "#DCDCDC", high = "#7C7C7C") +
+      stat_function(fun = dnorm, colour = "firebrick",
+                    args = list(mean = mean(datos[,var]),
+                                sd = sd(datos[,var]))) +
+      ggtitle("Histograma con curva normal teórica") +
+      theme_bw()
   )
-
-print(
-qqnorm(datos[,var], pch = 19, col = "gray50")
-)
-qqline(datos[,var])
-
-print(shapiro.test(datos[,var]))
-
-print(ks.test(datos[,var], "pnorm", mean(datos[,var]), sd(datos[,var])))
-
-print(nortest::lillie.test(datos[,var]))
-
-return()
-
+  
+  print(
+    qqnorm(datos[,var], pch = 19, col = "gray50")
+  )
+  qqline(datos[,var])
+  
+  print(shapiro.test(datos[,var]))
+  
+  print(ks.test(datos[,var], "pnorm", mean(datos[,var]), sd(datos[,var])))
+  
+  print(nortest::lillie.test(datos[,var]))
+  
+  return()
+  
 }
 
 orinaFlavNorm <- checkNorm(orinaFlav, 'ES')
@@ -2200,21 +2200,21 @@ re_norm <- function(datos, var){
   while (resultado$p.value < 0.05) {
     
     
-  datosNorm <- subset(datos, datos[,var] > (Q[1] - valIQR*iqr) & 
-                         datos[,var] < (Q[2] + valIQR*iqr))
-  
-  # resultado <- ks.test(datosNorm[, var], "pnorm",
-  #                      mean(datosNorm[, var]),
-  #                      sd(datosNorm[, var]))
-  # 
-  
-  resultado <- nortest::lillie.test(datos[,var])
-  
-  print(nrow(datosNorm))
-  print(valIQR)
-  valIQR <- valIQR - 0.05
-  
-    }
+    datosNorm <- subset(datos, datos[,var] > (Q[1] - valIQR*iqr) & 
+                          datos[,var] < (Q[2] + valIQR*iqr))
+    
+    # resultado <- ks.test(datosNorm[, var], "pnorm",
+    #                      mean(datosNorm[, var]),
+    #                      sd(datosNorm[, var]))
+    # 
+    
+    resultado <- nortest::lillie.test(datos[,var])
+    
+    print(nrow(datosNorm))
+    print(valIQR)
+    valIQR <- valIQR - 0.05
+    
+  }
   
   return(list(pval = resultado$p.value, dataset =datosNorm))
 }
@@ -2232,14 +2232,14 @@ batchNorm <- function(tabla){
     print(names(tabla)[i])
     
     if (is.numeric(tabla[,i])){
-        
+      
       resultado <- re_norm(datos = tabla, var = names(tabla)[i])
       
       print(names(tabla[i]))
       
-      }
-  print(nrow(resultado$dataset))
-  print(ncol(resultado$dataset))  
+    }
+    print(nrow(resultado$dataset))
+    print(ncol(resultado$dataset))  
   } 
   return(resultado)
 }
@@ -2258,8 +2258,8 @@ checkMultVar <- function(listaTablas) {
   
   
   tablaNumMet1 <- listaTablas %>% 
-   dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante,
-                    Tiempo, Sexo, numVol))
+    dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante,
+                     Tiempo, Sexo, numVol))
   
   multivarTest <- QuantPsyc::mult.norm(tablaNumMet1)$mult.test
   print(multivarTest)
@@ -2288,32 +2288,32 @@ clusterNPlot(plasmaAnt)
 
 
 aov_todo <- function (tablaFactors) {
-
-counts <- data.frame(table(tablaFactors$numVol))
-
-tabla_Dupl <- tablaFactors[tablaFactors$numVol %in% counts$Var1[counts$Freq > 1],]
-
-
-aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo *
-                                                         Endulzante * Tiempo +
-                                                         Error(numVol/Tiempo),
-                                                        data = tabla_Dupl))
-
-for (j in seq(1, length(aov_results))) {
-  message(paste("Variable analizada: ", names(aov_results)[j]))
   
-  resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
+  counts <- data.frame(table(tablaFactors$numVol))
   
-  for (i in seq(1,4)){
+  tabla_Dupl <- tablaFactors[tablaFactors$numVol %in% counts$Var1[counts$Freq > 1],]
+  
+  
+  aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo *
+                                                      Endulzante * Tiempo +
+                                                      Error(numVol/Tiempo),
+                                                    data = tabla_Dupl))
+  
+  for (j in seq(1, length(aov_results))) {
+    message(paste("Variable analizada: ", names(aov_results)[j]))
     
-    if (resultado[[1]][,5][i] < 0.1){
-      print(resultado[[1]][i,])
-    }
+    resultado <- summary(aov_results[[j]])$`Error: numVol:Tiempo`
     
-  }  
+    for (i in seq(1,4)){
+      
+      if (resultado[[1]][,5][i] < 0.1){
+        print(resultado[[1]][i,])
+      }
+      
+    }  
+    
+  }
   
-}
-
 }
 
 aov_todo (orinaFlavNorm)
@@ -2371,12 +2371,12 @@ anova_tablexD <- get_anova_table(res.aov, correction = "auto")
 
 aov_results2 <- lapply(tabla_Dupl, function(x) anova_test(tabla_Dupl,
                                                           as.numeric(x) ~ Sexo * 
-                                                          Endulzante * Tiempo +
-                                                          Error(numVol/Tiempo)
-                                                          ))
+                                                            Endulzante * Tiempo +
+                                                            Error(numVol/Tiempo)
+))
 aov_results <- lapply(tabla_Dupl, function(x) aov(as.numeric(x) ~ Sexo * Endulzante * Tiempo +
-                                                         Error(numVol/Tiempo),
-                                                       data = tabla_Dupl))
+                                                    Error(numVol/Tiempo),
+                                                  data = tabla_Dupl))
 
 
 aov_test <- function(tabla, variable){
@@ -2391,7 +2391,7 @@ aov_test <- function(tabla, variable){
   tablaAnova <- get_anova_table(res.aov, correction = "auto")
   
   print(tablaAnova)
-
+  
 }
 
 aov_test(orinaFlav$tablaFactors, "ES")
@@ -2421,8 +2421,8 @@ str(orinaFlav$tablaFactors)
 for (i in seq(1,ncol(orinaFlav$tablaFactors))){
   
   if (is.numeric(orinaFlav$tablaFactors[,i])){
-      aov_test(orinaFlav$tablaFactors,
-           names(orinaFlav$tablaFactors)[i])
+    aov_test(orinaFlav$tablaFactors,
+             names(orinaFlav$tablaFactors)[i])
   }
   
   
@@ -2488,4 +2488,3 @@ pairwiseTTest <- function(tabla){
 
 
 pairwiseTTest(orinaFlavDupl)
-  

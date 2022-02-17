@@ -80,10 +80,10 @@ preprocessTablas1 <- function(root, nombreTabla) {
 ```{r lectura tablas, include=FALSE}
 
 
-orinaFlav <- preprocessTablas1("data/", "tablaOrinaFlav.csv")
-orinaAnt <- preprocessTablas1("data/", "tablaorinaAnt.csv")
-plasmaAnt <- preprocessTablas1("data/", "tablaplasmaAnt.csv")
-plasmaFlav <- preprocessTablas1("data/", "tablaplasmaFlav.csv")
+orinaFlav <- preprocessTablas1("../data/", "tablaOrinaFlav.csv")
+orinaAnt <- preprocessTablas1("../data/", "tablaorinaAnt.csv")
+plasmaAnt <- preprocessTablas1("../data/", "tablaplasmaAnt.csv")
+plasmaFlav <- preprocessTablas1("../data/", "tablaplasmaFlav_adjusted.csv")
 
 
 
@@ -130,6 +130,7 @@ aov_loop <- function(tabla){
 aov_loop(orinaFlav)
 aov_loop(orinaAnt)
 aov_loop(plasmaAnt)
+aov_loop(plasmaFlav)
 ```
 
 
@@ -189,6 +190,7 @@ pairwiseTTest <- function(tabla){
 pairwiseTTest(orinaFlav)
 pairwiseTTest(orinaAnt)
 pairwiseTTest(plasmaAnt)
+pairwiseTTest(plasmaFlav)
 
 ```
 
