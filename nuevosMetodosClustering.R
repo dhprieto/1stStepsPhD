@@ -102,7 +102,7 @@ summary(comparacionPA) # kmeans
 # plasmaAnt ----
 
 matriz_distancias <- dist(x = plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
-                                                      Endulzante, Sexo, numVol, Tiempo)), method = "euclidean")
+                                      Endulzante, Sexo, numVol, Tiempo)) , method = "euclidean")
 hc_completo <- hclust(d = matriz_distancias, method = "complete")
 hc_average  <- hclust(d = matriz_distancias, method = "average")
 hc_single   <- hclust(d = matriz_distancias, method = "single")
@@ -116,14 +116,6 @@ plot(hc_single, ylab = "", xlab = "", sub = "",
 
 clustersPA <- cutree(hc_completo, k=3)
 
-
-fviz_dend(x = hc_completo, k = 3,
-          label_cols = as.numeric(plasmaAnt$Endulzante))
-
-table(clustersPA, plasmaAnt$Endulzante, plasmaAnt$Tiempo)
-table(clustersPA, plasmaAnt$Sexo)
-
-library(ggdendro)
 
 
 # colors: ST-RED, SU-GREEN, SA-BLACK
