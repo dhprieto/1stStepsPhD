@@ -1,117 +1,133 @@
-library(tidyverse)
 library(factoextra)
 library(ggpubr)
-library(scales)
-source("scripts/reading.R")
+source("scripts/preprocess.R")
 
+# lectura
 
-# Lectura de tablas
-
-# Tablas crónico con datos antropométricos ----
-
-listaTablas <- preprocessTables("data/", "tablaPlasmaAnt.csv")$tablaFactors
-
-for (i in colnames(listaTablas)) {
-  
-  if (is.numeric(listaTablas[,i])){
-    
-    listaTablas <- listaTablas[!listaTablas[, i] %in% boxplot.stats(listaTablas[,i])$out,]
-  }
-} 
-
-tablaNumMet <- listaTablas  %>% 
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
-
-plasmaFlav <- tablaNumMet
-
-
-# tutorial SOM
-
-library(cluster)
-library(lattice)
-library(kohonen)
-
-pruebaSOM <- som(as.matrix(tablaNumMet), somgrid(4,4, "hexagonal")) 
-plot(pruebaSOM, type = "codes")
-plot(pruebaSOM, type = "mapping", col = listaTablas$Endulzante, pch=19)
-plot(pruebaSOM, type = "mapping", col = listaTablas$Sexo, pch=19)
-
-
-## comparación Kmeans
-
-library(NbClust)
-numClusters <- NbClust(tablaNumMet, distance = "euclidean", 
-                       method = "kmeans",
-                       index = "alllong")
-
-
-pruebaKmeans <- kmeans(tablaNumMet, 3)
-
-plot(pruebaSOM, type = "mapping", col = pruebaKmeans$cluster, pch=19)
-
-fviz_cluster(object = pruebaKmeans, data = tablaNumMet, show.clust.cent = TRUE,
-             ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
-  labs(title = "Resultados clustering K-means") +
-  theme_bw() +
-  theme(legend.position = "none")
+orinaFlav <- removeOutliers(preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors)
+orinaAnt <- removeOutliers(preprocessTables("data/", "tablaorinaAnt.csv")$tablaFactors)
+plasmaAnt <- removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors)
+plasmaFlav <- removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors)
 
 
 # prueba ClValid
 
 library(clValid)
 library(mclust)
+library(kohonen)
 
-comparacion <- clValid(
-  obj        = plasmaFlav,
+comparacionOF <- clValid(
+  obj        = orinaFlav %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                Endulzante, Sexo, numVol, Tiempo)),
   nClust     = 3,
   clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
   validation = c("stability", "internal")
 )
 
-summary(comparacion)
+summary(comparacionOF) # som
+ 
+# Optimal Scores:
+#   
+#   Score  Method       Clusters
+# APN          0.1499 sota         3       
+# AD           0.1179 som          3       
+# ADM          0.0274 som          3       
+# FOM          0.0480 sota         3       
+# Connectivity 7.9952 hierarchical 3       
+# Dunn         0.2201 hierarchical 3       
+# Silhouette   0.4086 som          3  
 
-# PlasmaAnt DIANA
+comparacionOA <- clValid(
+  obj        = orinaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                      Endulzante, Sexo, numVol, Tiempo)),
+  nClust     = 3,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
+
+summary(comparacionOA) # hierarchical
+
+# Optimal Scores:
+#   
+#   Score   Method       Clusters
+# APN           0.1127 diana        3       
+# AD            0.0931 pam          3       
+# ADM           0.0175 hierarchical 3       
+# FOM           0.0360 model        3       
+# Connectivity 16.5925 hierarchical 3       
+# Dunn          0.1596 hierarchical 3       
+# Silhouette    0.4082 hierarchical 3   
+
+
+comparacionPF <- clValid(
+  obj        = plasmaFlav %>% select(-c(IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                        Endulzante, Sexo, numVol, Tiempo)),
+  nClust     = 3,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
+
+summary(comparacionPF) # PAM
+
+# Optimal Scores:
+#   
+#   Score   Method       Clusters
+# APN           0.2064 hierarchical 3       
+# AD            0.3295 sota         3       
+# ADM           0.1297 sota         3       
+# FOM           0.1766 pam          3       
+# Connectivity 18.8262 hierarchical 3       
+# Dunn          0.1068 clara        3       
+# Silhouette    0.3251 clara        3       
+
+comparacionPA <- clValid(
+  obj        = plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                       Endulzante, Sexo, numVol, Tiempo)),
+  nClust     = 3,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
+
+summary(comparacionPA) # kmeans
+ 
+# Optimal Scores:
+#   
+#   Score   Method       Clusters
+# APN           0.1589 diana        3       
+# AD            0.3581 som          3       
+# ADM           0.0687 sota         3       
+# FOM           0.1204 som          3       
+# Connectivity 40.5036 hierarchical 3       
+# Dunn          0.1496 diana        3       
+# Silhouette    0.2637 diana        3       
+
+# PlasmaAnt diana
 # orinaAnt hierarchical
-# orinaFlav sota/kmeans
-# plasmaFlav(+Peso) clara/sota
+# orinaFlav som
+# plasmaFlav(+Peso) pam
 
 # plasmaAnt ----
 
 library(dendextend)
 library(RColorBrewer)
 
-# 3 clkusters
+# diana
 
-fviz_nbclust(plasmaAnt, hcut, hc_func = "diana")
+fviz_nbclust(plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                 Endulzante, Sexo, numVol, Tiempo)), hcut, hc_func = "diana")
 
 dianaPlasmaAnt <- diana(plasmaAnt)
 
-dianaPlasmaAnt%>%
-  set(what="labels_color",as.numeric(listaTablas$Endulzante)) %>%
-  pltree(main="Plasma Antocianos")
-
-
-
-rect.hclust(dianaPlasmaAnt, k = 3, border = 2:10) %>%
-  
-
 clusterPLasmaANt <- cutree(dianaPlasmaAnt, k = 3)
 
-
-tableEdulcorantePF <- table(listaTablas$Endulzante)
-
-
 fviz_dend(x = dianaPlasmaAnt,
-          k=3,
-          label_cols = as.numeric(listaTablas$Endulzante))
-legend("topleft", legend = c("ST", "SU", "SA"), 
-       col = as.numeric(listaTablas$Endulzante))
+          label_cols = as.numeric(plasmaAnt$Endulzante))
 
-table(clusterPLasmaANt, listaTablas$Endulzante)
-table(clusterPLasmaANt, listaTablas$Sexo)
+table(clusterPLasmaANt, plasmaAnt$Endulzante, plasmaAnt$Tiempo)
+table(clusterPLasmaANt, plasmaAnt$Sexo)
 
 
-# tenemos un grupo grande que contiene
+# discordancia de grupos y plot
 
 # orinaAnt ----
 
