@@ -4,10 +4,10 @@ source("scripts/preprocess.R")
 
 # lectura
 
-orinaFlav <- removeOutliers(preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors)
-orinaAnt <- removeOutliers(preprocessTables("data/", "tablaorinaAnt.csv")$tablaFactors)
-plasmaAnt <- removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors)
-plasmaFlav <- removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors)
+orinaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors))
+orinaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaorinaAnt.csv")$tablaFactors))
+plasmaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors))
+plasmaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors))
 
 
 # prueba ClValid
@@ -24,18 +24,15 @@ comparacionOF <- clValid(
   validation = c("stability", "internal")
 )
 
-summary(comparacionOF) # som
+summary(comparacionOF) # hierarchical
  
-# Optimal Scores:
-#   
-#   Score  Method       Clusters
-# APN          0.1499 sota         3       
-# AD           0.1179 som          3       
-# ADM          0.0274 som          3       
-# FOM          0.0480 sota         3       
-# Connectivity 7.9952 hierarchical 3       
-# Dunn         0.2201 hierarchical 3       
-# Silhouette   0.4086 som          3  
+# APN           0.0431 hierarchical 3       
+# AD            0.5632 kmeans       3       
+# ADM           0.0725 hierarchical 3       
+# FOM           0.2228 hierarchical 3       
+# Connectivity 18.3302 hierarchical 3       
+# Dunn          0.2251 hierarchical 3       
+# Silhouette    0.3737 hierarchical 3 
 
 comparacionOA <- clValid(
   obj        = orinaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
@@ -50,13 +47,13 @@ summary(comparacionOA) # hierarchical
 # Optimal Scores:
 #   
 #   Score   Method       Clusters
-# APN           0.1127 diana        3       
-# AD            0.0931 pam          3       
-# ADM           0.0175 hierarchical 3       
-# FOM           0.0360 model        3       
-# Connectivity 16.5925 hierarchical 3       
-# Dunn          0.1596 hierarchical 3       
-# Silhouette    0.4082 hierarchical 3   
+# APN           0.0471 hierarchical 3       
+# AD            0.5133 som          3       
+# ADM           0.0913 hierarchical 3       
+# FOM           0.2025 clara        3       
+# Connectivity 13.0802 hierarchical 3       
+# Dunn          0.1997 hierarchical 3       
+# Silhouette    0.2766 hierarchical 3 
 
 
 comparacionPF <- clValid(
@@ -67,18 +64,18 @@ comparacionPF <- clValid(
   validation = c("stability", "internal")
 )
 
-summary(comparacionPF) # PAM
+summary(comparacionPF) # hierarchical
 
 # Optimal Scores:
 #   
-#   Score   Method       Clusters
-# APN           0.2064 hierarchical 3       
-# AD            0.3295 sota         3       
-# ADM           0.1297 sota         3       
-# FOM           0.1766 pam          3       
-# Connectivity 18.8262 hierarchical 3       
-# Dunn          0.1068 clara        3       
-# Silhouette    0.3251 clara        3       
+#   Score  Method       Clusters
+# APN          0.2737 diana        3       
+# AD           0.4165 pam          3       
+# ADM          0.1359 hierarchical 3       
+# FOM          0.2198 kmeans       3       
+# Connectivity 7.3341 hierarchical 3       
+# Dunn         0.2288 hierarchical 3       
+# Silhouette   0.2770 diana        3      
 
 comparacionPA <- clValid(
   obj        = plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
@@ -93,18 +90,47 @@ summary(comparacionPA) # kmeans
 # Optimal Scores:
 #   
 #   Score   Method       Clusters
-# APN           0.1589 diana        3       
-# AD            0.3581 som          3       
-# ADM           0.0687 sota         3       
-# FOM           0.1204 som          3       
-# Connectivity 40.5036 hierarchical 3       
-# Dunn          0.1496 diana        3       
-# Silhouette    0.2637 diana        3       
+# APN           0.1071 hierarchical 3       
+# AD            0.6536 kmeans       3       
+# ADM           0.1036 hierarchical 3       
+# FOM           0.2177 diana        3       
+# Connectivity 38.3520 hierarchical 3       
+# Dunn          0.2400 hierarchical 3       
+# Silhouette    0.2369 hierarchical 3       
 
-# PlasmaAnt diana
-# orinaAnt hierarchical
-# orinaFlav som
-# plasmaFlav(+Peso) pam
+
+# plasmaAnt ----
+
+matriz_distancias <- dist(x = plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                      Endulzante, Sexo, numVol, Tiempo)), method = "euclidean")
+hc_completo <- hclust(d = matriz_distancias, method = "complete")
+hc_average  <- hclust(d = matriz_distancias, method = "average")
+hc_single   <- hclust(d = matriz_distancias, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersPA <- cutree(hc_completo, k=3)
+
+
+fviz_dend(x = hc_completo, k = 3,
+          label_cols = as.numeric(plasmaAnt$Endulzante))
+
+table(clustersPA, plasmaAnt$Endulzante, plasmaAnt$Tiempo)
+table(clustersPA, plasmaAnt$Sexo)
+
+library(ggdendro)
+
+
+# colors: ST-RED, SU-GREEN, SA-BLACK
+
+
+# Viejo ----
+
 
 # plasmaAnt ----
 
