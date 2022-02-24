@@ -1,5 +1,12 @@
 library(factoextra)
 library(ggpubr)
+library(grid)
+library(gridExtra)
+library(NbClust)
+library(clValid)
+library(mclust)
+library(kohonen)
+
 source("scripts/preprocess.R")
 
 # lectura
@@ -9,33 +16,84 @@ orinaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaorinaA
 plasmaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors))
 plasmaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors))
 
+anthro <- c("Peso", "IMC", "Grasa", "IRCV", 
+            "Bpmin", "Bpmax", "Frec")
 
-# prueba ClValid
+tableAnth <- tabla %>% select (all_of(anthro), Tiempo, Sexo, Endulzante)
+tableMet <- tabla %>% select (-anthro, -numVol, Tiempo, Sexo, Endulzante)
 
-library(clValid)
-library(mclust)
-library(kohonen)
+
+# orinaFlav ----
+
+NbClust(data = orinaFlav %>% filter(Tiempo == "0") 
+        %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec,
+                      Endulzante, Sexo, numVol, Tiempo)), 
+        distance = "euclidean", min.nc = 2, max.nc = 15, 
+        method = "kmeans", index = "all", alphaBeale = 0.1)
+
+# 8
 
 comparacionOF <- clValid(
-  obj        = orinaFlav %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
-                                Endulzante, Sexo, numVol, Tiempo)),
-  nClust     = 3,
+  obj        = orinaFlav %>% filter(Tiempo == "0") %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                                     Endulzante, Sexo, numVol, Tiempo)),
+  nClust     = 8,
   clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
   validation = c("stability", "internal")
 )
 
-summary(comparacionOF) # hierarchical
- 
-# APN           0.0431 hierarchical 3       
-# AD            0.5632 kmeans       3       
-# ADM           0.0725 hierarchical 3       
-# FOM           0.2228 hierarchical 3       
-# Connectivity 18.3302 hierarchical 3       
-# Dunn          0.2251 hierarchical 3       
-# Silhouette    0.3737 hierarchical 3 
+summary(comparacionOF) # hierarchical/pam/kmeans
+
+clustersOF_T0 <- pam(orinaFlav %>% filter(Tiempo == "0") %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                      Endulzante, Sexo, numVol, Tiempo)), 8)
+
+
+p1 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "0")
+                       %>% select (-anthro, -Tiempo, Sexo, Endulzante), 
+                       clustersOF_T0$clustering)
+
+p3 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "0")
+                       %>% select (all_of(anthro), -Tiempo,numVol, Sexo, Endulzante), 
+                       clustersOF_T0$clustering)
+
+
+# T == Final
+
+NbClust(data = orinaFlav %>% filter(Tiempo == "Final") 
+        %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec,
+                      Endulzante, Sexo, numVol, Tiempo)), 
+        distance = "euclidean", min.nc = 2, max.nc = 15, 
+        method = "kmeans", index = "all", alphaBeale = 0.1)
+# 6
+
+
+comparacionOF <- clValid(
+  obj        = orinaFlav %>% filter(Tiempo == "Final") %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                Endulzante, Sexo, numVol, Tiempo)),
+  nClust     = 6,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
+
+summary(comparacionOF) # kmeans
+
+clustersOF_TF <- kmeans(orinaFlav %>% filter(Tiempo == "Final") %>% 
+                 select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, 
+                 Frec, Endulzante, Sexo, numVol, Tiempo)), centers = 6, nstart = 50)
+
+
+p2 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "Final")
+                       %>% select (-anthro, -Tiempo, Sexo, Endulzante), 
+                       clustersOF_TF$cluster)
+
+p4 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "Final")
+                       %>% select (all_of(anthro), -Tiempo,numVol, Sexo, Endulzante), 
+                       clustersOF_TF$cluster)
+
+ggarrange(p1,p2)
+ggarrange(p3,p4)
 
 comparacionOA <- clValid(
-  obj        = orinaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+  obj        = orinaAnt %>% filter(Tiempo == "0")%>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
                                       Endulzante, Sexo, numVol, Tiempo)),
   nClust     = 3,
   clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
@@ -57,14 +115,14 @@ summary(comparacionOA) # hierarchical
 
 
 comparacionPF <- clValid(
-  obj        = plasmaFlav %>% select(-c(IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+  obj        = plasmaFlav %>% filter(Tiempo == "Final") %>% select(-c(IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
                                         Endulzante, Sexo, numVol, Tiempo)),
-  nClust     = 3,
+  nClust     = 2:6,
   clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
   validation = c("stability", "internal")
 )
 
-summary(comparacionPF) # hierarchical
+summary(comparacionPF) # 0 hierarchical 6 Final 4 clara/pam
 
 # Optimal Scores:
 #   
@@ -78,14 +136,14 @@ summary(comparacionPF) # hierarchical
 # Silhouette   0.2770 diana        3      
 
 comparacionPA <- clValid(
-  obj        = plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+  obj        = plasmaAnt %>% filter(Tiempo == "Final")%>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
                                        Endulzante, Sexo, numVol, Tiempo)),
-  nClust     = 3,
+  nClust     = 2:6,
   clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
   validation = c("stability", "internal")
 )
 
-summary(comparacionPA) # kmeans
+summary(comparacionPA) # hierarchical
  
 # Optimal Scores:
 #   
@@ -116,158 +174,329 @@ plot(hc_single, ylab = "", xlab = "", sub = "",
 
 clustersPA <- cutree(hc_completo, k=3)
 
+clusterNuevoPlot(plasmaAnt, clustersPA)
 
+# plasmaFlav ----
 
-# colors: ST-RED, SU-GREEN, SA-BLACK
+matriz_distancias <- dist(x = plasmaFlav %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                      Endulzante, Sexo, numVol, Tiempo)) , method = "euclidean")
+hc_completo <- hclust(d = matriz_distancias, method = "complete")
+hc_average  <- hclust(d = matriz_distancias, method = "average")
+hc_single   <- hclust(d = matriz_distancias, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
 
+clustersPF <- cutree(hc_average, k=3)
 
-# Viejo ----
-
-
-# plasmaAnt ----
-
-library(dendextend)
-library(RColorBrewer)
-
-# diana
-
-fviz_nbclust(plasmaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
-                                 Endulzante, Sexo, numVol, Tiempo)), hcut, hc_func = "diana")
-
-dianaPlasmaAnt <- diana(plasmaAnt)
-
-clusterPLasmaANt <- cutree(dianaPlasmaAnt, k = 3)
-
-fviz_dend(x = dianaPlasmaAnt,
-          label_cols = as.numeric(plasmaAnt$Endulzante))
-
-table(clusterPLasmaANt, plasmaAnt$Endulzante, plasmaAnt$Tiempo)
-table(clusterPLasmaANt, plasmaAnt$Sexo)
-
-
-# discordancia de grupos y plot
-
-# orinaAnt ----
-
-
-orinaAnt <- preprocessTables("data/", "tablaOrinaAnt.csv")$tablaFactors
-
-for (i in colnames(orinaAnt)) {
-  
-  if (is.numeric(orinaAnt[,i])){
-    
-    orinaAnt <- orinaAnt[!orinaAnt[, i] %in% boxplot.stats(orinaAnt[,i])$out,]
-  }
-} 
-
-tablaNumMet <- orinaAnt  %>% 
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
-
-matrizDist <- dist(tablaNumMet, method= "euclidean")
- 
-set.seed(123)
-
-
-hc_euclidea_completo <- hclust(d = matrizDist, method = "complete")
-
-library(NbClust)
-numClusters <- NbClust(tablaNumMet, distance = "euclidean", 
-                       method = "complete",
-                       index = "alllong")
-
-# 3
-
-hc_euclidea_single   <- hclust(d = matrizDist, method = "single")
-
-
-
-numClusters <- NbClust(tablaNumMet, distance = "euclidean", 
-                       method = "single",
-                       index = "alllong")
-## 2
-
-hc_euclidea_average  <- hclust(d = matrizDist, method = "average")
-
-
-numClusters <- NbClust(tablaNumMet, distance = "euclidean", 
-                       method = "average",
-                       index = "alllong")
-
-# 2
-
-
-fviz_dend(x = hc_euclidea_completo,
-          k=3,
-          label_cols = as.numeric(orinaAnt$Sexo))
-
-fviz_dend(x = hc_euclidea_single,
-          k=2,
-          label_cols = as.numeric(orinaAnt$Sexo))
-
-fviz_dend(x = hc_euclidea_average,
-          k=2,
-          label_cols = as.numeric(orinaAnt$Sexo))
-
+clusterNuevoPlot(plasmaFlav, clustersPF)
 
 # orinaFlav ----
 
-## kmeans ----
-orinaFlav <- preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors
+matriz_distancias <- dist(x = orinaFlav %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                       Endulzante, Sexo, numVol, Tiempo)) , method = "euclidean")
+hc_completo <- hclust(d = matriz_distancias, method = "complete")
+hc_average  <- hclust(d = matriz_distancias, method = "average")
+hc_single   <- hclust(d = matriz_distancias, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
 
-for (i in colnames(orinaFlav)) {
+clustersOF <- cutree(hc_completo, k=3)
+
+clusterNuevoPlot(orinaFlav, clustersOF)
+
+# orinaAnt ----
+
+matriz_distancias <- dist(x = orinaAnt %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                      Endulzante, Sexo, numVol, Tiempo)) , method = "euclidean")
+hc_completo <- hclust(d = matriz_distancias, method = "complete")
+hc_average  <- hclust(d = matriz_distancias, method = "average")
+hc_single   <- hclust(d = matriz_distancias, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersOA <- cutree(hc_completo, k=3)
+
+clusterNuevoPlot(orinaAnt, clustersOA)
+
+
+### funciones ----
+
+clusterNuevoPlot <- function(tabla, clusters){
+
+  tabla_clusters <- tabla %>% tibble::add_column(clusters) %>% select(-numVol)
   
-  if (is.numeric(orinaFlav[,i])){
-    
-    orinaFlav <- orinaFlav[!orinaFlav[, i] %in% boxplot.stats(orinaFlav[,i])$out,]
-  }
-} 
-
-tablaNumMet <- orinaFlav  %>% 
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
-
-
-numClusters <- NbClust(tablaNumMet, distance = "euclidean", 
-                       method = "kmeans",
-                       index = "alllong")
-# 3 
-
-kmeansOrinaFlav <- kmeans(tablaNumMet, 3)
-
-fviz_cluster(kmeansOrinaFlav, data = tablaNumMet,show.clust.cent = TRUE,
-             ellipse.type = "euclid", star.plot = TRUE, repel = TRUE)
-
-table(kmeansOrinaFlav$cluster, orinaFlav$Endulzante)
-
-table(kmeansOrinaFlav$cluster, orinaFlav$Sexo)
-
-
-# plasmaFlav
-
-
-plasmaFlav <- preprocessTables("data/", "tablaPlasmaFlav_adjusted.csv")$tablaFactors
-
-for (i in colnames(plasmaFlav)) {
+  tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+  tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters) #tabla_clusters %>% count(Endulzante, clusters)
   
-  if (is.numeric(plasmaFlav[,i])){
+  tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
+  tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
+  
+  longtableOF <- reshape2::melt(tabla_clusters, id = c("clusters", "Tiempo"))
+  
+  longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Tiempo, )
+  
+  ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
+    geom_boxplot()+
+    annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
+    annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
+    annotation_custom(grob = tableGrob(tableSexo, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+    annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+    ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(tabla))))+
+    theme(axis.text=element_text(angle = 45, size=4),
+          axis.title=element_text(size=14,face="bold"))+
+    labs(y = "standarized value", x = "variables/clusters")+
+    facet_wrap(~Tiempo)
+  
+}
+
+# colors: ST-RED, SU-GREEN, SA-BLACK
+
+### pruebas ----
+
+##### orina Ant----
+
+# T == 0
+
+matriz_distanciasT_0 <- dist(x = orinaAnt %>%
+                               filter(Tiempo == "0") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                                     Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_0, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_0, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_0, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersOA_T0 <- cutree(hc_completo, k=3)
+
+p1 <- clusterSinTiempo(orinaAnt %>% filter (Tiempo == "0"), clustersOA_T0)
+
+
+# T == Final
+
+matriz_distanciasT_F <- dist(x = orinaAnt %>%
+                               filter(Tiempo == "Final") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_F, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_F, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_F, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersOA_TF <- cutree(hc_completo, k=3)
+
+p2 <- clusterSinTiempo(orinaAnt %>% filter (Tiempo == "Final"), clustersOA_TF)
+
+
+ggarrange(p1,p2)
+
+
+
+
+
+clusterSinTiempo <- function(tabla, clusters){
+  
+  tabla_clusters <- tabla %>% tibble::add_column(clusters) %>% select(-numVol)
+  
+  tableSexo <- table(tabla_clusters$Sexo, tabla_clusters$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+  tableEdulcorante <- table(tabla_clusters$Endulzante, tabla_clusters$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+  
+  tabla_clusters$Endulzante <- rescale(as.numeric(tabla_clusters$Endulzante))
+  tabla_clusters$Sexo <- rescale(as.numeric(tabla_clusters$Sexo))
+  
+  longtableOF <- reshape2::melt(tabla_clusters, id = c("clusters"))
+  
+  longtableOF <- tabla_clusters %>% gather(variable, values, -clusters)
+  
+  p <- ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
+    geom_boxplot()+
+    annotate("text", x = which(unique(longtableOF$variable)=="Sexo"), y = 1.03, label = "Mujer") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Sexo"), y = -0.03, label = "Hombre") +
+    annotate("text", x = which(unique(longtableOF$variable)=="Endulzante"), y = 1.03, label = "SU") + 
+    annotate("text",x = which(unique(longtableOF$variable)=="Endulzante"), y = -0.03, label = "SA")+
+    annotation_custom(grob = tableGrob(tableSexo, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
+    annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
+    ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(tabla))))+
+    theme(axis.text=element_text(angle = 45, size=4),
+          axis.title=element_text(size=14,face="bold"))+
+    labs(y = "standarized value", x = "variables/clusters")
     
-    plasmaFlav <- plasmaFlav[!plasmaFlav[, i] %in% boxplot.stats(plasmaFlav[,i])$out,]
-  }
-} 
+  return(p)
+}
 
-tablaNumMet <- plasmaFlav  %>% 
-  dplyr::select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Endulzante, Sexo, numVol, Tiempo))
 
-numclusters <- NbClust(tablaNumMet, distance = "euclidean", 
-        method = "centroid",
-        index = "alllong")
 
-# 2 
+##### orina Flav----
 
-clustersPlasmaFlav <- pam(tablaNumMet, 2)
-fviz_cluster (clustersPlasmaFlav, data = tablaNumMet)
+# T == 0
 
-table(clustersPlasmaFlav$cluster, plasmaFlav$Endulzante)
+matriz_distanciasT_0 <- dist(x = orinaFlav %>%
+                               filter(Tiempo == "0") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_0, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_0, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_0, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
 
-table(clustersPlasmaFlav$cluster, plasmaFlav$Sexo)
+clustersOA_T0 <- cutree(hc_completo, k=3)
 
-### ----
+p1 <- clusterSinTiempo(orinaFlav %>% filter (Tiempo == "0"), clustersOA_T0)
+
+# T == Final
+
+matriz_distanciasT_F <- dist(x = orinaFlav %>%
+                               filter(Tiempo == "Final") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_F, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_F, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_F, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersOA_TF <- cutree(hc_average, k=3)
+
+p2 <- clusterSinTiempo(orinaFlav %>% filter (Tiempo == "Final"), clustersOA_TF)
+
+ggarrange(p1,p2)
+
+##### plasma Flav----
+
+# T == 0
+
+matriz_distanciasT_0 <- dist(x = plasmaFlav %>%
+                               filter(Tiempo == "0") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_0, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_0, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_0, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersPF_T0 <- cutree(hc_completo, k=3)
+
+p1 <- clusterSinTiempo(plasmaFlav %>% filter (Tiempo == "0"), clustersPF_T0)
+
+# T == Final
+
+matriz_distanciasT_F <- dist(x = plasmaFlav %>%
+                               filter(Tiempo == "Final") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_F, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_F, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_F, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersPF_TF <- cutree(hc_completo, k=3)
+
+p2 <- clusterSinTiempo(plasmaFlav %>% filter (Tiempo == "Final"), clustersPF_TF)
+
+ggarrange(p1,p2)
+
+
+##### plasma Ant----
+
+# T == 0
+
+matriz_distanciasT_0 <- dist(x = plasmaAnt %>%
+                               filter(Tiempo == "0") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_0, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_0, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_0, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersPA_T0 <- cutree(hc_completo, k=3)
+
+p1 <- clusterSinTiempo(plasmaAnt %>% filter (Tiempo == "0"), clustersPA_T0)
+
+# T == Final
+
+matriz_distanciasT_F <- dist(x = plasmaAnt %>%
+                               filter(Tiempo == "Final") %>% 
+                               select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
+                                         Endulzante, Sexo, numVol, Tiempo)) , 
+                             method = "euclidean")
+hc_completo <- hclust(d = matriz_distanciasT_F, method = "complete")
+hc_average  <- hclust(d = matriz_distanciasT_F, method = "average")
+hc_single   <- hclust(d = matriz_distanciasT_F, method = "single")
+par(mfrow = c(3, 1))
+plot(hc_completo, ylab = "", xlab = "", sub = "",
+     main = "Linkage completo", cex = 0.8)
+plot(hc_average, ylab = "", xlab = "", sub = "",
+     main = "Linkage average", cex = 0.8)
+plot(hc_single, ylab = "", xlab = "", sub = "",
+     main = "Linkage single", cex = 0.8)
+
+clustersPA_TF <- cutree(hc_average, k=3)
+
+p2 <- clusterSinTiempo(plasmaAnt %>% filter (Tiempo == "Final"), clustersPA_TF)
+
+ggarrange(p1,p2)
