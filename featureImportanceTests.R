@@ -1,8 +1,6 @@
-library(tidyverse)
-library(scales)
 library(caret)
 library(AppliedPredictiveModeling)
-source("scripts/reading.R")
+source("scripts/preprocess.R")
 
 listaTablas <- preprocessTables("data/", "tablaOrinaAnt.csv")
 
@@ -71,7 +69,7 @@ control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
 # train the model
 
-model <- train(Sexo~., data=tablaFactorsMet, method="lvq", trControl=control)
+model <- train(Endulzante~., data=tablaFactorsMet, method="lvq", trControl=control)
 # estimate variable importance
 importance <- varImp(model, scale=FALSE)
 # summarize importance
@@ -86,7 +84,7 @@ plot(importance)
 
 control <- rfeControl(functions=rfFuncs, method="cv", number=10)
 # run the RFE algorithm
-results <- rfe(tablaNumMet, tablaFactorsMet$Sexo, sizes=c(1:8), rfeControl=control)
+results <- rfe(tablaFactorsMet, tablaFactors$Sexo, sizes=c(1:8), rfeControl=control)
 # summarize the results
 print(results)
 # list the chosen features
