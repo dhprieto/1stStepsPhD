@@ -19,10 +19,6 @@ plasmaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplas
 anthro <- c("Peso", "IMC", "Grasa", "IRCV", 
             "Bpmin", "Bpmax", "Frec")
 
-tableAnth <- tabla %>% select (all_of(anthro), Tiempo, Sexo, Endulzante)
-tableMet <- tabla %>% select (-anthro, -numVol, Tiempo, Sexo, Endulzante)
-
-
 # orinaFlav ----
 
 NbClust(data = orinaFlav %>% filter(Tiempo == "0") 
@@ -45,6 +41,12 @@ summary(comparacionOF) # hierarchical/pam/kmeans
 
 clustersOF_T0 <- pam(orinaFlav %>% filter(Tiempo == "0") %>% select(-c(Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, 
                                                       Endulzante, Sexo, numVol, Tiempo)), 8)
+
+p11 <- fviz_cluster(clustersOF_T0, ellipse.type = "convex", repel = T)+
+  labs(title = "Proyección PCA orinaFlav Tiempo 0", subtitle = "PAM Clustering")+
+  theme_bw()+
+  theme(legend.position = "bottom")
+
 
 
 p1 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "0")
@@ -81,6 +83,13 @@ clustersOF_TF <- kmeans(orinaFlav %>% filter(Tiempo == "Final") %>%
                  Frec, Endulzante, Sexo, numVol, Tiempo)), centers = 6, nstart = 50)
 
 
+p12 <- fviz_cluster(clustersOF_TF, data = orinaFlav %>% filter (Tiempo == "Final") %>% 
+                      select(-c(Endulzante, Sexo, numVol, Tiempo)), ellipse.type = "convex")+
+  labs(title = "Proyección PCA orinaFlav Tiempo Final", subtitle = "Kmeans Clustering")+
+  theme_bw()+
+  theme(legend.position = "bottom")
+
+
 p2 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "Final")
                        %>% select (-anthro, -Tiempo, Sexo, Endulzante), 
                        clustersOF_TF$cluster)
@@ -89,7 +98,7 @@ p4 <- clusterSinTiempo(orinaFlav %>% filter(Tiempo == "Final")
                        %>% select (all_of(anthro), -Tiempo,numVol, Sexo, Endulzante), 
                        clustersOF_TF$cluster)
 
-ggarrange(p1,p2)
+ggarrange(p11,p12)
 ggarrange(p3,p4)
 
 comparacionOA <- clValid(
