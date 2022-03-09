@@ -72,24 +72,23 @@ reading <- function(tablaPath, nasPercentageCol, nasRow){
   addAntro <- function (pathToAntro, tabla) {
     
     antro <- read.csv(pathToAntro, sep = ";", dec = ",")
-    
     for (i in seq(1,nrow(antro))){
-      if (antro$Nº.Volunt.[i] <= 46){
+      if (antro$Voluntario[i] <= 46){
         antro$Endulzante[i] <- "ST"
         
       }
-      if ((antro$Nº.Volunt.[i] >= 51) & (antro$Nº.Volunt.[i] <= 96)){
+      if ((antro$Voluntario[i] >= 51) & (antro$Voluntario[i] <= 96)){
         antro$Endulzante[i] <- "SU"
-        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]
+        antro$Voluntario[i] <- antro$Voluntario[i]
         }
-      if ((antro$Nº.Volunt.[i] >= 101) & (antro$Nº.Volunt.[i] <= 146)){
+      if ((antro$Voluntario[i] >= 101) & (antro$Voluntario[i] <= 146)){
         antro$Endulzante[i] <- "SA"
-        antro$Nº.Volunt.[i] <- antro$Nº.Volunt.[i]
+        antro$Voluntario[i] <- antro$Voluntario[i]
       }  
     }
   
   tabla$numVol <- as.integer(tabla$numVol)    
-  tabla <- merge(x= tabla, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Nº.Volunt.", "Endulzante"), all=T)
+  tabla <- merge(x= tabla, y= antro, by.x = c("numVol","Endulzante"), by.y= c("Voluntario", "Endulzante"), all=T)
   
   # Añadimos sexo
   
