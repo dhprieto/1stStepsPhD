@@ -15,7 +15,7 @@ tableAnth <- tabla %>% select (all_of(anthro), Tiempo, Sexo, Endulzante)
 tableMet <- tabla %>% select (-anthro, -numVol, Tiempo, Sexo, Endulzante)
 
 
-tableMetMelt <- melt(orinaFlav %>% select (ES, HE.G, NG, Tiempo, Sexo, Endulzante), 
+tableMetMelt <- melt(plasmaFlav %>% select (ES, Tiempo, Sexo, Endulzante), 
                      id = c("Tiempo", "Sexo", "Endulzante"))
 
 bxp(tableMetMelt, "Endulzante")
@@ -37,7 +37,7 @@ bxp <- function(longTable, factore){
                                  level = unique(longTable$variable)),as.numeric(value), 
                           fill=factor(longTable[,factore]))) +
       geom_boxplot()+
-      ggtitle(paste("Sweetener:Time Flavanones-urine"))+
+      ggtitle(paste("Sweetener:Time Flavanoids-plasma"))+
       labs(y = "standarized value", x = "variables", fill = "Sweetener")+
       scale_colour_discrete("Sweetener")+
       facet_wrap(~Tiempo)
