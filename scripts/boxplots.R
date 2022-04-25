@@ -1,4 +1,4 @@
-source("../scripts/preprocess.R")
+source("scripts/preprocess.R")
 library(reshape2)
 
 boxplotBias <- function(tabla){
