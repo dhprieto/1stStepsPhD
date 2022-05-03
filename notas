@@ -1,11 +1,8 @@
-los outliers no influyen en los resultados de la anova
-
-
 pendiente
 -----
-- probar resultados con anovas pareadas y no pareadas
 - modelar con todo el dataset
 - modelar entrenando con T_0 y testando con T_F
+
 
 hecho
 -----
