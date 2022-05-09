@@ -1,27 +1,24 @@
 source("scripts/preprocess.R")
 source("scripts/boxplots.R")
 
-orinaFlav <- removeOutliers(preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors)
-orinaAnt <- removeOutliers(preprocessTables("data/", "tablaorinaAnt.csv")$tablaFactors)
-plasmaAnt <- removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors)
-plasmaFlav <- removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors)
-
+orinaFlav <- read.csv("data/mainUrineFlav.csv")[-1]
+orinaAnt <- read.csv("data/mainUrineAnt.csv")[-1]
+plasmaAnt <- read.csv("data/mainPlasmaAnt.csv")[-1]
+plasmaFlav <- read.csv("data/mainPlasmaFlav.csv")[-1]
 
 anthro <- c("Peso", "IMC", "Grasa", "IRCV", 
             "Bpmin", "Bpmax", "Frec")
 
+tableAnth <- orinaFlav %>% select (all_of(anthro), Time, Sex, Sweetener)
+tableMet <- orinaFlav %>% select (-anthro, -numVol, Time, Sex, Sweetener)
 
-tableAnth <- tabla %>% select (all_of(anthro), Tiempo, Sexo, Endulzante)
-tableMet <- tabla %>% select (-anthro, -numVol, Tiempo, Sexo, Endulzante)
+tableMetMelt <- melt(plasmaFlav %>% select (ES, Time, Sex, Sweetener), 
+                     id = c("Time", "Sex", "Sweetener"))
 
-
-tableMetMelt <- melt(plasmaFlav %>% select (ES, Tiempo, Sexo, Endulzante), 
-                     id = c("Tiempo", "Sexo", "Endulzante"))
-
-bxp(tableMetMelt, "Endulzante")
+bxp(tableMetMelt, "Sweetener")
 bxp <- function(longTable, factore){
   
-  if (factore == "Tiempo") {
+  if (factore == "Time") {
     
     ggplot(longTable, aes(factor(variable, 
                                  level = unique(longTable$variable)),as.numeric(value), 
@@ -40,16 +37,16 @@ bxp <- function(longTable, factore){
       ggtitle(paste("Sweetener:Time Flavanoids-plasma"))+
       labs(y = "standarized value", x = "variables", fill = "Sweetener")+
       scale_colour_discrete("Sweetener")+
-      facet_wrap(~Tiempo)
+      facet_wrap(~Time)
     
     
   }
 }
 
-print(bxp(tableMetMelt, "Sexo"))
-print(bxp(tableMetMelt, "Endulzante"))
-print(bxp(tableMetMelt, "Tiempo"))
-print(bxp(tableAnthMelt, "Sexo"))
-print(bxp(tableAnthMelt, "Tiempo"))
-bxp(tableAnthMelt, "Endulzante")
+print(bxp(tableMetMelt, "Sex"))
+print(bxp(tableMetMelt, "Sweetener"))
+print(bxp(tableMetMelt, "Time"))
+print(bxp(tableAnthMelt, "Sex"))
+print(bxp(tableAnthMelt, "Time"))
+bxp(tableAnthMelt, "Sweetener")
 }
