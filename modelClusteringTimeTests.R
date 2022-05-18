@@ -3,220 +3,223 @@ library(mclust)
 library(factoextra)
 library(ggpubr)
 library(reshape2)
-
+library(gridExtra)
+library(clValid)
 # lectura
+orinaFlav <- read.csv("data/mainUrineFlav.csv")[-1]
+orinaAnt <- read.csv("data/mainUrineAnt.csv")[-1]
+plasmaAnt <- read.csv("data/mainPlasmaAnt.csv")[-1]
+plasmaFlav <- read.csv("data/mainPlasmaFlav.csv")[-1]
 
-orinaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaOrinaFlav.csv")$tablaFactors))
-orinaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaorinaAnt.csv")$tablaFactors))
-plasmaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors))
-plasmaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors))
-
-# rename
-
-colnames(plasmaFlav) <- c("E", "ES",
-                         anthro, "Sweetener", "Time",
-                        "Sex", "numVol")
-
-write.csv(plasmaFlav, "data/mainPlasmaFlav.csv")
-
+# 
 anthro <- c("Peso", "IMC", "Grasa", "IRCV", 
             "Bpmin", "Bpmax", "Frec")
 
-clusterNPlot <- function(listaTablas, anthropometric){
-  
-  tablaNumMet <- listaTablas  %>% 
-    dplyr::select(-c(anthro, Sweetener, Sex, numVol, Time))
-  
-  model_clustering_OF <- Mclust(tablaNumMet)
-  
-  p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
-                    title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
-  
-  p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
-                    title = "Clusters Plot Orina Flav", pallete = "jco")
-  
-  ggarrange(p1,p2)
-  
-  if(anthropometric){
-  
-  tabla_clusters <- tablaNumMet %>% tibble::add_column(Peso = listaTablas$Peso, 
-                                                       IMC = listaTablas$IMC, 
-                                                       Grasa = listaTablas$Grasa, 
-                                                       IRCV = listaTablas$IRCV, 
-                                                       Bpmin = listaTablas$Bpmin, 
-                                                       Bpmax = listaTablas$Bpmax, 
-                                                       Frec = listaTablas$Frec,
-                                                       clusters = model_clustering_OF$classification,
-                                                       Sweetener = rescale(as.numeric(listaTablas$Sweetener)), 
-                                                       Sex = rescale(as.numeric(listaTablas$Sex)),
-                                                       Time = listaTablas$Time) %>%
-    select(everything(),Peso, IMC, Grasa, IRCV, Bpmin, Bpmax, Frec, Sweetener, Sex, Time, clusters)
-  
-  
-  
-  tableSex <- table(tabla_clusters$Sex, tabla_clusters$clusters)#tabla_clusters %>% count(Sex, clusters)  
-  tableEdulcorante <- table(tabla_clusters$Sweetener, tabla_clusters$clusters) #tabla_clusters %>% count(Sweetener, clusters)
-  
-  tabla_clusters$Sweetener <- rescale(as.numeric(tabla_clusters$Sweetener))
-  tabla_clusters$Sex <- rescale(as.numeric(tabla_clusters$Sex))
-  
-  longtableOF <- melt(tabla_clusters, id = c("clusters", "Time"))
-  
-  longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Time, )
-  
-  ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
-    geom_boxplot()+
-    annotate("text", x = which(unique(longtableOF$variable)=="Sex"), y = 1.03, label = "Women") + 
-    annotate("text",x = which(unique(longtableOF$variable)=="Sex"), y = -0.03, label = "Men") +
-    annotate("text", x = which(unique(longtableOF$variable)=="Sweetner"), y = 1.03, label = "SU") + 
-    annotate("text",x = which(unique(longtableOF$variable)=="Sweetner"), y = -0.03, label = "SA")+
-    annotation_custom(grob = tableGrob(tableSex, rows = c("M", "F"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0.75, ymax=1)+
-    annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 11,xmax=13, ymin=0, ymax=0.25)+
-    ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(listaTablas))))+
-    labs(y = "standarized value", x = "variables/clusters")+
-    facet_wrap(~Time)
-  }
-  
-  else {
-    tabla_clusters <- tablaNumMet %>% tibble::add_column(clusters = model_clustering_OF$classification,
-                                                         Sweetener = rescale(as.numeric(listaTablas$Sweetener)), 
-                                                         Sex = rescale(as.numeric(listaTablas$Sex)),
-                                                         Time = listaTablas$Time) %>%
-      select(everything(), Sweetener, Sex, Time, clusters)
-    
-    
-    
-    tableSex <- table(tabla_clusters$Sex, tabla_clusters$clusters)#tabla_clusters %>% count(Sex, clusters)  
-    tableEdulcorante <- table(tabla_clusters$Sweetener, tabla_clusters$clusters) #tabla_clusters %>% count(Sweetener, clusters)
-    
-    tabla_clusters$Sweetener <- rescale(as.numeric(tabla_clusters$Sweetener))
-    tabla_clusters$Sex <- rescale(as.numeric(tabla_clusters$Sex))
-    
-    longtableOF <- melt(tabla_clusters, id = c("clusters", "Time"))
-    
-    longtableOF <- tabla_clusters %>% gather(variable, values, -clusters, -Time, )
-    
-    ggplot(longtableOF, aes(factor(variable, level = unique(longtableOF$variable)),as.numeric(values), fill=factor(clusters))) +
-      geom_boxplot()+
-      annotate("text", x = which(unique(longtableOF$variable)=="Sex"), y = 1.03, label = "Women") + 
-      annotate("text",x = which(unique(longtableOF$variable)=="Sex"), y = -0.03, label = "Men") +
-      annotate("text", x = which(unique(longtableOF$variable)=="Sweetner"), y = 1.03, label = "SU") + 
-      annotate("text",x = which(unique(longtableOF$variable)=="Sweetner"), y = -0.03, label = "SA")+
-      annotation_custom(grob = tableGrob(tableSex, rows = c("M", "F"), theme = ttheme_default(base_size = 8)), xmin= 5,xmax=7, ymin=0.75, ymax=1)+
-      annotation_custom(grob = tableGrob(tableEdulcorante, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), xmin= 5,xmax=7, ymin=0, ymax=0.25)+
-      ggtitle(paste("Boxplot Cluster Analysis ", deparse(substitute(listaTablas))))+
-      labs(y = "standarized value", x = "variables/clusters")+
-      facet_wrap(~Time)
-  }
-}
+# flavplot ----
 
-clusterNPlot(orinaAnt, anthropometric = F)
+flavplot <- orinaFlav %>% select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(HE.G, NS, NG)
 
-counts <- data.frame(table(orinaAnt$numVol))
+model_clustering_OF <- Mclust(flavplot)
 
-orinaAntDupl <- orinaAnt[orinaAnt$numVol %in% counts$Var1[counts$Freq > 1],]
+p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = "Clusters Plot Orina Flav", pallete = "jco")
+ggarrange(p1,p2)
 
 
-# prueba con media
+flavplot_T0 <- orinaFlav %>% filter(Time == "Initial") %>% 
+  select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(HE.G, NS, NG)
 
-orinaAntDuplArr <- orinaAntDupl %>% select(-anthro) %>% arrange(numVol)
+flavplot_TF <- orinaFlav %>% filter(Time == "Final") %>% 
+  select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(HE.G, NS, NG)
 
+modelClusteringFlav_T0 <- Mclust(flavplot_T0)
 
-orinaAntDupl$numVol[1] == orinaAntDupl$numVol[1+1]
+p1 <- fviz_mclust(object = modelClusteringFlav_T0, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav Initial Time") + scale_x_discrete(limits = c(1:10))
+p2_0 <- fviz_mclust(modelClusteringFlav_T0, what = "classification", geom = "point",
+                  title = "A. Flavanones Initial Time", pallete = "jco")
+ggarrange(p1,p2)
 
-rowMeans(data.frame(orinaAntDuplArr[i,],orinaAntDuplArr[i+1,])) 
+modelClusteringFlav_TF <- Mclust(flavplot_TF, G = 4)
 
-while (i < 81){
-for(i in seq(1,nrow(orinaAntDuplArr))){
-  
-  
-  
-  if (orinaAntDuplArr$numVol[i] == orinaAntDuplArr$numVol[i+1]){
-   nuVector <- rowMeans(data.frame(as.numeric(orinaAntDuplArr[i,]), as.numeric(orinaAntDuplArr[i+1,])))
-   print(nuVector)  
-   }
-  
-}
-}
-
-install.packages("TSclust")
-
-library(TSclust)
-
-orinaAntDupl_0 <- orinaAntDupl %>% filter(Time == "0") %>% select((-c(Time, Sweetener, Sex,numVol)))
-orinaAntDupl_F <- orinaAntDupl %>% filter(Time == "Final") %>% select(-c(Time, Sweetener, Sex, numVol))
-
-diss.DTWARP(t(orinaAntDupl_0), t(orinaAntDupl_F))
+p1 <- fviz_mclust(object = modelClusteringFlav_TF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Orina Flav Final Time") + scale_x_discrete(limits = c(1:10))
+p2_F <- fviz_mclust(modelClusteringFlav_TF, what = "classification", geom = "point",
+                  title = "B. Flav Final Time", pallete = "jco")
+ggarrange(p2_0,p2_F)
 
 
-library(dtwclust)
+# antplot ----
 
-listOrinaAnt <- split(orinaAntDuplArr %>% select((-c(Time, Sweetener, Sex,numVol))), f = orinaAntDuplArr$numVol, drop = T)
+comparacionPA_T0 <- clValid(
+  obj        = plasmaAnt %>% filter(Time == "Initial") %>% select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% 
+                                                                    select(CA, VA.GG, DHPAA, DHPAA.G)
+,
+  nClust     = 2:6,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
 
-tsclust(listOrinaAnt, k = 4)
-
-
-#### ----
-
-library(longclust)
-
-c("EG", "ES", "HE-G", "NG", "NS",  "Peso", 
-                         "IMC","Grasa","IRCV","Bpmin","Bpmax","Frec",
-                         "Sweetener", "Time", "Sex", "numVol")
-
-orinaFlav <- read.csv("data/mainUrineFlav.csv")[-1] 
-orinaAnt <- read.csv("data/mainUrineAnt.csv")[-1]
-plasmaAnt <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaAnt.csv")$tablaFactors))
-plasmaFlav <- escaladoTablas(removeOutliers(preprocessTables("data/", "tablaplasmaFlav_adjusted.csv")$tablaFactors))
+summary(comparacionPA_T0) 
 
 
-counts <- data.frame(table(orinaFlav$numVol))
+comparacionPA_TF <- clValid(
+  obj        = plasmaAnt %>% filter(Time == "Final") %>% select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% 
+    select(CA, VA.GG, DHPAA, DHPAA.G)
+  ,
+  nClust     = 2:6,
+  clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+  validation = c("stability", "internal")
+)
 
-orinaFlavDupl <- orinaFlav[orinaFlav$numVol %in% counts$Var1[counts$Freq > 1],]
+summary(comparacionPA_TF) 
 
-uwu <- as.matrix(orinaFlavDupl %>% arrange(numVol) %>% select(EG, ES, HE.G, NG, NS, Time, numVol)) 
+### model-based ----
 
-resultado <- longclustEM(x = uwu, 2, 5) 
+antplot <- plasmaAnt %>% select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(CA, VA.GG, DHPAA, DHPAA.G)
 
-plot(resultado, uwu)
+modelClustering <- Mclust(antplot)
+
+p1 <- fviz_mclust(object = modelClustering, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Plasma Ant ") + scale_x_discrete(limits = c(1:10))
+p2 <- fviz_mclust(modelClustering, what = "classification", geom = "point",
+                  title = "Clusters Plot Plasma Ant ", pallete = "jco")
+ggarrange(p1,p2)
 
 
-View(melt(uwu, id = c("numVol")))
+antplot_T0 <- plasmaAnt %>% filter(Time == "Initial") %>%
+  select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(CA, VA.GG, DHPAA, DHPAA.G)
+
+antplot_TF <- plasmaAnt %>% filter(Time == "Final") %>%
+  select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(CA, VA.GG, DHPAA, DHPAA.G)
+
+modelClusteringAnt_T0 <- Mclust(antplot_T0, G = 5)
+
+p1 <- fviz_mclust(object = modelClusteringAnt_T0, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Plasma Ant Initial Time") + scale_x_discrete(limits = c(1:10))
+p2_0 <- fviz_mclust(modelClusteringAnt_T0, what = "classification", geom = "point",
+                  title = "C.Anthocyanins Initial Time", pallete = "jco")
+plot(p1)
+
+ggarrange(p1,p2)
+
+
+modelClusteringAnt_TF <- Mclust(antplot_TF, G = 4)
+
+p1 <- fviz_mclust(object = modelClusteringAnt_TF, what = "BIC", pallete = "jco",  
+                  title = "Model Selection Plasma Ant Final Time") + scale_x_discrete(limits = c(1:10))
+p2_F <- fviz_mclust(modelClusteringAnt_TF, what = "classification", geom = "point",
+                  title = "D. Anthocyanins Final Time", pallete = "jco")
+ggarrange(p2_0,p2_F)
 
 
 
 
-m1 <- c(23,34,39,45,51,56)
-S1 <- matrix(c(1.00, -0.90, 0.18, -0.13, 0.10, -0.05, -0.90,
-               1.31, -0.26, 0.18, -0.15, 0.07, 0.18, -0.26, 4.05, -2.84,
-               2.27, -1.13, -0.13, 0.18, -2.84, 2.29, -1.83, 0.91, 0.10,
-               -0.15, 2.27, -1.83, 3.46, -1.73, -0.05, 0.07, -1.13, 0.91,
-               -1.73, 1.57), 6, 6)
-m2 <- c(16,18,15,17,21,17)
-S2 <- matrix(c(1.00, 0.00, -0.50, -0.20, -0.20, 0.19, 0.00,
-               2.00, 0.00, -1.20, -0.80, -0.36,-0.50, 0.00, 1.25, 0.10,
-               -0.10, -0.39, -0.20, -1.20, 0.10, 2.76, 0.52, -1.22,-0.20,
-               -0.80, -0.10, 0.52, 1.40, 0.17, 0.19, -0.36, -0.39, -1.22,
-               0.17, 3.17), 6, 6)
-m3 <- c(8, 11, 16, 22, 25, 28)
-S3 <- matrix(c(1.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
-               1.00, -0.20, -0.64, 0.26, 0.00, 0.00, -0.20, 1.04, -0.17,
-               -0.10, 0.00, 0.00, -0.64, -0.17, 1.50, -0.65, 0.00, 0.00,
-               0.26, -0.10, -0.65, 1.32, 0.00, 0.00, 0.00, 0.00, 0.00,
-               0.00, 1.00), 6, 6)
-m4 <- c(12, 9, 8, 5, 4 ,2)
-S4 <- diag(c(1,1,1,1,1,1))
-data <- matrix(0, 40, 6)
+modelClusteringAnt_T0$classification
+modelClusteringAnt_TF$classification
 
-library(mvtnorm)
+modelClusteringFlav_T0$classification
+modelClusteringFlav_TF$classification
 
-data[1:10,] <- rmvnorm(10, m1, S1)
-data[11:20,] <- rmvnorm(10, m2, S2)
-data[21:30,] <- rmvnorm(10, m3, S3)
-data[31:40,] <- rmvnorm(10, m4, S4)
+# plots ----
 
-data
+# Ant_T0
 
-clus <- longclustEM(data, 3, 5, linearMeans=TRUE)
-summary(clus)
-plot(clus,data)
+tabla_clustersAnt_T0 <-  plasmaAnt %>% filter(Time == "Initial") %>%
+                         select(-c(anthro, numVol, Time)) %>% 
+                         select(CA, VA.GG, DHPAA, DHPAA.G, Sweetener, Sex) %>%
+                         add_column(clusters = modelClusteringAnt_T0$classification)
+
+tableSexo_T0 <- table(tabla_clustersAnt_T0$Sex, tabla_clustersAnt_T0$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tabla_clustersAnt_T0 <- tabla_clustersAnt_T0 %>% select(-c(Sweetener, Sex))
+
+longtableAnt_T0 <- melt(tabla_clustersAnt_T0, id = c("clusters"))
+
+p1 <- ggplot(longtableAnt_T0, aes(factor(variable, level = unique(longtableAnt_T0$variable)),as.numeric(value), 
+                            fill=factor(clusters))) +
+  geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 4,xmax=5.5, ymin=0.75, ymax=1.25)+
+ 
+  ggtitle("C. Anthocyanins at Initial Time")+
+  labs(y = "standarized value",x = "Bioactive Anthocyanins", fill = "Cluster")
+
+# Ant_TF
+
+tabla_clustersAnt_TF <-  plasmaAnt %>% filter(Time == "Final") %>%
+  select(-c(anthro, numVol, Time)) %>% 
+  select(CA, VA.GG, DHPAA, DHPAA.G, Sweetener, Sex) %>%
+  add_column(clusters = modelClusteringAnt_TF$classification)
+
+tableSexo_TF <- table(tabla_clustersAnt_TF$Sex, tabla_clustersAnt_TF$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+tableEdulcorante_TF <- table(tabla_clustersAnt_TF$Sweetener, tabla_clustersAnt_TF$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+
+tabla_clustersAnt_TF <- tabla_clustersAnt_TF %>% select(-c(Sweetener, Sex))
+
+longtableAnt_TF <- melt(tabla_clustersAnt_TF, id = c("clusters"))
+
+p2 <- ggplot(longtableAnt_TF, aes(factor(variable, level = unique(longtableAnt_TF$variable)),as.numeric(value), 
+                                  fill=factor(clusters))) +
+  geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 4,xmax=5.5, ymin=0.75, ymax=1.25)+
+  annotation_custom(grob = tableGrob(tableEdulcorante_TF, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 4,xmax=5.5, ymin=-0.25, ymax=0.25)+
+  ggtitle("D. Anthocyanins at Final Time")+
+  labs(y = "standarized value",  x = "Bioactive Anthocyanins", fill = "Cluster")
+
+
+ggarrange(p1,p2)
+
+
+# Flav_T0
+
+tabla_clustersFlav_T0 <-  orinaFlav %>% filter(Time == "Initial") %>%
+  select(-c(anthro, numVol, Time)) %>% 
+  select(HE.G, NG, NS, Sweetener, Sex) %>%
+  add_column(clusters = modelClusteringFlav_T0$classification)
+
+tableSexo_T0 <- table(tabla_clustersFlav_T0$Sex, tabla_clustersFlav_T0$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tabla_clustersFlav_T0 <- tabla_clustersFlav_T0 %>% select(-c(Sweetener, Sex))
+
+longtableFlav_T0 <- melt(tabla_clustersFlav_T0, id = c("clusters"))
+
+p1 <- ggplot(longtableFlav_T0, aes(factor(variable, level = unique(longtableFlav_T0$variable)),as.numeric(value), 
+                                  fill=factor(clusters))) +
+  geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 4-1,xmax=5.5-1, ymin=0.75, ymax=1.25)+
+  ggtitle("A. Flavanones at Initial Time")+
+  labs(y = "standarized value", x = "Bioactive Flavanones", fill = "Cluster")
+
+# Flav_TF
+
+tabla_clustersFlav_TF <- orinaFlav %>% filter(Time == "Final") %>%
+  select(-c(anthro, numVol, Time)) %>% 
+  select(HE.G, NG, NS, Sweetener, Sex) %>%
+  add_column(clusters = modelClusteringFlav_TF$classification)
+
+tableSexo_TF <- table(tabla_clustersFlav_TF$Sex, tabla_clustersFlav_TF$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+tableEdulcorFlave_TF <- table(tabla_clustersFlav_TF$Sweetener, tabla_clustersFlav_TF$clusters) #tabla_clusters %>% count(EndulzFlave, clusters)
+
+tabla_clustersFlav_TF <- tabla_clustersFlav_TF %>% select(-c(Sweetener, Sex))
+
+longtableFlav_TF <- melt(tabla_clustersFlav_TF, id = c("clusters"))
+
+p2 <- ggplot(longtableFlav_TF, aes(factor(variable, level = unique(longtableFlav_TF$variable)),as.numeric(value), 
+                                  fill=factor(clusters))) +
+  geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 3,xmax=4.5, ymin=0.75, ymax=1.25)+
+  annotation_custom(grob = tableGrob(tableEdulcorFlave_TF, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 3,xmax=4.5, ymin=-0.25, ymax=0.25)+
+  ggtitle("B. Flavanones at Final Time")+
+  labs(y = "standarized value", x = "Bioactive Flavanones", fill = "Cluster")
+
+
+ggarrange(p1,p2)
+
