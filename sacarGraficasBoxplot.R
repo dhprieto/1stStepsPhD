@@ -12,10 +12,10 @@ anthro <- c("Peso", "IMC", "Grasa", "IRCV",
 tableAnth <- orinaFlav %>% select (all_of(anthro), Time, Sex, Sweetener)
 tableMet <- orinaFlav %>% select (-anthro, -numVol, Time, Sex, Sweetener)
 
-tableMetMelt <- melt(plasmaAnt %>% select (CA, VA.GG, DHPAA, DHPAA.G, Time, Sex, Sweetener), 
+tableMetMelt <- melt(orinaFlav %>% select (NS, Time, Sex, Sweetener), 
                      id = c("Time", "Sex", "Sweetener"))
 
-bxp(tableMetMelt, "Sex")
+bxp(tableMetMelt, "Sweetener")
 
 
 tableMetMelt <- melt(orinaFlav %>% select (HE.G, NG, NS, Time, Sex, Sweetener), 
@@ -27,7 +27,7 @@ ggplot(tableMetMelt, aes(factor(variable,
                       fill=factor(Time, levels = c("Initial", "Final")))) +
   geom_boxplot()+
   ggtitle(paste("B. Sex:Time Anthocyanins"))+
-  labs(y = "standarized value", x = "Bioactive Anthocyanins", fill = "Time")+
+  labs(y = "standarized value", x = "variables", fill = "Time")+
   
   facet_wrap(~factor(Sex))
 
@@ -40,7 +40,7 @@ ggplot(tableMetMelt, aes(factor(variable,
                          fill=factor(Time, levels = c("Initial", "Final")))) +
   geom_boxplot()+
   ggtitle(paste("A. Sex:Time Flavanones"))+
-  labs(y = "standarized value", x = "Bioactive Flavanones", fill = "Time")+
+  labs(y = "standarized value", x = "s Flavanones", fill = "Time")+
   
   facet_wrap(~factor(Sex))
 
@@ -67,9 +67,9 @@ bxp <- function(longTable, factore){
                                  level = unique(longTable$variable)),as.numeric(value), 
                           fill=factor(longTable[,factore]))) +
       geom_boxplot()+
-      ggtitle(paste("B. Sex:Time Flavanones-Plasma"))+
+      ggtitle(paste("B. Sex:Time Anthocyanin-Urine"))+
       labs(y = "standarized value", x = "variables", fill = "Sex")+
-        
+      scale_fill_brewer(palette = "Reds")+  
       facet_wrap(~factor(Time, levels = c("Initial", "Final")))
     
     
@@ -80,8 +80,8 @@ bxp <- function(longTable, factore){
                                  level = unique(longTable$variable)),as.numeric(value), 
                           fill=factor(longTable[,factore])), colour = "Sweetener") +
       geom_boxplot()+
-      ggtitle(paste("C. Sweetener:Time Flavanones-urine"))+
-      labs(y = "standarized value", x = "bioactive", fill = "Sex")+
+      ggtitle(paste("B. Sweetener:Time Flavanones-urine"))+
+      labs(y = "standarized value", x = "variables", fill = "Sweetener")+
       facet_wrap(~factor(Time, levels = c("Initial", "Final")))
     
     

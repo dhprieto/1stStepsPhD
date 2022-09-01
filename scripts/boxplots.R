@@ -32,16 +32,16 @@ bxp <- function(longTable, factore){
   }
   
   else{
-  ggplot(longTable, aes(factor(variable, 
-                            level = unique(longTable$variable)),as.numeric(value), 
-                            fill=factor(longTable[,factore]))) +
-  geom_boxplot()+
-  ggtitle(paste("boxplot ", deparse(substitute(longtable))," ", factore))+
-  labs(y = "standarized value", x = "variables", legend = factore)+
-  facet_wrap(~Tiempo)
-
-
-    }
+    ggplot(longTable, aes(factor(variable, 
+                                 level = unique(longTable$variable)),as.numeric(value), 
+                          fill=factor(longTable[,factore]))) +
+      geom_boxplot()+
+      ggtitle(paste("boxplot ", deparse(substitute(longtable))," ", factore))+
+      labs(y = "standarized value", x = "variables", legend = factore)+
+      facet_wrap(~Tiempo)
+    
+    
+  }
 }
 
 print(bxp(tableMetMelt, "Sexo"))

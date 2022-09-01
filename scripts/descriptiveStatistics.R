@@ -1,6 +1,6 @@
 source("scripts/preprocess.R")
 
-#install.packages(c("modeest", "psych"))
+install.packages(c("modeest", "psych"))
 
 library(modeest)
 library(psych)
@@ -9,43 +9,51 @@ listaTablas <- preprocessTables("data/", "tablaOrinaAnt.csv")
 
 tablaFactores <- removeOutliers(listaTablas$tablaSinEsc)
 
-estadisticosDescriptivos <- function (tabla, variableNum) {
+estadisticosDescriptivos <- function (tabla) {
 
-  if (is.numeric(tabla[, variableNum])){
+  #Encabezados de cada estadístico como un vector
+  nombres <- c("Mínimo", "Q1", "Media", "Media recortada", "Mediana", "Moda",
+               "Varianza", "Desviación Estándar", "Q3", "Máximo", "Simetría", "Curtosis")
+  
+  descr <- data.frame(matrix(ncol = length(nombres), nrow = 0))
+  colnames(descr) <- nombres
+  
+  for (i in colnames(tabla)){
+  
+  if (is.numeric(tabla[, i]) & ){
     
-      min <- min(tabla[, variableNum], na.rm = TRUE)
-      q1 <- quantile(tabla[, variableNum], probs = 0.25, na.rm = TRUE)
-      media <- mean.default(tabla[, variableNum], na.rm = TRUE)
-      media_rec <- mean.default(tabla[, variableNum], trim = 0.025, na.rm = TRUE)
-      mediana <- median.default(tabla[, variableNum], na.rm = TRUE)
-      moda <- mfv(tabla[, variableNum])
-      var <- var(tabla[, variableNum], na.rm = TRUE)
-      desvest <- sd(tabla[, variableNum], na.rm = TRUE)
-      q3 <- quantile(tabla[, variableNum], probs = 0.75, na.rm = TRUE)
-      max <- max(tabla[, variableNum], na.rm = TRUE)
-      s <- skew(tabla[, variableNum])
-      c <- kurtosi(tabla[, variableNum])
+      min <- min(tabla[, i], na.rm = TRUE)
+      q1 <- quantile(tabla[, i], probs = 0.25, na.rm = TRUE)
+      media <- mean.default(tabla[, i], na.rm = TRUE)
+      media_rec <- mean.default(tabla[, i], trim = 0.025, na.rm = TRUE)
+      mediana <- median.default(tabla[, i], na.rm = TRUE)
+      moda <- mfv(tabla[, i])
+      var <- var(tabla[, i], na.rm = TRUE)
+      desvest <- sd(tabla[, i], na.rm = TRUE)
+      q3 <- quantile(tabla[, i], probs = 0.75, na.rm = TRUE)
+      max <- max(tabla[, i], na.rm = TRUE)
+      s <- skew(tabla[, i])
+      c <- kurtosi(tabla[, i])
   
 
   #Valores de estadísticos como vector
   descriptivos <- as.numeric(c(min, q1, media, media_rec, mediana, moda,
                                      var, desvest, q3, max, s, c))
 
-  #Encabezados de cada estadístico como un vector
-  nombres <- c("Mínimo", "Q1", "Media", "Media recortada", "Mediana", "Moda",
-             "Varianza", "Desviación Estándar", "Q3", "Máximo", "Simetría", "Curtosis")
-
-
-  descr2 <- as.data.frame(rbind(nombres, descriptivos))
+  descr <- rbind(descr,descriptivos)
 
   }
+    
+    
+  }
 
-  return (descr2)
+  return (descr)
 
 
 }
 
-pruebaUwu <- estadisticosDescriptivos(tablaFactores, "Peso")
+pruebaUwu <- estadisticosDescriptivos(tablaFactores)
+
 View(pruebaUwu)
 
 skimr::skim(tablaFactores)

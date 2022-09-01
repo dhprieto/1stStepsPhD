@@ -31,9 +31,9 @@ correlatedFeatures <- function (tabla) {
   
   print(highcorr)
   
-    
-}
   
+}
+
 
 ## rankby importance ----
 

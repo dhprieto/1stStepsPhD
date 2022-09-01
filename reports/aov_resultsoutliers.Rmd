@@ -1,0 +1,126 @@
+---
+title: "aov_results"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rstatix)
+library(scales)
+
+```
+
+
+```{r lectura tablas, include=FALSE}
+
+
+orinaFlav <- read.csv("../data/limpiosOutliers/orinaFlavNoOutliers.csv")[-1]
+orinaAnt <- read.csv("../data/limpiosOutliers/orinaAntNoOutliers.csv")[-1]
+plasmaAnt <- read.csv("../data/limpiosOutliers/plasmaFlavNoOutliers.csv")[-1]
+plasmaFlav <- read.csv("../data/limpiosOutliers/plasmaFlavNoOutliers.csv")[-1]
+
+
+```
+
+
+```{r anova, include=FALSE}
+aov_test <- function(tabla, variable){
+  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  
+  res.aov <- anova_test(data = tablaVar, dv=variable, wid=numVol, 
+                         between = c(Sexo, Endulzante), within= Tiempo)
+
+  tablaAnova <- get_anova_table(res.aov, correction = "auto")
+  
+  print(tablaAnova)
+}
+
+aov_loop <- function(tabla){
+   
+  message(paste("Tabla analizada: ", deparse(substitute(tabla))))
+  for (i in seq(1,ncol(tabla))){
+  
+    if (is.numeric(tabla[,i]) & names(tabla)[i] != "numVol"){
+        message(paste("Variable analizada: ", names(tabla)[i]))
+        aov_test(tabla,
+           names(tabla)[i])
+    }
+  
+  
+  }
+}
+
+
+```
+
+```{r anova_exec}
+
+
+aov_loop(orinaFlav)
+aov_loop(orinaAnt)
+aov_loop(plasmaAnt)
+aov_loop(plasmaFlav)
+```
+
+
+<!-- ```{r pairwise, include= FALSE} -->
+
+<!-- pairwiseTTest <- function(tabla){ -->
+
+<!--   counts <- data.frame(table(tabla$numVol)) -->
+
+<!--   tabla <- tabla[tabla$numVol %in% counts$Var1[counts$Freq > 1],] -->
+
+<!--   for (i in colnames(tabla)){ -->
+
+<!--     if (is.numeric(tabla[,i])){ -->
+
+
+<!--       message(paste("Variable analizada: ", i)) -->
+
+<!--       message(paste("Comparaciones Tiempo ", i))  -->
+
+<!--       print(pairwise_t_test(data = tabla , formula = as.formula(paste(sym(i),"~ Tiempo")), -->
+<!--                             paired = T, p.adjust.method = "bonferroni") -->
+<!--             %>% dplyr::select(-df, -statistic)) -->
+
+<!--       tablaGr <- group_by(tabla, Endulzante, Sexo) -->
+
+<!--       message(paste("Comparaciones Tiempo-Endulzante-Sexo ", i)) -->
+
+<!--       print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")), -->
+<!--                             paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic)) -->
+
+
+<!--       tablaGr <- group_by(tabla, Endulzante) -->
+
+<!--       message(paste("Comparaciones Tiempo-Endulzante", i)) -->
+
+<!--       print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")), -->
+<!--                             paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic)) -->
+
+
+<!--       tablaGr <- group_by(tabla, Sexo) -->
+
+<!--       message(paste("Comparaciones Tiempo-Sexo", i)) -->
+
+<!--       print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Tiempo")), -->
+<!--                             paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic)) -->
+<!--     } -->
+<!--   } -->
+<!-- } -->
+
+
+
+<!-- ``` -->
+
+
+<!-- ```{r pairwise_exec} -->
+<!-- pairwiseTTest(orinaFlav) -->
+<!-- pairwiseTTest(orinaAnt) -->
+<!-- pairwiseTTest(plasmaAnt) -->
+<!-- pairwiseTTest(plasmaFlav) -->
+
+<!-- ``` -->

@@ -1,6 +1,5 @@
 # script anovas ----
 
-library(tidyverse)
 library(rstatix)
 
 # Función para realizar la anova de tres vías sobre una variable
@@ -8,12 +7,12 @@ library(rstatix)
 
 aov_test <- function(tabla, variable){
   
-  tablaVar <- tabla %>% select(numVol, Endulzante, Sexo, Tiempo, variable)
+  tablaVar <- tabla %>% select(numVol, Sweetener, Sex, Time, variable)
 
-  tablaVar <- tablaVar[!tablaVar[[5]] %in% boxplot.stats(tablaVar[[5]])$out,]
-  
+  # tablaVar <- tablaVar[!tablaVar[[5]] %in% boxplot.stats(tablaVar[[5]])$out,]
+   
   res.aov <- anova_test(data = ungroup(tablaVar), dv=variable, wid=numVol, 
-                        between = c(Sexo, Endulzante), within= Tiempo)
+                        between = c(Sex, Sweetener), within= Time)
   
   tablaAnova <- get_anova_table(res.aov, correction = "auto")
   
@@ -25,17 +24,26 @@ aov_test <- function(tabla, variable){
 aov_loop <- function(tabla){
   
   message(paste("Tabla analizada: ", deparse(substitute(tabla))))
-  for (i in seq(1,ncol(tabla))){
+  for (i in colnames(tabla)[-1]){
 
-    if (is.numeric(tabla[[i]])){
+    if (is.numeric(tabla[,i])){
     
-      message(paste("Variable analizada: ", names(tabla)[i]))
-      aov_test(tabla,
-               names(tabla)[i])
+      message(paste("Variable analizada: ", i))
+      aov_test(tabla,i)
     }
     
     
   }
 }
 
-# uwu
+
+aov_loop(table1.4)
+
+# test ----
+
+table1.0 <- readingFillingGrouping("data/chronicUrineAnt.csv")
+table1.1 <- anthroSex(table1.0)
+table1.2 <- normalizingNumeric(table1.1)
+table1.3 <- factoringImputating(table1.2)
+table1.4 <- timingCleanFeatures(table1.3)
+

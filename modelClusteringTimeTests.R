@@ -47,7 +47,7 @@ modelClusteringFlav_TF <- Mclust(flavplot_TF, G = 4)
 p1 <- fviz_mclust(object = modelClusteringFlav_TF, what = "BIC", pallete = "jco",  
                   title = "Model Selection Orina Flav Final Time") + scale_x_discrete(limits = c(1:10))
 p2_F <- fviz_mclust(modelClusteringFlav_TF, what = "classification", geom = "point",
-                  title = "B. Flav Final Time", pallete = "jco")
+                  title = "B. Flavanones Final Time", pallete = "jco")
 ggarrange(p2_0,p2_F)
 
 
@@ -100,7 +100,7 @@ modelClusteringAnt_T0 <- Mclust(antplot_T0, G = 5)
 p1 <- fviz_mclust(object = modelClusteringAnt_T0, what = "BIC", pallete = "jco",  
                   title = "Model Selection Plasma Ant Initial Time") + scale_x_discrete(limits = c(1:10))
 p2_0 <- fviz_mclust(modelClusteringAnt_T0, what = "classification", geom = "point",
-                  title = "C.Anthocyanins Initial Time", pallete = "jco")
+                  title = "A.Anthocyanins Initial Time", pallete = "jco")
 plot(p1)
 
 ggarrange(p1,p2)
@@ -111,7 +111,7 @@ modelClusteringAnt_TF <- Mclust(antplot_TF, G = 4)
 p1 <- fviz_mclust(object = modelClusteringAnt_TF, what = "BIC", pallete = "jco",  
                   title = "Model Selection Plasma Ant Final Time") + scale_x_discrete(limits = c(1:10))
 p2_F <- fviz_mclust(modelClusteringAnt_TF, what = "classification", geom = "point",
-                  title = "D. Anthocyanins Final Time", pallete = "jco")
+                  title = "B. Anthocyanins Final Time", pallete = "jco")
 ggarrange(p2_0,p2_F)
 
 
@@ -141,11 +141,11 @@ longtableAnt_T0 <- melt(tabla_clustersAnt_T0, id = c("clusters"))
 p1 <- ggplot(longtableAnt_T0, aes(factor(variable, level = unique(longtableAnt_T0$variable)),as.numeric(value), 
                             fill=factor(clusters))) +
   geom_boxplot()+
-  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
                     xmin= 4,xmax=5.5, ymin=0.75, ymax=1.25)+
  
-  ggtitle("C. Anthocyanins at Initial Time")+
-  labs(y = "standarized value",x = "Bioactive Anthocyanins", fill = "Cluster")
+  ggtitle("A. Anthocyanins at Initial Time")+
+  labs(y = "standarized value",x = "variables", fill = "Cluster")
 
 # Ant_TF
 
@@ -164,12 +164,12 @@ longtableAnt_TF <- melt(tabla_clustersAnt_TF, id = c("clusters"))
 p2 <- ggplot(longtableAnt_TF, aes(factor(variable, level = unique(longtableAnt_TF$variable)),as.numeric(value), 
                                   fill=factor(clusters))) +
   geom_boxplot()+
-  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
                     xmin= 4,xmax=5.5, ymin=0.75, ymax=1.25)+
   annotation_custom(grob = tableGrob(tableEdulcorante_TF, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
                     xmin= 4,xmax=5.5, ymin=-0.25, ymax=0.25)+
-  ggtitle("D. Anthocyanins at Final Time")+
-  labs(y = "standarized value",  x = "Bioactive Anthocyanins", fill = "Cluster")
+  ggtitle("B. Anthocyanins at Final Time")+
+  labs(y = "standarized value",  x = "variables", fill = "Cluster")
 
 
 ggarrange(p1,p2)
@@ -191,10 +191,10 @@ longtableFlav_T0 <- melt(tabla_clustersFlav_T0, id = c("clusters"))
 p1 <- ggplot(longtableFlav_T0, aes(factor(variable, level = unique(longtableFlav_T0$variable)),as.numeric(value), 
                                   fill=factor(clusters))) +
   geom_boxplot()+
-  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+  annotation_custom(grob = tableGrob(tableSexo_T0, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
                     xmin= 4-1,xmax=5.5-1, ymin=0.75, ymax=1.25)+
   ggtitle("A. Flavanones at Initial Time")+
-  labs(y = "standarized value", x = "Bioactive Flavanones", fill = "Cluster")
+  labs(y = "standarized value", x = "variables", fill = "Cluster")
 
 # Flav_TF
 
@@ -213,12 +213,12 @@ longtableFlav_TF <- melt(tabla_clustersFlav_TF, id = c("clusters"))
 p2 <- ggplot(longtableFlav_TF, aes(factor(variable, level = unique(longtableFlav_TF$variable)),as.numeric(value), 
                                   fill=factor(clusters))) +
   geom_boxplot()+
-  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("H", "M"), theme = ttheme_default(base_size = 8)), 
+  annotation_custom(grob = tableGrob(tableSexo_TF, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
                     xmin= 3,xmax=4.5, ymin=0.75, ymax=1.25)+
   annotation_custom(grob = tableGrob(tableEdulcorFlave_TF, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
                     xmin= 3,xmax=4.5, ymin=-0.25, ymax=0.25)+
   ggtitle("B. Flavanones at Final Time")+
-  labs(y = "standarized value", x = "Bioactive Flavanones", fill = "Cluster")
+  labs(y = "standarized value", x = "variables", fill = "Cluster")
 
 
 ggarrange(p1,p2)
