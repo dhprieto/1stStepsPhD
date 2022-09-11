@@ -57,3 +57,9 @@ pruebaUwu <- estadisticosDescriptivos(tablaFactores)
 View(pruebaUwu)
 
 skimr::skim(tablaFactores)
+
+plasmaAnt <- read.csv("data/mainPlasmaAnt.csv") %>% select(-c(Time, Sex, Sweetener, numVol, X))
+
+mainPlasmaDesc <- skimr::skim(plasmaAnt) %>% 
+  add_column(skewness = apply(plasmaAnt, MARGIN = 2, skewness)) 
+
