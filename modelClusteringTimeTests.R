@@ -22,11 +22,12 @@ flavplot <- orinaFlav %>% select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% s
 model_clustering_OF <- Mclust(flavplot)
 
 p1 <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",  
-                  title = "Model Selection Orina Flav") + scale_x_discrete(limits = c(1:10))
+                  title = "Model Selection") + scale_x_discrete(limits = c(1:10))
 p2 <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
                   title = "Clusters Plot Orina Flav", pallete = "jco")
 ggarrange(p1,p2)
 
+plot(p1)
 
 flavplot_T0 <- orinaFlav %>% filter(Time == "Initial") %>% 
   select(-c(anthro, Sweetener, Sex, numVol, Time)) %>% select(HE.G, NS, NG)
