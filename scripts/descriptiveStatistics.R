@@ -20,7 +20,7 @@ estadisticosDescriptivos <- function (tabla) {
   
   for (i in colnames(tabla)){
   
-  if (is.numeric(tabla[, i]) & ){
+  if (is.numeric(tabla[, i])){
     
       min <- min(tabla[, i], na.rm = TRUE)
       q1 <- quantile(tabla[, i], probs = 0.25, na.rm = TRUE)

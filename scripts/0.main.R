@@ -1,0 +1,391 @@
+library(tidyverse)
+library(scales)
+library("psych")
+library("modeest")
+library(caret)
+library(rstatix) 
+library(AppliedPredictiveModeling)
+source("../../effectsSexIntakers/scripts/6.anova.R")
+
+readingFillingGrouping <- function(tablaPath){
+    
+    tabla <- read.csv(tablaPath, sep = ";", dec = ".")
+    
+    if (tablaPath == "data/chronicUrineFlav.csv"){
+      tabla <- read.csv(tablaPath, sep = ";", dec = ",")
+    }
+    
+    # remove raw data from spectometry
+    
+    for (i in colnames(tabla)){
+      if(substr(i, nchar(i), nchar(i)) != "1" & i != "grouping"){
+        tabla[,i] <- NULL
+      }
+    }
+    
+    # adding sweetener
+    
+    for (i in seq(1, nrow(tabla))){
+      
+      if (grepl(pattern = "A", x = tabla$grouping[i])){
+        tabla$Sweetener[i] <- "ST"
+      }
+      
+      else if (grepl(pattern = "B", x = tabla$grouping[i])){
+        tabla$Sweetener[i] <- "SU"
+      }
+      
+      else if (grepl(pattern = "C", x = tabla$grouping[i])){
+        tabla$Sweetener[i] <- "SA"
+      }
+      
+      # adding numVol
+      
+      if (length(tabla$grouping[i]) == 4){
+        tabla$numVol[i] <- as.numeric(substr(tabla$grouping[i],0,1))
+        if (tabla$Sweetener[i] == "SU"){
+          tabla$numVol[i] = tabla$numVol[i] + 50
+        }
+        
+        else if (tabla$Sweetener[i] == "SA"){
+          tabla$numVol[i] = tabla$numVol[i] + 100
+        }
+        
+      }
+      
+      else {
+        tabla$numVol[i] <- as.numeric(substr(tabla$grouping[i],0,2))
+        
+        if (tabla$Sweetener[i] == "SU"){
+          tabla$numVol[i] = tabla$numVol[i] + 50
+        }
+        
+        else if (tabla$Sweetener[i] == "SA"){
+          tabla$numVol[i] = tabla$numVol[i] + 100
+        }
+        
+      }
+      
+      if (grepl(pattern = "F", x = tabla$grouping[i])){
+        tabla$Time[i] <- "Final"
+      }
+      else if (grepl(pattern = "([A-C])0", x = tabla$grouping[i])){
+        tabla$Time[i] <- "Initial"
+        
+      }
+      
+      
+    }    
+    
+    tableSex <- read.csv("../../effectsSexIntakers/data/chronicSexVolunteers.csv", sep = ";", dec = ",")
+    
+    tabla <- merge(tabla, tableSex, by = "numVol")
+    
+    tabla$Sex[tabla$Sex == "HOMBRE"] <- "MAN"
+    tabla$Sex[tabla$Sex == "MUJER"] <- "WOMAN"
+    
+    
+    
+    return(tabla)
+    
+  }
+  
+normalizingNumeric <- function(tableComplete) {
+  
+  for (i in colnames(tableComplete)){
+    
+    if (is.numeric(tableComplete[,i]) && i != "numVol"){
+      
+      tableComplete[,i] <- scales::rescale(tableComplete[,i])
+      
+    }
+    
+  }
+  return (tableComplete)    
+}
+
+factoringImputating <- function(tableNorm){
+  
+  tableNorm$Sweetener <- factor(tableNorm$Sweetener) 
+  tableNorm$Sex <- factor(tableNorm$Sex)
+  tableNorm$Time <- factor(tableNorm$Time)
+  
+  return(tableNorm)   
+  
+}
+
+
+estadisticosDescriptivos <- function (tabla) {
+  
+  #Encabezados de cada estadístico como un vector
+  nombres <- c("Mínimo", "Q1", "Media", "Media recortada", "Mediana", "Moda",
+               "Varianza", "Desviación Estándar", "Q3", "Máximo", "Simetría", "Curtosis")
+  
+  descr2 <- data.frame(matrix(ncol = length(nombres), nrow = 0))
+  
+  
+  for (i in colnames(tabla)) {
+    if (is.numeric(tabla[, i]) & i != "numVol"){
+      
+      min <- min(tabla[, i], na.rm = TRUE)
+      q1 <- quantile(tabla[, i], probs = 0.25, na.rm = TRUE)
+      media <- mean.default(tabla[, i], na.rm = TRUE)
+      media_rec <- mean.default(tabla[, i], trim = 0.025, na.rm = TRUE)
+      mediana <- median.default(tabla[, i], na.rm = TRUE)
+      moda <- mfv1(tabla[, i])
+      var <- var(tabla[, i], na.rm = TRUE)
+      desvest <- sd(tabla[, i], na.rm = TRUE)
+      q3 <- quantile(tabla[, i], probs = 0.75, na.rm = TRUE)
+      max <- max(tabla[, i], na.rm = TRUE)
+      s <- skew(tabla[, i])
+      c <- kurtosi(tabla[, i])
+      
+      
+      #Valores de estadísticos como vector
+      descriptivos <- as.numeric(c(min, q1, media, media_rec, mediana, moda,
+                                   var, desvest, q3, max, s, c))
+      
+      descr2 <- as.data.frame(rbind(descr2, descriptivos))
+      
+      
+      colnames(descr2) <- nombres
+      
+      
+    }
+    
+    
+    
+  }
+  
+  rownames(descr2) <- colnames(tabla)[!(colnames(tabla) %in% c("numVol", "grouping","Sex", "Time", "Sweetener"))] 
+  
+  return (descr2)
+  
+}
+
+# timing the features
+
+timingCleanFeatures <- function(tabla, pathToTable){
+  
+
+  if (pathToTable == "data/chronicPlasmAnt.csv"){
+    rename(tabla, CA = Caffeic.Acid..CA..1, CA.Gluc = CA.Gluc.1, CA.Sulfate = CA.Sulfate.1, Total.CA = TOTAL.CA.1,
+           DHPAA = X3.4.Dihidroxiphenilacetic.acid..DHPAA..1, DHPAA.Gluc = DHPAA.Gluc.1, DHPAA.di.Gluc = DHPAA.di.Gluc.1,
+           DHPAA.Gluc.Sulfate = DHPAA.Gluc.sulfate.1, DHPAA.di.Sulfate = DHPAA.di.Sulfate.1, Total.DHPAA = TOTAL.DHPAA.1,
+           TFA.Gluc = TFA.Gluc.1, TFA.Sulfate = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, VA = Vanillic.Acid..VA..1,
+           VA.GG = VA.GG.1, VA.Sulfate = VA.Sulfate.1, VA.Gluc.Sulfate = VA.Gluc.sulfate.1, 
+           VA.di.Sulfate = VA.di.sulfate.1, Total.VA = Total.VA.1)
+    
+  }
+  
+  else if(pathToTable == "data/chronicPlasmFlav.csv"){
+    rename(tabla, E = Eriodictiol..E..1, ES = ES.1 , Total.E = TOTAL.E.1, HE.G = HE.G.1, NG = NG.1)
+  }
+  
+  else if(pathToTable == "data/chronicUrineFlav.csv"){
+    rename(tabla, E = Eriodyctiol..E..1, EG = ES.1, ES = ES.1 , Total.E = TOTAL.E.1, HE = HE.1, HE.G = HE.G.1, 
+           HE.GG = HE.GG.1, Total.HE = TOTAL.HE.1, N = Naringenine..N..1, NG = NG.1, NGG = NGG.1, NS = NS.1, 
+           Total.N = TOTAL.N.1)
+  }
+  
+  else if (pathToTable == "data/chronicUrineAnt.csv"){
+    rename(tabla, CA = Caffeic.acid..CA..1, CA.Gluc = CA.Gluc.1, CA.Sulfate = CA.Sulfate.1, 
+           CA.Gluc.Sulfate = CA.Gluc.sulfate.1, Total.CA = TOTAL.CA.1,
+           DHPAA = X3.4...Dihidroxiphenilacetic.acid..DHPAA..1, 
+           DHPAA.Gluc = DHPAA.Gluc.1, DHPAA.di.Gluc = DHPAA.di.Gluc.1, DHPAA.Gluc.Sulfate = DHPAA.Gluc.sulfate.1, 
+           DHPAA.di.Sulfate = DHPAA.di.Sulfate.1, Total.DHPAA = TOTAL.DHPAA.1, TFA.Gluc = TFA.Gluc.1, 
+           TFA.Sulfate = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, VA = Vanillic.Acid..VA..1, VA.GG = VA.GG.1, 
+           VA.Gluc.Sulfate = VA.Gluc.sulfate.1, VA.di.Sulfate = VA.di.sulfate.1, Total.VA = Total.VA.1)
+  }
+  
+  
+  # return(tabla)
+}
+
+# Función para realizar la anova de tres vías sobre una variable
+# Imprime por pantalla el resultado
+
+aov_test <- function(tabla, variable){
+  
+  tablaVar <- tabla %>% select(numVol, Sweetener, Sex, Time, variable)
+  
+  # tablaVar <- tablaVar[!tablaVar[[5]] %in% boxplot.stats(tablaVar[[5]])$out,]
+  
+  res.aov <- anova_test(data = ungroup(tablaVar), dv=variable, wid=numVol, 
+                        between = c(Sex, Sweetener), within= Time)
+  
+  tablaAnova <- get_anova_table(res.aov, correction = "auto")
+  
+  print(tablaAnova)
+}
+
+# Función para hacer en bucle el análisis anova a lo largo de una tabla
+
+aov_loop <- function(tabla, varsRemoved){
+  
+  message(paste("Tabla analizada: ", deparse(substitute(tabla))))
+  for (i in colnames(tabla)[-1]){
+    
+    if (is.numeric(tabla[,i]) && !(i %in% varsRemoved)){
+      
+      message(paste("Variable analizada: ", i))
+      aov_test(tabla,i)
+    }
+    
+    
+  }
+}
+
+anovaTests <- function(tabla, varsRemoved) {
+  
+  aov_loop(tabla, varsRemoved)
+  pairwiseTTest(tabla, varsRemoved)
+  
+  
+}
+
+boxplotBias <- function(vars, table1.1, factore, removeOutliers = F ){
+  
+  # reading table
+  
+  table1.1 <- table1.0 %>% select (all_of(vars), Time, Sex, Sweetener, -c(numVol, grouping))
+  
+  
+  
+  if (removeOutliers){
+    
+    for (i in colnames(table1.1)) {
+      
+      if (is.numeric(table1.1[,i])){
+        
+        table1.1 <- table1.1[!table1.1[, i] %in% boxplot.stats(table1.1[,i])$out,]
+        
+      }
+    } 
+    
+    # return(table1.1)
+    
+  }
+  
+  
+  # long table format
+  
+  table1.2 <- melt(table1.1, id = c("Time", "Sex", "Sweetener"))
+  
+  # plot factors
+  
+  bxp <- function(longTable, factore){
+    
+    
+    
+    if (factore == "Time") {
+      
+      ggplot(longTable, aes(factor(variable, 
+                                   level = unique(longTable$variable)),as.numeric(value), 
+                            fill=factor(longTable[,factore], 
+                                        levels = c("Initial", "Final")))) +
+        geom_boxplot()+
+        ggtitle(paste("A.Time Flavanones-Plasma"))+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+        labs(y = "standarized value", x = "variables", fill = "Time")
+      
+    }
+    
+    else if (factore == "Sex") {
+      ggplot(longTable, aes(factor(variable, 
+                                   level = unique(longTable$variable)),as.numeric(value), 
+                            fill=factor(longTable[,factore]))) +
+        geom_boxplot()+
+        ggtitle(paste("B. Sex:Time Anthocyanin-Urine"))+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+        labs(y = "standarized value", x = "variables", fill = "Sex")+
+        scale_fill_brewer(palette = "Reds")+  
+        facet_wrap(~factor(Time, levels = c("Initial", "Final")))
+      
+      
+    }
+    
+    else{
+      ggplot(longTable, aes(factor(variable, 
+                                   level = unique(longTable$variable)),as.numeric(value), 
+                            fill=factor(longTable[,factore])), colour = "Sweetener") +
+        geom_boxplot()+
+        ggtitle(paste("B. Sweetener:Time Flavanones-urine"))+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+        labs(y = "standarized value", x = "variables", fill = "Sweetener")+
+        facet_wrap(~factor(Time, levels = c("Initial", "Final")))
+      
+      
+    }
+  }
+  
+  
+  bxp(table1.2, factore)
+  
+}
+
+pairwiseTTest <- function(tabla, varsRemoved){
+  
+  
+  # remover no duplicados
+  
+  if (deparse(substitute(tabla)) == "urineAnt"){
+    counts <- data.frame(table(tabla$numVol))
+    tabla <- tabla[tabla$numVol %in% counts$Var1[counts$Freq > 1],]
+  }
+  for (i in colnames(tabla)){
+    
+    if (is.numeric(tabla[,i]) & !(i %in% varsRemoved)){
+      
+      
+      message(paste("Analized variable: ", i))
+      
+      message(paste("Time comparisons ", i)) 
+      
+      print(pairwise_t_test(data = tabla , formula = as.formula(paste(sym(i),"~ Time")),
+                            paired = T, p.adjust.method = "bonferroni")
+            %>% dplyr::select(-df, -statistic))
+      
+      tablaGr <- group_by(tabla, Sweetener, Sex)
+      
+      message(paste("Time-Sweetener-Sex comparisons", i))
+      
+      print(pairwise_t_test(data = tablaGr, formula = as.formula(paste(sym(i),"~ Time")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+      
+      
+      tablaGr <- group_by(tabla, Sweetener)
+      
+      message(paste("Time-Sweetener comparisons", i))
+      
+      print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Time")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+      
+      
+      tablaGr <- group_by(tabla, Sex)
+      
+      message(paste("Time-Sex comparisons", i))
+      
+      print(pairwise_t_test(data = tablaGr , formula = as.formula(paste(sym(i),"~ Time")),
+                            paired = T, p.adjust.method = "bonferroni") %>% dplyr::select(-df, -statistic))
+    }
+  }
+}
+
+
+
+# test ----
+
+main1prepoc <- function(pathToTable, pathtoRealTable){
+
+tabla1.0 <- readingFillingGrouping(pathToTable)
+tabla1.1 <- normalizingNumeric(tabla1.0)
+tabla1.2 <- factoringImputating(tabla1.1)
+#tabla1.2_stats <- estadisticosDescriptivos(urAnt1.2)
+tabla1.3 <- timingCleanFeatures(tabla1.2, pathtoRealTable)
+
+return (tabla1.3)
+
+}
+
+
