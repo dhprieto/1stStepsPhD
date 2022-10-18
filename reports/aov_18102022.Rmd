@@ -499,6 +499,26 @@ urineFlavClustering <- clusteringTest("../../effectsSexIntakers/data/chronicUrin
 urineAntClustering <- clusteringTest("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
 
 
+  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
+  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
+  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+
+  
+    
+  table1.5_initial <-  table1.4 %>% 
+    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>% 
+    mutate_if(is.double,as.numeric) %>% drop_na()
+
+    comparisonTI <- clValid(
+    obj        = table1.5_initial,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+summary(comparisonTI)
+
+
 
 ggarrange(urineFlavClustering[[5]],urineFlavClustering[[6]])
 
