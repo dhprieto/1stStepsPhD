@@ -15,12 +15,13 @@ library(modeest)
 library(caret)
 library(rstatix) 
 library(AppliedPredictiveModeling)
-
+library(reshape2)
 library(clValid)
 library(mclust)
 library(factoextra)
 library(ggpubr)
-
+library(simputation)
+library(cluster)
 readingFillingGrouping <- function(tablaPath){
     
     tabla <- read.csv(tablaPath, sep = ";", dec = ".")
@@ -266,7 +267,7 @@ anovaTests <- function(tabla, varsRemoved) {
   
 }
 
-boxplotBias <- function(vars, table1.1, factore, removeOutliers = F ){
+boxplotBias <- function(vars, table1.0, factore, removeOutliers = F, titlePLot ){
   
   # reading table
   
@@ -307,7 +308,7 @@ boxplotBias <- function(vars, table1.1, factore, removeOutliers = F ){
                             fill=factor(longTable[,factore], 
                                         levels = c("Initial", "Final")))) +
         geom_boxplot()+
-        ggtitle(paste("A.Time Flavanones-Plasma"))+
+        ggtitle(titlePLot)+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
         labs(y = "standarized value", x = "variables", fill = "Time")
       
@@ -318,7 +319,7 @@ boxplotBias <- function(vars, table1.1, factore, removeOutliers = F ){
                                    level = unique(longTable$variable)),as.numeric(value), 
                             fill=factor(longTable[,factore]))) +
         geom_boxplot()+
-        ggtitle(paste("B. Sex:Time Anthocyanin-Urine"))+
+        ggtitle(paste(titlePLot))+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
         labs(y = "standarized value", x = "variables", fill = "Sex")+
         scale_fill_brewer(palette = "Reds")+  
@@ -332,7 +333,7 @@ boxplotBias <- function(vars, table1.1, factore, removeOutliers = F ){
                                    level = unique(longTable$variable)),as.numeric(value), 
                             fill=factor(longTable[,factore])), colour = "Sweetener") +
         geom_boxplot()+
-        ggtitle(paste("B. Sweetener:Time Flavanones-urine"))+
+        ggtitle(titlePLot)+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
         labs(y = "standarized value", x = "variables", fill = "Sweetener")+
         facet_wrap(~factor(Time, levels = c("Initial", "Final")))
@@ -407,12 +408,18 @@ return (tabla1.3)
 ## R Markdown
 
 ```{r cars}
+```
 
+
+```{r cars}
 plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
 plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
 urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+```
 
+
+```{r cars}
 ```
 
 
@@ -436,25 +443,61 @@ anovaTests(urineAnt_nodup, varsRemoved = c("CA.Sulfate", "DHPAA.di.Gluc", "TFA.d
 
 ```{r boxplot bias}
 
+#Boxplot urine-anthocyanins
 
+boxplotBias(vars = c("DHPAA", "VA", "VA.Gluc.Sulfate", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Time", removeOutliers = F, titlePLot = "A. Time evolution Anthocyanins-Urine")
+
+boxplotBias(vars = c("CA","DHPAA"), table1.0 = urineAnt_nodup, factore = "Sex", removeOutliers = T, titlePLot = "B. Sex:Time 
+evolution Anthocyanins-Urine")
+
+boxplotBias(vars = c("DHPAA"), table1.0 = urineAnt_nodup, factore = "Sweetener", removeOutliers = T, titlePLot = "C. Sweetener:Time evolution Anthocyanins-Urine")
+
+# Boxplot flavanones urine
+
+boxplotBias(vars = c("HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Time", removeOutliers = F, titlePLot = "A. Time evolution Flavanones-Urine")
+
+boxplotBias(vars = c("E","EG.1","ES", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Sex", removeOutliers = F, titlePLot = "B. Sex:Time evolution Flavanones-Urine")
+
+boxplotBias(vars = c("E","EG.1","ES", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Flavanones-Urine")
+
+#Boxplot anthocyanins plasm
+
+boxplotBias(vars = c("CA",  "CA.Gluc", "Total.CA", "DHPAA","DHPAA.Gluc", "DHPAA.di.Gluc","DHPAA.Gluc.Sulfate", "Total.DHPAA",
+                    "Total.TFA", "VA.GG","VA.Sulfate", "VA.Gluc.Sulfate", "VA.di.Sulfate"), table1.0 = plasmAnt, factore =                         "Time", removeOutliers = F, titlePLot = "A. Time evolution Anthocyanins-Plasm")
+
+boxplotBias(vars = c("CA",  "CA.Gluc", "Total.CA", "DHPAA","DHPAA.Gluc", "DHPAA.di.Gluc","DHPAA.Gluc.Sulfate", 
+                     "DHPAA.di.Sulfate","Total.DHPAA","TFA.Sulfate","Total.TFA", "VA.GG","VA.Sulfate", "VA.Gluc.Sulfate"), 
+                     table1.0 = plasmAnt, factore ="Sex", removeOutliers = F, titlePLot = "B. Sex:Time evolution Anthocyanins-Plasm")
+
+boxplotBias(vars = c("CA",  "CA.Gluc", "Total.CA", "DHPAA","DHPAA.Gluc", "DHPAA.di.Gluc","DHPAA.Gluc.Sulfate", 
+                     "DHPAA.di.Sulfate","Total.DHPAA","TFA.Gluc","TFA.Sulfate","Total.TFA", "VA.GG","VA.Sulfate", "VA.Gluc.Sulfate", "VA.di.Sulfate"), 
+                     table1.0 = plasmAnt, factore ="Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Anthocyanins-Plasm")
+
+
+#Boxplot flavanones plasm
+
+boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Flavanones-Plasm")
+
+boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sex", removeOutliers = T, titlePLot = "B. Sex:Time evolution Flavanones-Plasm")
+
+boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Flavanones-Plasm")
 
 ```
 
 ```{r clustering}
-
 clusteringTest <- function(pathToTable, fakepath){
-  
+
   table1.4 <- main1prepoc(pathToTable, fakepath)
-  
-  table1.5_initial <-  table1.4 %>% 
-    filter(Time == "Initial") %>% 
-    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>% 
-    mutate_if(is.double,as.numeric) %>% drop_na()
-  
-  table1.5_final <-  table1.4 %>% 
-    filter(Time == "Final") %>% 
-    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>% 
-    mutate_if(is.double,as.numeric) %>% drop_na()
+
+  table1.5_initial <-  table1.4 %>%
+    filter(Time == "Initial") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>%
+    mutate_if(is.double,as.numeric) #%>% drop_na()
+
+  table1.5_final <-  table1.4 %>%
+    filter(Time == "Final") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>%
+    mutate_if(is.double,as.numeric) #%>% drop_na()
 
   comparisonTI <- clValid(
     obj        = table1.5_initial,
@@ -468,49 +511,64 @@ clusteringTest <- function(pathToTable, fakepath){
     clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
     validation = c("stability", "internal")
   )
-  
+
   return(list(comparisonTI, comparisonTF))
-  
-  # ### model-based clustering
-  # 
-  # # Initial time
-  # model_clustering_OF <- Mclust(table1.5_initial)
-  # 
-  # p1I <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",
-  #                   title = paste("Model Selection ", pathToTable, "Initial Time")) + scale_x_discrete(limits = c(1:10))
-  # p2I <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
-  #                   title = paste("Clusters Plot ", pathToTable, "Initial Time") , pallete = "jco")
-  # 
-  # # Final time
-  # 
-  # model_clustering_OF <- Mclust(table1.5_final)
-  # 
-  # p1F <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",
-  #                   title = paste("Model Selection ", pathToTable, "Final Time")) + scale_x_discrete(limits = c(1:10))
-  # p2F <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
-  #                   title = paste("Clusters Plot ", pathToTable, "Final Time"), pallete = "jco")
-  # 
-  # return(list(comparisonTI, comparisonTF, p1I, p2I, p1F, p2F))
 }
+#   
+#   # ### model-based clustering
+#   # 
+#   # # Initial time
+#   # model_clustering_OF <- Mclust(table1.5_initial)
+#   # 
+#   # p1I <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",
+#   #                   title = paste("Model Selection ", pathToTable, "Initial Time")) + scale_x_discrete(limits = c(1:10))
+#   # p2I <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+#   #                   title = paste("Clusters Plot ", pathToTable, "Initial Time") , pallete = "jco")
+#   # 
+#   # # Final time
+#   # 
+#   # model_clustering_OF <- Mclust(table1.5_final)
+#   # 
+#   # p1F <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",
+#   #                   title = paste("Model Selection ", pathToTable, "Final Time")) + scale_x_discrete(limits = c(1:10))
+#   # p2F <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+#   #                   title = paste("Clusters Plot ", pathToTable, "Final Time"), pallete = "jco")
+#   # 
+#   # return(list(comparisonTI, comparisonTF, p1I, p2I, p1F, p2F))
+# }
+# 
 
-plasmFlavClustering <- clusteringTest("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
-plasmAntClustering <- clusteringTest("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
-urineFlavClustering <- clusteringTest("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
-urineAntClustering <- clusteringTest("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+```
 
 
-  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
-  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
-  table1.4 <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+```{r plasm flav analysis clustering}
 
-  
-    
-  table1.5_initial <-  table1.4 %>% 
-    select(-c(grouping, Sweetener, Sex, numVol, Time)) %>% 
-    mutate_if(is.double,as.numeric) %>% drop_na()
+plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
 
-    comparisonTI <- clValid(
+sapply(plasmFlav, function(x) sum(is.na(x)))
+
+#too much NA in Total.E
+
+plasmFlavImp <- impute_cart(plasmFlav, E+ES ~ Sweetener + Sex + Time+ HE.G + NG)
+
+  table1.5_initial <-  plasmFlavImp %>%
+    filter(Time == "Initial") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, Total.E)) %>%
+    mutate_if(is.double,as.numeric) #%>% drop_na()
+
+  table1.5_final <-  plasmFlavImp %>%
+    filter(Time == "Final") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, Total.E)) %>%
+    mutate_if(is.double,as.numeric)
+
+  comparisonTI <- clValid(
     obj        = table1.5_initial,
+    nClust     = 2:9,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+  comparisonTF <- clValid(
+    obj        = table1.5_final,
     nClust     = 2:6,
     clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
     validation = c("stability", "internal")
@@ -518,22 +576,204 @@ urineAntClustering <- clusteringTest("../../effectsSexIntakers/data/chronicUrine
 
 summary(comparisonTI)
 
+#              Score  Method       Clusters
+# APN          0.0293 hierarchical 3       
+# AD           0.1431 som          6       
+# ADM          0.0262 model        2       
+# FOM          0.0749 model        2       
+# Connectivity 3.5190 sota         2       
+# Dunn         0.2542 kmeans       5       
+# Silhouette   0.5269 hierarchical 2 
+
+### model-based clustering
+
+# Initial time
+
+model_clustering_OF <- Mclust(table1.5_initial, G = 3)
+
+p1I <- fviz_mclust(object = model_clustering_OF, what = "BIC", pallete = "jco",
+                  title = paste("Model Selection  Plasm Flavanones Initial Time")) + scale_x_discrete(limits = c(1:10))
+p2I <- fviz_mclust(model_clustering_OF, what = "classification", geom = "point",
+                  title = paste("Clusters Plot  Plasm Flavanones Initial Time") , pallete = "jco")
+
+plasmFlavClust <- cbind(table1.5_initial, model_clustering_OF$classification)
+
+pcaPF <- prcomp(table1.5_initial, scale = T)
+
+fviz_pca_biplot(pcaPF, habillage = model_clustering_OF$classification)
+
+ggarrange(p1I, p2I)
 
 
-ggarrange(urineFlavClustering[[5]],urineFlavClustering[[6]])
+# Final time
 
+#              Score  Method       Clusters
+# APN          0.0000 hierarchical 2       
+# AD           0.1741 diana        6       
+# ADM          0.0000 hierarchical 2       
+# FOM          0.0914 diana        4       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.9959 hierarchical 2       
+# Silhouette   0.8013 hierarchical 2 
 
-summary(plasmFlavClustering[[1]])
+# diana clustering
 
-summary(plasmFlavClustering[[2]])
+summary(comparisonTF)
 
-summary(plasmAntClustering[[1]])
+distances <- dist(x = table1.5_final[-c(55,105),], method = "manhattan")
 
-summary(plasmAntClustering[[2]])
+hc_diana <- diana(x = distances, diss = TRUE, metric = "manhattan")
+
+fviz_dend(hc_diana, k = 4)
+
+clusters_final <- cutree(tree = hc_diana, k = 4)
+
+pcaFinal <- prcomp(table1.5_final[-c(55,105),], scale = T)
+
+fviz_pca_biplot(pcaFinal, habillage = clusters_final)
 
 
 
 ```
 
+
+```{r}
+
+plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
+
+sapply(plasmAnt, function(x) sum(is.na(x)))
+
+# We impute CA, CA.Gluc, CA.Sulfate, DHPAA.Gluc, DHPAA.di.Gluc, DHPAA.Gluc.Sulfate, TFA.Sulfate, VA.Gluc.Sulfate, Va.di
+# sulfate
+# We remove DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate, 
+
+plasmAntImp <- impute_cart(dat = plasmAnt, formula = CA+ CA.Gluc+ CA.Sulfate+ DHPAA.Gluc+ DHPAA.di.Gluc+ DHPAA.Gluc.Sulfate+ TFA.Sulfate+ VA.Gluc.Sulfate+ VA.di.Sulfate ~ Sweetener + Sex + Time + Total.CA + DHPAA+Total.DHPAA+ Total.TFA+VA.GG+ Total.VA)
+
+  table1.5_initial <-  plasmAntImp %>%
+    filter(Time == "Initial") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)) %>%
+    mutate_if(is.double,as.numeric) #%>% drop_na()
+
+  table1.5_final <-  plasmAntImp %>%
+    filter(Time == "Final") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)) %>%
+    mutate_if(is.double,as.numeric)
+
+  comparisonTI <- clValid(
+    obj        = table1.5_initial,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+  comparisonTF <- clValid(
+    obj        = table1.5_final,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+summary(comparisonTI)
+
+#              Score  Method       Clusters
+# APN          0.0000 hierarchical 3       
+# AD           0.4898 pam          6       
+# ADM          0.0000 hierarchical 3       
+# FOM          0.1031 hierarchical 5       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.6871 hierarchical 2       
+# Silhouette   0.6062 hierarchical 2
+
+# hierarchical cluster k = 5
+
+distances <- dist(x = table1.5_initial, method = "manhattan")
+
+hc_hier <- hclust(d = distances, method = "complete")
+
+fviz_dend(hc_hier, k = 5)
+
+clusters_final <- cutree(tree = hc_hier, k = 5)
+
+pcaFinal <- prcomp(table1.5_final, scale = T)
+
+fviz_pca_biplot(pcaFinal, habillage = clusters_final) 
+
+summary(comparisonTF)
+
+#              Score  Method       Clusters
+# APN          0.0053 hierarchical 2       
+# AD           0.6947 kmeans       6       
+# ADM          0.0097 hierarchical 2       
+# FOM          0.1448 model        6       
+# Connectivity 3.0718 hierarchical 2       
+# Dunn         0.4619 hierarchical 2       
+# Silhouette   0.5005 hierarchical 2 
+
+# model k = 6
+
+model_clustering_TF <- Mclust(table1.5_initial, G = 6)
+
+p1I <- fviz_mclust(object = model_clustering_TF, what = "BIC", pallete = "jco",
+                  title = paste("Model Selection  Plasm Flavanones Initial Time")) + scale_x_discrete(limits = c(1:10))
+p2I <- fviz_mclust(model_clustering_TF, what = "classification", geom = "point",
+                  title = paste("Clusters Plot  Plasm Flavanones Initial Time") , pallete = "jco")
+
+pcaPF <- prcomp(table1.5_initial, scale = T)
+
+fviz_pca_biplot(pcaPF, habillage = model_clustering_TF$classification, addEllipses = T)
+
+
+```
+```{r}
+urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+
+
+sapply(urineAnt, function(x) sum(is.na(x)))
+
+str(urineAnt)
+
+# We impute CA+ CA.Gluc+ DHPAA+ DHPAA.Gluc+DHPAA.Gluc.Sulfate+DHPAA.di.Sulfate+Total.DHPAA+TFA.Gluc+ TFA.Sulfate+ VA+ VA.GG +  VA.Gluc.Sulfate+ Va.di.Sulfate
+# sulfate
+# We remove CA.Sulfate, DHPAA.di.Gluc, TFA.di.Sulfate, TIFA.Sulfate.1 VA, VA.Sulfate, 
+
+urineAnt$Total.CA <- as.numeric(urineAnt$Total.CA)
+
+
+
+
+urineAntImp <- impute_cart(dat = urineAnt, formula = CA+ CA.Gluc+ DHPAA+ DHPAA.Gluc + DHPAA.Gluc.Sulfate + DHPAA.di.Sulfate + Total.DHPAA + TFA.Gluc + TFA.Sulfate+ VA+ VA.GG +  VA.Gluc.Sulfate+ VA.di.Sulfate
+                           ~ Sweetener + Sex + Time + Total.TFA+Total.VA)
+
+urineAntImp$Total.CA
+
+  table1.5_initial <-  urineAntImp %>%
+    filter(Time == "Initial") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+    mutate_if(is.character,as.numeric) #%>% drop_na()
+
+  table1.5_final <-  urineAntImp %>%
+    filter(Time == "Final") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+    mutate_if(is.character,as.numeric)
+
+  comparisonTI <- clValid(
+    obj        = table1.5_initial,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+  comparisonTF <- clValid(
+    obj        = table1.5_final,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+```
+
+```{r}
+plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
+plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
+urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
+urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+```
 
 
