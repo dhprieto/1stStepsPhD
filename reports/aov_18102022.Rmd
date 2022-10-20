@@ -405,25 +405,18 @@ return (tabla1.3)
 
 ```
 
-## R Markdown
+## Comienza lo weno
 
-```{r cars}
-```
-
-
-```{r cars}
+```{r lectura tablas}
 plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
 plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
 urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
 ```
 
+## Anova Test
 
-```{r cars}
-```
-
-
-```{r pressure}
+```{r test anova}
 
 anovaTests(plasmAnt, varsRemoved = c("VA", "Total.VA"))
 anovaTests(plasmFlav, varsRemoved = c("Total.E"))
@@ -440,6 +433,8 @@ anovaTests(urineAnt_nodup, varsRemoved = c("CA.Sulfate", "DHPAA.di.Gluc", "TFA.d
 #CA.Gluc.Sulfate + Total.CA + Total.TFA + Total.VA +
 
 ```
+
+# Boxplot bias
 
 ```{r boxplot bias}
 
@@ -483,6 +478,298 @@ boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sex", r
 boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Flavanones-Plasm")
 
 ```
+
+# Feature selection
+
+
+```{r feature selection}
+
+
+correlatedFeatures <- function (tabla) {
+
+
+  numericFeatures <- tabla[,unlist(lapply(tabla,is.numeric))]
+
+
+  corrMatrix <- cor(numericFeatures)
+  highcorr <- findCorrelation(corrMatrix, 0.75)
+
+  print(highcorr)
+
+}
+# 8 
+colnames(urineFlav)[correlatedFeatures(urineFlav)] # HE.G
+
+colnames(urineAnt)[correlatedFeatures(urineAnt)] #
+
+colnames(plasmAnt)[correlatedFeatures(plasmAnt)] #
+
+colnames(plasmFlav)[correlatedFeatures(plasmFlav)] #
+
+#test2
+
+# feature importance about Sex urineFlav ----
+
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model (maybe use %>%select(-all_of(anthro), -numVol, -grouping) %>% filter (Time == "Final"))
+model <- train(Sex~., data=urineFlavImp %>%select(-c(grouping, Sweetener, numVol, Time)), method="lvq", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+
+###
+
+
+
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model (maybe use %>%select(-all_of(anthro), -numVol, -grouping) %>% filter (Time == "Final"))
+model <- train(Sex~., data=plasmAntImp %>% select(-c(grouping, Sweetener, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)), method="lvq", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+
+##### RF - Boruta
+
+
+library(Boruta)
+library(mlbench)
+library(caret)
+library(randomForest)
+
+
+set.seed(123)
+
+borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
+borutaF <- Boruta(Sex:Sweetener~ ., data = urineFlavImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
+
+
+print(getSelectedAttributes(borutaI))
+
+borutaSex <- Boruta(Sex~ ., data = urineFlavImp %>% select(-c(grouping, numVol)), doTrace = 2, maxRuns = 500)
+borutaTriple <- Boruta(Time:Sex:Sweetener~ ., data = urineFlavImp %>% select(-c(grouping, numVol)), doTrace = 2, maxRuns = 500)
+
+
+print(Boruta::getSelectedAttributes(borutaTriple))
+```
+
+
+# Clustering with feature selection
+
+
+### UrineFlaV
+
+
+
+```{r clustering urineFlav}
+
+set.seed(123)
+
+
+### urineFlav
+
+## time initial 
+
+# feature selection
+
+borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
+# clustering method selection 
+
+  tableIn <-  urineFlavImp %>%
+    filter(Time == "Initial") %>%
+    select(getSelectedAttributes(borutaI)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableIn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTI)
+  
+#                Score  Method       Clusters
+# APN          0.0000 hierarchical 2       
+# AD           0.0701 som          6       
+# ADM          0.0000 hierarchical 2       
+# FOM          0.0323 pam          6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         2.9886 hierarchical 2       
+# Silhouette   0.9365 hierarchical 2     
+  
+  
+# pam clustering k = 6
+  
+  
+  clustersIn <-cluster::pam(x = tableIn[-63,], k = 6, metric = "manhattan")
+  pcaIn <- prcomp(tableIn[-63,])
+
+  fviz_pca_biplot(pcaIn, habillage = clustersIn$clustering)
+
+  
+## time final
+
+# feature selection  
+  
+  borutaF <- Boruta(Sex:Sweetener~ ., data = urineFlavImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
+
+
+  tableFn <-  urineFlavImp %>%
+  filter(Time == "Final") %>%
+  select(getSelectedAttributes(borutaF)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableFn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTF)
+#   
+#                Score  Method       Clusters
+# APN          0.0013 hierarchical 2       
+# AD           0.2944 pam          6       
+# ADM          0.0024 hierarchical 2       
+# FOM          0.0834 som          6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.6514 hierarchical 2       
+# Silhouette   0.6364 hierarchical 2    
+
+# som clustering k = 6
+  
+library(kohonen)
+
+  clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
+  pcaFn <- prcomp(tableFn)
+
+  fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T)
+
+
+  
+        
+```
+
+
+### UrineAnt
+
+
+
+```{r clustering urineFlav}
+
+set.seed(123)
+
+
+### urineFlav
+
+## time initial 
+
+# feature selection
+
+borutaI <- Boruta(Sex~ ., data = urineAntImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 3, maxRuns = 500)
+
+plot(borutaI)
+
+# clustering method selection 
+
+  tableIn <-  urineAntImp %>%
+    filter(Time == "Initial") %>%
+    select(getSelectedAttributes(borutaI)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableIn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTI)
+  
+#              Score  Method       Clusters
+# APN          0.0298 hierarchical 2       
+# AD           0.0756 pam          6       
+# ADM          0.0123 hierarchical 2       
+# FOM          0.0612 model        6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         1.1629 hierarchical 2       
+# Silhouette   0.8745 hierarchical 2     
+  
+  
+# pam clustering k = 6
+  
+  
+  clustersIn <- Mclust(tableIn)$classification
+  pcaIn <- prcomp(tableIn)
+
+  fviz_pca_biplot(pcaIn, habillage = clustersIn, addEllipses = T)
+
+  
+## time final
+
+# feature selection  
+  
+  borutaF <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 2, maxRuns = 500)
+
+
+  tableFn <-  urineAntImp %>%
+  filter(Time == "Final") %>%
+  select(getSelectedAttributes(borutaF)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableFn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTF)
+  
+#              Score  Method       Clusters
+# APN          0.0013 hierarchical 2       
+# AD           0.2944 pam          6       
+# ADM          0.0024 hierarchical 2       
+# FOM          0.0834 som          6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.6514 hierarchical 2       
+# Silhouette   0.6364 hierarchical 2  
+
+# som clustering k = 6
+  
+  clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
+  pcaFn <- prcomp(tableFn)
+
+  fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T)
+
+
+  
+        
+```
+
+
+
+
+
+
+# Clustering w/O feature selection
 
 ```{r clustering}
 clusteringTest <- function(pathToTable, fakepath){
@@ -539,6 +826,8 @@ clusteringTest <- function(pathToTable, fakepath){
 # 
 
 ```
+
+### Plasm flavanones set
 
 
 ```{r plasm flav analysis clustering}
@@ -637,6 +926,8 @@ fviz_pca_biplot(pcaFinal, habillage = clusters_final)
 ```
 
 
+### Plasm Anthocyanins set
+
 ```{r}
 
 plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
@@ -723,27 +1014,26 @@ fviz_pca_biplot(pcaPF, habillage = model_clustering_TF$classification, addEllips
 
 
 ```
+### Urine Anthocyanins set
+
 ```{r}
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
 
 
 sapply(urineAnt, function(x) sum(is.na(x)))
 
-str(urineAnt)
-
 # We impute CA+ CA.Gluc+ DHPAA+ DHPAA.Gluc+DHPAA.Gluc.Sulfate+DHPAA.di.Sulfate+Total.DHPAA+TFA.Gluc+ TFA.Sulfate+ VA+ VA.GG +  VA.Gluc.Sulfate+ Va.di.Sulfate
 # sulfate
 # We remove CA.Sulfate, DHPAA.di.Gluc, TFA.di.Sulfate, TIFA.Sulfate.1 VA, VA.Sulfate, 
 
 urineAnt$Total.CA <- as.numeric(urineAnt$Total.CA)
+urineAnt$CA.Gluc.Sulfate <- as.numeric(urineAnt$CA.Gluc.Sulfate)
+
+sapply(urineAntImp, function(x) sum(is.na(x)))
 
 
-
-
-urineAntImp <- impute_cart(dat = urineAnt, formula = CA+ CA.Gluc+ DHPAA+ DHPAA.Gluc + DHPAA.Gluc.Sulfate + DHPAA.di.Sulfate + Total.DHPAA + TFA.Gluc + TFA.Sulfate+ VA+ VA.GG +  VA.Gluc.Sulfate+ VA.di.Sulfate
-                           ~ Sweetener + Sex + Time + Total.TFA+Total.VA)
-
-urineAntImp$Total.CA
+urineAntImp <- impute_cart(dat = urineAnt, formula = CA + CA.Gluc + CA.Gluc.Sulfate+ Total.CA+ DHPAA+ DHPAA.Gluc + DHPAA.Gluc.Sulfate + DHPAA.di.Sulfate + Total.DHPAA + TFA.Gluc + TFA.Sulfate+ VA+ VA.GG +  VA.Gluc.Sulfate+ VA.di.Sulfate
+                           ~ Sweetener + Sex + Time + Total.TFA + Total.VA)
 
   table1.5_initial <-  urineAntImp %>%
     filter(Time == "Initial") %>%
@@ -767,13 +1057,146 @@ urineAntImp$Total.CA
     clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
     validation = c("stability", "internal")
   )
+
+
+summary(comparisonTI)
+
+#              Score  Method       Clusters
+# APN          0.0022 hierarchical 3       
+# AD           0.4889 pam          6       
+# ADM          0.0135 hierarchical 2       
+# FOM          0.1008 diana        6       
+# Connectivity 4.9087 hierarchical 2       
+# Dunn         0.6936 hierarchical 5       
+# Silhouette   0.7852 hierarchical 2       
+
+# diana k = 6 
+
+distances <- dist(table1.5_initial, method = "manhattan")
+
+hc_diana <- diana(x = distances, metric = "manhattan")
+
+clusters_initial <- cutree (hc_diana, k = 6)
+
+pca_initial <- prcomp(table1.5_initial, scale = T)
+
+fviz_pca_biplot(pca_initial, habillage = clusters_initial)
+
+
+summary(comparisonTF)
+
+
+#              Score  Method       Clusters
+# APN          0.0019 hierarchical 5       
+# AD           0.4652 kmeans       6       
+# ADM          0.0070 hierarchical 2       
+# FOM          0.0918 kmeans       6       
+# Connectivity 5.1798 hierarchical 2       
+# Dunn         0.3797 hierarchical 4       
+# Silhouette   0.6283 hierarchical 2 
+
+# k-means k = 6
+
+clusters_final <- kmeans(x = table1.5_final, centers = 6)
+
+pcaFinal <- prcomp(table1.5_final, scale = T)
+
+fviz_pca_biplot(pcaFinal, habillage = clusters_final$cluster)
+
+
 ```
 
+
+Urine Flavanones Set
+
+
+
 ```{r}
-plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "data/chronicPlasmAnt.csv")
-plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
+
 urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
-urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+
+sapply(urineFlav, function(x) sum(is.na(x)))
+
+# We impute E + EG + ES + HE.G + N + NG + NGG + NS
+# We remove nothing
+# We use as predictors Total.E + HE + HE.GG + Total.HE + Total.N
+
+urineFlavImp <- impute_cart(urineFlav, E + EG.1 + ES + HE.G + N + NG + NGG + NS ~ Sweetener + Sex + Time + Total.E + HE + HE.GG + Total.HE + Total.N)
+
+  table1.5_initial <-  urineFlavImp %>%
+    filter(Time == "Initial") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, Total.E)) %>%
+    mutate_if(is.double,as.numeric) #%>% drop_na()
+
+  table1.5_final <-  urineFlavImp %>%
+    filter(Time == "Final") %>%
+    select(-c(grouping, Sweetener, Sex, numVol, Time, Total.E)) %>%
+    mutate_if(is.double,as.numeric)
+
+  comparisonTI <- clValid(
+    obj        = table1.5_initial,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+  comparisonTF <- clValid(
+    obj        = table1.5_final,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+summary(comparisonTI)
+
+#              Score  Method       Clusters
+# APN          0.0000 hierarchical 2       
+# AD           0.2416 pam          6       
+# ADM          0.0000 hierarchical 2       
+# FOM          0.0650 kmeans       6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         1.4836 hierarchical 2       
+# Silhouette   0.8408 hierarchical 2
+
+# kmeans k = 6
+
+clusters_initial <- kmeans(x = table1.5_initial, centers = 6)
+
+pca_initial <- prcomp(table1.5_initial, scale = T)
+
+fviz_pca_biplot(pca_initial, habillage = clusters_initial$cluster)
+
+# Time  = final model
+
+summary(comparisonTF)
+
+#              Score  Method       Clusters
+# APN          0.0013 hierarchical 2       
+# AD           0.2944 pam          6       
+# ADM          0.0024 hierarchical 2       
+# FOM          0.0834 som          6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.6514 hierarchical 2       
+# Silhouette   0.6364 hierarchical 2  
+
+# som clustering k = 6
+
+library(kohonen)
+
+som_grid <- somgrid(xdim = 25, ydim=5, topo="hexagonal")
+# Finally, train the SOM, options for the number of iterations,
+# the learning rates, and the neighbourhood are available
+som_model <- som(as.matrix(table1.5_final), 
+        grid=som_grid, 
+        rlen=100, 
+        alpha=c(0.05,0.01), 
+        keep.data = TRUE)
+
+som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), k = 6)
+
+pcaFinal <- prcomp(table1.5_final, scale = T)
+
+fviz_pca_biplot(pcaFinal, habillage = som_cluster)
+
 ```
 
 
