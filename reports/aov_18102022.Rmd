@@ -5,6 +5,9 @@ date: "18/10/2022"
 output: html_document
 ---
 
+### Los análisi
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -22,6 +25,12 @@ library(factoextra)
 library(ggpubr)
 library(simputation)
 library(cluster)
+library(Boruta)
+library(mlbench)
+library(caret)
+library(randomForest)
+library(gridExtra)
+
 readingFillingGrouping <- function(tablaPath){
     
     tabla <- read.csv(tablaPath, sep = ";", dec = ".")
@@ -310,7 +319,7 @@ boxplotBias <- function(vars, table1.0, factore, removeOutliers = F, titlePLot )
         geom_boxplot()+
         ggtitle(titlePLot)+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
-        labs(y = "standarized value", x = "variables", fill = "Time")
+        labs(y = "standarized value", x = "Bio", fill = "Time")
       
     }
     
@@ -328,7 +337,7 @@ boxplotBias <- function(vars, table1.0, factore, removeOutliers = F, titlePLot )
       
     }
     
-    else{
+    else if (factore == "Sweetener"){
       ggplot(longTable, aes(factor(variable, 
                                    level = unique(longTable$variable)),as.numeric(value), 
                             fill=factor(longTable[,factore])), colour = "Sweetener") +
@@ -479,98 +488,499 @@ boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sweeten
 
 ```
 
-# Feature selection
-
-
-```{r feature selection}
-
-
-correlatedFeatures <- function (tabla) {
-
-
-  numericFeatures <- tabla[,unlist(lapply(tabla,is.numeric))]
-
-
-  corrMatrix <- cor(numericFeatures)
-  highcorr <- findCorrelation(corrMatrix, 0.75)
-
-  print(highcorr)
-
-}
-# 8 
-colnames(urineFlav)[correlatedFeatures(urineFlav)] # HE.G
-
-colnames(urineAnt)[correlatedFeatures(urineAnt)] #
-
-colnames(plasmAnt)[correlatedFeatures(plasmAnt)] #
-
-colnames(plasmFlav)[correlatedFeatures(plasmFlav)] #
-
-#test2
-
-# feature importance about Sex urineFlav ----
-
-control <- trainControl(method="repeatedcv", number=10, repeats=3)
-# train the model (maybe use %>%select(-all_of(anthro), -numVol, -grouping) %>% filter (Time == "Final"))
-model <- train(Sex~., data=urineFlavImp %>%select(-c(grouping, Sweetener, numVol, Time)), method="lvq", trControl=control)
-# estimate variable importance
-importance <- varImp(model, scale=FALSE)
-# summarize importance
-print(importance)
-# plot importance
-plot(importance)
-
-
-###
-
-
-
-control <- trainControl(method="repeatedcv", number=10, repeats=3)
-# train the model (maybe use %>%select(-all_of(anthro), -numVol, -grouping) %>% filter (Time == "Final"))
-model <- train(Sex~., data=plasmAntImp %>% select(-c(grouping, Sweetener, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)), method="lvq", trControl=control)
-# estimate variable importance
-importance <- varImp(model, scale=FALSE)
-# summarize importance
-print(importance)
-# plot importance
-plot(importance)
-
-
-##### RF - Boruta
-
-
-library(Boruta)
-library(mlbench)
-library(caret)
-library(randomForest)
-
-
-set.seed(123)
-
-borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
-                   filter(Time == "Initial") %>%
-                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
-borutaF <- Boruta(Sex:Sweetener~ ., data = urineFlavImp %>%
-                   filter(Time == "Final") %>%
-                   select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
-
-
-print(getSelectedAttributes(borutaI))
-
-borutaSex <- Boruta(Sex~ ., data = urineFlavImp %>% select(-c(grouping, numVol)), doTrace = 2, maxRuns = 500)
-borutaTriple <- Boruta(Time:Sex:Sweetener~ ., data = urineFlavImp %>% select(-c(grouping, numVol)), doTrace = 2, maxRuns = 500)
-
-
-print(Boruta::getSelectedAttributes(borutaTriple))
-```
-
-
 # Clustering with feature selection
 
 
-### UrineFlaV
+#### AntPlasm (PENDIENTE)
+
+```{r clustering urineAnt}
+
+set.seed(123)
+
+## time initial 
+
+# feature selection
+
+borutaAP_I <- Boruta(Sex~ ., data = plasmAntImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)), doTrace = 3, maxRuns = 500)
+
+# BORUTA RESULTS:
+getSelectedAttributes(borutaAP_I)
+# [1] "Total.CA"      "TFA.Sulfate"   "Total.TFA"     "VA.di.Sulfate" "Total.VA"     
+
+# clustering method selection 
+
+  tableAP_I <-  plasmAntImp %>%
+    filter(Time == "Initial") %>%
+    select(getSelectedAttributes(borutaAP_I)) 
+  
+  comparisonAP_I <- clValid(
+    obj        = tableAP_I,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonAP_I)
+  
+# RESULTS CLUSTERING VALIDATION: 
+
+#              Score  Method       Clusters
+# APN          0.0000 hierarchical 2       
+# AD           0.1523 kmeans       6       
+# ADM          0.0000 hierarchical 2       
+# FOM          0.0694 kmeans       6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.7479 hierarchical 2       
+# Silhouette   0.7902 hierarchical 2  
+    
+# CLUSTERING TECHNIQUE SELECTION: kmeans clustering, k = 6
+  
+  clustersAP_I <- kmeans(tableAP_I, centers = 6)
+  pcaAP_I <- prcomp(tableAP_I)
+
+  p1_AP <- fviz_pca_biplot(pcaAP_I, habillage = clustersAP_I$cluster, addEllipses = T, col.var = "black",
+                        title = "A. Anthocyanins in Plasm at Initial Time")
+
+# punto 81 da problemas...
+  
+## time final
+
+# feature selection  
+  
+borutaAP_F <- Boruta(Sex:Sweetener~ ., data = plasmAntImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)), doTrace = 3, maxRuns = 500)
 
 
+
+# BORUTA RESULTS:
+getSelectedAttributes(borutaAP_F)
+
+# [1] "DHPAA.Gluc.Sulfate" "TFA.Sulfate"        "Total.TFA"          "VA.GG"              "VA.Gluc.Sulfate"   
+# "Total.VA"    
+
+# clustering method selection 
+
+  tableAP_F <-  plasmAntImp %>%
+  filter(Time == "Final") %>%
+  select(getSelectedAttributes(borutaAP_F)) 
+  
+  comparisonAP_F <- clValid(
+    obj        = tableAP_F,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonAP_F)
+
+
+# RESULTS CLUSTERING VALIDATION: 
+  
+#              Score  Method       Clusters
+# APN          0.0106 hierarchical 2       
+# AD           0.2931 clara        6       
+# ADM          0.0123 hierarchical 3       
+# FOM          0.1124 clara        6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.5437 hierarchical 3       
+# Silhouette   0.6707 hierarchical 2       
+
+
+# CLUSTERING TECHNIQUE SELECTION: clara clustering, k = 6 (clara ~ pam)
+  
+  clustersAP_F <-cluster::pam(x = tableAP_F, k = 6, metric = "manhattan")
+  pcaAP_F <- prcomp(tableAP_F)
+
+  p2_AP <- fviz_pca_biplot(pcaAP_F, habillage = clustersAP_F$clustering, addEllipses = T,col.var = "black",
+                        title = "B. Anthocyanins in Plasm at Final Time")
+
+### total boxplot
+  
+### initial time
+  
+tablaClustersAP_I <-  plasmAntImp %>% filter(Time == "Initial") %>%
+                         select(-c(grouping, numVol, Time,DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)) %>%
+                         add_column(clusters = clustersAP_I$cluster)
+
+tableSexAP_I <- table(tablaClustersAP_I$Sex, tablaClustersAP_I$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tablaClustersAP_I <- tablaClustersAP_I %>% select(-c(Sweetener, Sex))
+
+longtableAP_I <- melt(tablaClustersAP_I, id = c("clusters"))
+
+p3_AP <- ggplot(longtableAP_I, aes(factor(variable, level = unique(longtableAP_I$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  # coord_cartesian(ylim = quantile(longtableAP_I$value, c(0, 0.97)))+
+      annotation_custom(grob = tableGrob(tableSexAP_I, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+      xmin=14,xmax=17, ymin=0.75, ymax=1)+
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+
+      ggtitle("A. Anthocyanins in Plasm at Initial Time")+
+      labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
+
+
+
+### final time
+
+tablaClustersAP_F <-  plasmAntImp %>% filter(Time == "Final") %>%
+                         select(-c(grouping, numVol, Time, DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate)) %>%
+                         add_column(clusters = clustersAP_F$clustering)
+
+tableSexAP_F <- table(tablaClustersAP_F$Sex, tablaClustersAP_F$clusters) #tabla_clusters %>% count(Sexo, clusters)  
+tableSweetenerAP_F <- table(tablaClustersAP_F$Sweetener, tablaClustersAP_F$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+
+tablaClustersAP_F <- tablaClustersAP_F %>% select(-c(Sweetener, Sex))
+
+longtableFn <- melt(tablaClustersAP_F, id = c("clusters"))
+
+p4_AP <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  # coord_cartesian(ylim = quantile(longtableFn$value, c(0, 0.97)))+
+  annotation_custom(grob = tableGrob(tableSexAP_F, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 13,xmax=16, ymin=0.95, ymax=1.15)+
+  annotation_custom(grob = tableGrob(tableSweetenerAP_F, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 13,xmax=16, ymin=0.75, ymax=0.95)+
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+
+      ggtitle("B. Anthocyanins in Plasm at Final Time")+
+      labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
+  
+
+# plotting in da block
+
+ggarrange(p1_AP,p2_AP)
+ggarrange(p3_AP,p4_AP)
+        
+```
+
+
+#### AntUrine
+
+```{r clustering urineAnt}
+
+set.seed(123)
+
+
+### urineFlav
+
+## time initial 
+
+# feature selection
+
+borutaI <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 3, maxRuns = 500)
+
+# BORUTA RESULTS:
+getSelectedAttributes(borutaI)
+# [1] "CA.Gluc"          "CA.Gluc.Sulfate"  "DHPAA.di.Sulfate" "VA"              
+# [5] "Total.VA" 
+
+# clustering method selection 
+
+  tableIn <-  urineAntImp %>%
+    filter(Time == "Initial") %>%
+    select(getSelectedAttributes(borutaI)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableIn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTI)
+
+# RESULTS CLUSTERING VALIDATION: 
+  
+#              Score  Method       Clusters
+# APN          0.0031 kmeans       2       
+# AD           0.0821 pam          6       
+# ADM          0.0129 hierarchical 2       
+# FOM          0.0564 clara        6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.7206 hierarchical 2       
+# Silhouette   0.8466 hierarchical 3       
+    
+# CLUSTERING TECHNIQUE SELECTION: pam clustering k = 6
+  
+  
+  clustersIn <- cluster::pam(tableIn[-69,], k = 4, metric = "manhattan")
+  pcaIn <- prcomp(tableIn[-69,])
+
+  p1 <- fviz_pca_biplot(pcaIn, habillage = clustersIn$clustering, addEllipses = T,col.var = "black",
+                        title = "A. Anthocyanins in Urine at Initial Time")
+
+## time final
+
+# feature selection  
+  
+borutaF <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 2, maxRuns = 500)
+
+# [1] "CA"       "Total.CA" "DHPAA"    "TFA.Gluc"
+
+
+  tableFn <-  urineAntImp %>%
+  filter(Time == "Final") %>%
+  select(getSelectedAttributes(borutaF)) 
+  
+  comparisonTI <- clValid(
+    obj        = tableFn,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonTF)
+  
+# RESULTS CLUSTERING VALIDATION: 
+
+#              Score  Method       Clusters
+# APN          0.0013 hierarchical 2       
+# AD           0.2944 pam          6       
+# ADM          0.0024 hierarchical 2       
+# FOM          0.0834 som          6       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.6514 hierarchical 2       
+# Silhouette   0.6364 hierarchical 2  
+
+# CLUSTERING TECHNIQUE SELECTION: pam clustering k = 6
+  
+  clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
+  pcaFn <- prcomp(tableFn)
+
+  p2 <- fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T,col.var = "black",
+                        title = "B. Anthocyanins in Urine at Final Time")
+
+
+### total boxplot
+  
+### initial time
+  
+tablaClustersIn <-  urineAntImp[-69,] %>% filter(Time == "Initial") %>%
+                         select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc,
+                                   TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+                         add_column(clusters = clustersIn$clustering)
+
+tableSexIn <- table(tablaClustersIn$Sex, tablaClustersIn$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tablaClustersIn <- tablaClustersIn %>% select(-c(Sweetener, Sex))
+
+longtableIn <- melt(tablaClustersIn, id = c("clusters"))
+
+p3 <- ggplot(longtableIn, aes(factor(variable, level = unique(longtableIn$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  coord_cartesian(ylim = quantile(longtableIn$value, c(0, 0.97)))+
+      annotation_custom(grob = tableGrob(tableSexIn, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+      xmin=16,xmax=19, ymin=0.4, ymax=0.5)+
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+
+      ggtitle("A. Anthocyanins in Urine at Initial Time")+
+      labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
+
+# final time
+
+tablaClustersFn <-  urineAntImp %>% filter(Time == "Final")%>%
+                         select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+                         add_column(clusters = clustersFn$clustering)
+
+tableSexFn <- table(tablaClustersFn$Sex, tablaClustersFn$clusters) #tabla_clusters %>% count(Sexo, clusters)  
+tableSweetenerFn <- table(tablaClustersFn$Sweetener, tablaClustersFn$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+
+tablaClustersFn <- tablaClustersFn %>% select(-c(Sweetener, Sex))
+
+longtableFn <- melt(tablaClustersFn, id = c("clusters"))
+
+p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  coord_cartesian(ylim = quantile(longtableFn$value, c(0, 0.97)))+
+  annotation_custom(grob = tableGrob(tableSexFn, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 16,xmax=19, ymin=0.5, ymax=0.57)+
+  annotation_custom(grob = tableGrob(tableSweetenerFn, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 16,xmax=19, ymin=0.4, ymax=0.47)+
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+
+      ggtitle("B. Anthocyanins in urine at Final Time")+
+      labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
+  
+
+# plotting in da block
+
+ggarrange(p1,p2)
+ggarrange(p3,p4)
+        
+```
+
+
+#### FlavPlasm (PENDIENTE)
+
+```{r clustering urineFlav}
+
+set.seed(123)
+
+## time initial 
+
+# feature selection
+
+borutaFP_I <- Boruta(Sex~ ., data = plasmFlavImp %>%
+                   filter(Time == "Initial") %>%
+                   select(-c(grouping, numVol, Time,Total.E)), doTrace = 2, maxRuns = 500)
+
+# BORA RESULTS:
+# [1]  "ES" -> we ignore boruta lol
+
+# clustering method selection 
+
+  tableFP_I <-  plasmFlavImp %>%
+    filter(Time == "Initial")  %>%
+    select(c(E, ES, HE.G, NG))
+
+  comparisonFP_I <- clValid(
+    obj        = tableFP_I,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonFP_I)
+  
+# RESULTS CLUSTERING VALIDATION: 
+    
+#              Score  Method       Clusters
+# APN          0.0293 hierarchical 3       
+# AD           0.1449 pam          5       
+# ADM          0.0262 model        2       
+# FOM          0.0749 model        2       
+# Connectivity 3.5190 sota         2       
+# Dunn         0.2542 kmeans       5       
+# Silhouette   0.5269 hierarchical 2        
+  
+  
+# CLUSTERING TECHNIQUE SELECTION: model based clustering k = 2
+  
+  
+  clustersFP_I <- Mclust(tableFP_I, G= 4)
+  
+  pcaFP_I <- prcomp(tableFP_I)
+
+  p1_FP <- fviz_pca_biplot(pcaFP_I, habillage = clustersFP_I$classification, addEllipses = T, col.var = "black",
+                        title = "A. Flavanones in Plasm at Initial Time")
+
+  
+
+
+  
+  
+## time final
+
+# feature selection  
+  
+  borutaFP_F <- Boruta(Sex~ ., data = plasmFlavImp %>%
+                   filter(Time == "Final") %>%
+                   select(-c(grouping, numVol, Time,Total.E)), doTrace = 2, maxRuns = 500)
+
+# BORA RESULTS:
+# [1]  "E" -> we ignore boruta lol
+
+# clustering method selection 
+
+  tableFP_F <-  plasmFlavImp %>%
+    filter(Time == "Final")  %>%
+    select(c(E, ES, HE.G, NG))
+  
+  comparisonFP_F <- clValid(
+    obj        = tableFP_F,
+    nClust     = 2:6,
+    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
+    validation = c("stability", "internal")
+  )
+
+  summary(comparisonFP_F)
+
+# RESULTS CLUSTERING VALIDATION: 
+
+#              Score  Method       Clusters
+# APN          0.0000 hierarchical 2       
+# AD           0.1741 diana        6       
+# ADM          0.0000 hierarchical 2       
+# FOM          0.0914 diana        4       
+# Connectivity 2.9290 hierarchical 2       
+# Dunn         0.9959 hierarchical 2       
+# Silhouette   0.8013 hierarchical 2  
+
+# CLUSTERING TECHNIQUE SELECTION:  diana clustering k = 4
+  
+  distancesFP_F <- dist(tableFP_F[-c(55, 105),], method = "manhattan")
+  
+  dianaFP_F <- diana(distancesFP_F, diss = T, metric = "manhattan")
+  
+  clustersFP_F <- cutree(dianaFP_F, k = 4)
+  
+  pcaFP_F <- prcomp(tableFP_F[-c(55, 105),])
+
+  p2_FP <- fviz_pca_biplot(pcaFP_F, habillage = clustersFP_F, addEllipses = T,col.var = "black",
+                                                title = "B. Flavanones in Plasm at Final Time")
+
+##### TAKE CARE ABOUT 55 AND 105 POINTS  
+
+  
+    
+### total boxplot ----
+  
+### initial time
+  
+tablaClustersFP_I <-  plasmFlavImp %>% filter(Time == "Initial")
+                         select(-c(grouping, numVol, Time, Total.E)) %>%
+                         add_column(clusters = clustersFP_I$classification)
+
+tableSexFP_I <- table(tablaClustersFP_I$Sex, tablaClustersFP_I$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tablaClustersFP_I <- tablaClustersFP_I %>% select(-c(Sweetener, Sex))
+
+longtableFP_I <- melt(tablaClustersFP_I, id = c("clusters"))
+
+p3_FP <- ggplot(longtableFP_I, aes(factor(variable, level = unique(longtableFP_I$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+      annotation_custom(grob = tableGrob(tableSexFP_I, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+      xmin= 3,xmax=6, ymin=0.75, ymax=1.25)+
+      ggtitle("A. Flavanones in Plasm at Initial Time")+
+      labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
+
+# final time
+
+tablaClustersFP_F <-  plasmFlavImp %>% filter(Time == "Final") %>% filter(!row_number() %in% c(55,105)) %>% 
+                         select(-c(grouping, numVol, Time, Total.E)) %>%
+                         add_column(clusters = clustersFP_F)
+
+tableSexFP_F <- table(tablaClustersFP_F$Sex, tablaClustersFP_F$clusters) #tabla_clusters %>% count(Sexo, clusters)  
+tableSweetenerFP_F <- table(tablaClustersFP_F$Sweetener, tablaClustersFP_F$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+
+tablaClustersFP_F <- tablaClustersFP_F %>% select(-c(Sweetener, Sex))
+
+longtableFP_F <- melt(tablaClustersFP_F, id = c("clusters"))
+
+p4_FP <- ggplot(longtableFP_F, aes(factor(variable, level = unique(longtableFP_F$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexFP_F, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 3,xmax=6, ymin=0.75, ymax=1)+
+  annotation_custom(grob = tableGrob(tableSweetenerFP_F, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 3,xmax=6, ymin=0.57, ymax=0.75)+
+      ggtitle("B. Flavanones in Plasm at Final Time")+
+      labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
+
+# plotting in da block
+
+ggarrange(p1_FP,p2_FP)
+ggarrange(p3_FP,p4_FP)
+        
+```
+
+#### FlavUrine
 
 ```{r clustering urineFlav}
 
@@ -586,12 +996,13 @@ set.seed(123)
 borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
                    filter(Time == "Initial") %>%
                    select(-c(grouping, numVol, Time)), doTrace = 2, maxRuns = 500)
+
 # clustering method selection 
 
   tableIn <-  urineFlavImp %>%
-    filter(Time == "Initial") %>%
-    select(getSelectedAttributes(borutaI)) 
-  
+    filter(Time == "Initial")  %>%
+    select(getSelectedAttributes(borutaI))
+
   comparisonTI <- clValid(
     obj        = tableIn,
     nClust     = 2:6,
@@ -617,8 +1028,13 @@ borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
   clustersIn <-cluster::pam(x = tableIn[-63,], k = 6, metric = "manhattan")
   pcaIn <- prcomp(tableIn[-63,])
 
-  fviz_pca_biplot(pcaIn, habillage = clustersIn$clustering)
+  p1 <- fviz_pca_biplot(pcaIn, habillage = clustersIn$clustering, addEllipses = T, col.var = "black",
+                        title = "A. Flavanones in Urine at Initial Time")
 
+  
+
+
+  
   
 ## time final
 
@@ -651,118 +1067,83 @@ borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
 # Dunn         0.6514 hierarchical 2       
 # Silhouette   0.6364 hierarchical 2    
 
-# som clustering k = 6
-  
-library(kohonen)
-
-  clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
-  pcaFn <- prcomp(tableFn)
-
-  fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T)
-
-
-  
-        
-```
-
-
-### UrineAnt
-
-
-
-```{r clustering urineFlav}
-
-set.seed(123)
-
-
-### urineFlav
-
-## time initial 
-
-# feature selection
-
-borutaI <- Boruta(Sex~ ., data = urineAntImp %>%
-                   filter(Time == "Initial") %>%
-                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 3, maxRuns = 500)
-
-plot(borutaI)
-
-# clustering method selection 
-
-  tableIn <-  urineAntImp %>%
-    filter(Time == "Initial") %>%
-    select(getSelectedAttributes(borutaI)) 
-  
-  comparisonTI <- clValid(
-    obj        = tableIn,
-    nClust     = 2:6,
-    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
-    validation = c("stability", "internal")
-  )
-
-  summary(comparisonTI)
-  
-#              Score  Method       Clusters
-# APN          0.0298 hierarchical 2       
-# AD           0.0756 pam          6       
-# ADM          0.0123 hierarchical 2       
-# FOM          0.0612 model        6       
-# Connectivity 2.9290 hierarchical 2       
-# Dunn         1.1629 hierarchical 2       
-# Silhouette   0.8745 hierarchical 2     
-  
-  
 # pam clustering k = 6
   
-  
-  clustersIn <- Mclust(tableIn)$classification
-  pcaIn <- prcomp(tableIn)
-
-  fviz_pca_biplot(pcaIn, habillage = clustersIn, addEllipses = T)
-
-  
-## time final
-
-# feature selection  
-  
-  borutaF <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
-                   filter(Time == "Final") %>%
-                   select(-c(grouping, numVol, Time, CA.Sulfate, DHPAA.di.Gluc, TFA.di.sulfate.1, TIFA.Sulfate.1)), doTrace = 2, maxRuns = 500)
-
-
-  tableFn <-  urineAntImp %>%
-  filter(Time == "Final") %>%
-  select(getSelectedAttributes(borutaF)) 
-  
-  comparisonTI <- clValid(
-    obj        = tableFn,
-    nClust     = 2:6,
-    clMethods  = c( "hierarchical", "kmeans", "diana", "fanny", "som", "model", "sota", "pam", "clara","agnes"),
-    validation = c("stability", "internal")
-  )
-
-  summary(comparisonTF)
-  
-#              Score  Method       Clusters
-# APN          0.0013 hierarchical 2       
-# AD           0.2944 pam          6       
-# ADM          0.0024 hierarchical 2       
-# FOM          0.0834 som          6       
-# Connectivity 2.9290 hierarchical 2       
-# Dunn         0.6514 hierarchical 2       
-# Silhouette   0.6364 hierarchical 2  
-
-# som clustering k = 6
-  
   clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
   pcaFn <- prcomp(tableFn)
 
-  fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T)
+  p2 <- fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T,col.var = "black",
+                                                title = "B. Flavanones in Urine at Final Time")
 
-
+### total boxplot
   
+### initial time
+  
+tablaClustersIn <-  urineFlavImp %>% filter(Time == "Initial")%>%
+                         select(-c(grouping, numVol, Time)) %>%
+                         add_column(clusters = clustersIn$clustering)
+
+tableSexIn <- table(tablaClustersIn$Sex, tablaClustersIn$clusters)#tabla_clusters %>% count(Sexo, clusters)  
+
+tablaClustersIn <- tablaClustersIn %>% select(-c(Sweetener, Sex))
+
+longtableIn <- melt(tablaClustersIn, id = c("clusters"))
+
+p3 <- ggplot(longtableIn, aes(factor(variable, level = unique(longtableIn$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+      annotation_custom(grob = tableGrob(tableSexIn, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+      xmin= 9,xmax=13, ymin=0.75, ymax=1.25)+
+      ggtitle("A. Flavanones in urine at Initial Time")+
+      labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
+
+# final time
+
+tablaClustersFn <-  urineFlavImp %>% filter(Time == "Final")%>%
+                         select(-c(grouping, numVol, Time)) %>%
+                         add_column(clusters = clustersFn$clustering)
+
+tableSexFn <- table(tablaClustersFn$Sex, tablaClustersFn$clusters) #tabla_clusters %>% count(Sexo, clusters)  
+tableSweetenerFn <- table(tablaClustersFn$Sweetener, tablaClustersFn$clusters) #tabla_clusters %>% count(Endulzante, clusters)
+
+tablaClustersFn <- tablaClustersFn %>% select(-c(Sweetener, Sex))
+
+longtableFn <- melt(tablaClustersFn, id = c("clusters"))
+
+p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variable)),as.numeric(value), 
+                            fill=factor(clusters)))+ geom_boxplot()+
+  annotation_custom(grob = tableGrob(tableSexFn, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 9,xmax=14, ymin=0.75, ymax=1.25)+
+  annotation_custom(grob = tableGrob(tableSweetenerFn, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
+                    xmin= 9,xmax=14, ymin=0.70, ymax=0.80)+
+      ggtitle("B. Flavanones in urine at FFnal Time")+
+      labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
+
+# plotting in da block
+
+ggarrange(p1,p2)
+ggarrange(p3,p4)
         
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -827,8 +1208,7 @@ clusteringTest <- function(pathToTable, fakepath){
 
 ```
 
-### Plasm flavanones set
-
+#### Plasm flavanones set
 
 ```{r plasm flav analysis clustering}
 
@@ -925,8 +1305,7 @@ fviz_pca_biplot(pcaFinal, habillage = clusters_final)
 
 ```
 
-
-### Plasm Anthocyanins set
+#### Plasm Anthocyanins set
 
 ```{r}
 
@@ -1014,7 +1393,8 @@ fviz_pca_biplot(pcaPF, habillage = model_clustering_TF$classification, addEllips
 
 
 ```
-### Urine Anthocyanins set
+
+#### Urine Anthocyanins set
 
 ```{r}
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
@@ -1106,10 +1486,7 @@ fviz_pca_biplot(pcaFinal, habillage = clusters_final$cluster)
 
 ```
 
-
-Urine Flavanones Set
-
-
+#### Urine Flavanones Set
 
 ```{r}
 
@@ -1198,5 +1575,3 @@ pcaFinal <- prcomp(table1.5_final, scale = T)
 fviz_pca_biplot(pcaFinal, habillage = som_cluster)
 
 ```
-
-
