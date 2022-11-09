@@ -1074,12 +1074,13 @@ borutaI <- Boruta(Sex~ ., data = urineFlavImp %>%
   p2 <- fviz_pca_biplot(pcaFn, habillage = clustersFn$clustering, addEllipses = T,col.var = "black",
                                                 title = "B. Flavanones in Urine at Final Time")
 
-ººººººººººº### total boxplot
+### total boxplot
   
 ### initial time
   
-tablaClustersIn <-  urineFlavImp %>% filter(Time == "Initial")%>%
+tablaClustersIn <-  urineFlavImp %>% filter(Time =="Initial")%>%
                          select(-c(grouping, numVol, Time)) %>%
+                         filter(!row_number() == 63) %>%
                          add_column(clusters = clustersIn$clustering)
 
 tableSexIn <- table(tablaClustersIn$Sex, tablaClustersIn$clusters)#tabla_clusters %>% count(Sexo, clusters)  
@@ -1114,7 +1115,7 @@ p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variab
                     xmin= 9,xmax=14, ymin=0.75, ymax=1.25)+
   annotation_custom(grob = tableGrob(tableSweetenerFn, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
                     xmin= 9,xmax=14, ymin=0.70, ymax=0.80)+
-      ggtitle("B. Flavanones in urine at FFnal Time")+
+      ggtitle("B. Flavanones in urine at Final Time")+
       labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
 
 # plotting in da block
