@@ -30,6 +30,7 @@ library(mlbench)
 library(caret)
 library(randomForest)
 library(gridExtra)
+library(RColorBrewer)
 
 readingFillingGrouping <- function(tablaPath){
     
@@ -193,33 +194,52 @@ timingCleanFeatures <- function(tabla, pathToTable){
   
 
   if (pathToTable == "data/chronicPlasmAnt.csv"){
-    rename(tabla, CA = Caffeic.Acid..CA..1, CA.Gluc = CA.Gluc.1, CA.Sulfate = CA.Sulfate.1, Total.CA = TOTAL.CA.1,
-           DHPAA = X3.4.Dihidroxiphenilacetic.acid..DHPAA..1, DHPAA.Gluc = DHPAA.Gluc.1, DHPAA.di.Gluc = DHPAA.di.Gluc.1,
-           DHPAA.Gluc.Sulfate = DHPAA.Gluc.sulfate.1, DHPAA.di.Sulfate = DHPAA.di.Sulfate.1, Total.DHPAA = TOTAL.DHPAA.1,
-           TFA.Gluc = TFA.Gluc.1, TFA.Sulfate = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, VA = Vanillic.Acid..VA..1,
-           VA.GG = VA.GG.1, VA.Sulfate = VA.Sulfate.1, VA.Gluc.Sulfate = VA.Gluc.sulfate.1, 
-           VA.di.Sulfate = VA.di.sulfate.1, Total.VA = Total.VA.1)
+    rename(tabla, CA = Caffeic.Acid..CA..1, CA.G = CA.Gluc.1, 
+           CA.S = CA.Sulfate.1, Total.CA = TOTAL.CA.1,
+           DHPAA = X3.4.Dihidroxiphenilacetic.acid..DHPAA..1, 
+           DHPAA.G = DHPAA.Gluc.1, 
+           DHPAA.GG = DHPAA.di.Gluc.1,
+           DHPAA.GS = DHPAA.Gluc.sulfate.1, 
+           DHPAA.SS = DHPAA.di.Sulfate.1, 
+           Total.DHPAA = TOTAL.DHPAA.1,
+           TFA.G = TFA.Gluc.1, 
+           TFA.S = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, 
+           VA = Vanillic.Acid..VA..1,
+           VA.GG = VA.GG.1, 
+           VA.S = VA.Sulfate.1, 
+           VA.GS = VA.Gluc.sulfate.1, 
+           VA.SS = VA.di.sulfate.1, Total.VA = Total.VA.1)
     
   }
   
   else if(pathToTable == "data/chronicPlasmFlav.csv"){
-    rename(tabla, E = Eriodictiol..E..1, ES = ES.1 , Total.E = TOTAL.E.1, HE.G = HE.G.1, NG = NG.1)
+    rename(tabla, E = Eriodictiol..E..1, 
+           E.S = ES.1 , 
+           Total.E = TOTAL.E.1, 
+           HE.G = HE.G.1, N.G = NG.1)
   }
   
   else if(pathToTable == "data/chronicUrineFlav.csv"){
-    rename(tabla, E = Eriodyctiol..E..1, EG = ES.1, ES = ES.1 , Total.E = TOTAL.E.1, HE = HE.1, HE.G = HE.G.1, 
-           HE.GG = HE.GG.1, Total.HE = TOTAL.HE.1, N = Naringenine..N..1, NG = NG.1, NGG = NGG.1, NS = NS.1, 
+    rename(tabla, 
+           E = Eriodyctiol..E..1, E.G = ES.1, E.S = ES.1 , Total.E = TOTAL.E.1, 
+           HE = HE.1, HE.G = HE.G.1, 
+           HE.GG = HE.GG.1, Total.HE = TOTAL.HE.1, 
+           N = Naringenine..N..1, N.G = NG.1, N.GG = NGG.1, N.S = NS.1, 
            Total.N = TOTAL.N.1)
   }
   
   else if (pathToTable == "data/chronicUrineAnt.csv"){
-    rename(tabla, CA = Caffeic.acid..CA..1, CA.Gluc = CA.Gluc.1, CA.Sulfate = CA.Sulfate.1, 
-           CA.Gluc.Sulfate = CA.Gluc.sulfate.1, Total.CA = TOTAL.CA.1,
+    rename(tabla, 
+           CA = Caffeic.acid..CA..1, 
+           CA.G= CA.Gluc.1, CA.S = CA.Sulfate.1, 
+           CA.GS = CA.Gluc.sulfate.1, Total.CA = TOTAL.CA.1,
            DHPAA = X3.4...Dihidroxiphenilacetic.acid..DHPAA..1, 
-           DHPAA.Gluc = DHPAA.Gluc.1, DHPAA.di.Gluc = DHPAA.di.Gluc.1, DHPAA.Gluc.Sulfate = DHPAA.Gluc.sulfate.1, 
-           DHPAA.di.Sulfate = DHPAA.di.Sulfate.1, Total.DHPAA = TOTAL.DHPAA.1, TFA.Gluc = TFA.Gluc.1, 
-           TFA.Sulfate = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, VA = Vanillic.Acid..VA..1, VA.GG = VA.GG.1, 
-           VA.Gluc.Sulfate = VA.Gluc.sulfate.1, VA.di.Sulfate = VA.di.sulfate.1, Total.VA = Total.VA.1)
+           DHPAA.G = DHPAA.Gluc.1, DHPAA.GG = DHPAA.di.Gluc.1, 
+           DHPAA.GS = DHPAA.Gluc.sulfate.1, 
+           DHPAA.SS = DHPAA.di.Sulfate.1, Total.DHPAA = TOTAL.DHPAA.1, 
+           TFA.G = TFA.Gluc.1, TFA.S = TFA.Sulfate.1, Total.TFA = TOTAL.TFA.1, 
+           VA = Vanillic.Acid..VA..1, VA.GG = VA.GG.1, 
+           VA.GS = VA.Gluc.sulfate.1, VA.SS = VA.di.sulfate.1, Total.VA = Total.VA.1)
   }
   
   
@@ -252,7 +272,6 @@ aov_loop <- function(tabla, varsRemoved){
   if (deparse(substitute(tabla)) %in% c("urineAnt", "urineFlav")){
     counts <- data.frame(table(tabla$numVol))
     tabla <- tabla[tabla$numVol %in% counts$Var1[counts$Freq > 1],]
-    print("yuuuuuuuuuuuuuuuuuuhu")
   }
   
   message(paste("Tabla analizada: ", deparse(substitute(tabla))))
@@ -435,7 +454,7 @@ counts <- data.frame(table(urineAnt$numVol))
 urineAnt_nodup <- urineAnt[urineAnt$numVol %in% counts$Var1[counts$Freq > 1],]
 #uwu1<- as.tibble(map(urineAnt_nodup, ~sum(is.na(.))))
 #urineAntImp <- impute_cart(urineAnt, CA.Gluc + DHPAA.Gluc + Total.DHPAA + TFA.Gluc + TFA.Sulfate + VA ~ Sweetener + Sex + Time)          
-anovaTests(urineAnt_nodup, varsRemoved = c("CA.Sulfate", "DHPAA.di.Gluc", "TFA.di.sulfate.1", "TIFA.Sulfate.1"))
+anovaTests(urineAnt_nodup, varsRemoved = c("CA.S", "DHPAA.GG", "TFA.di.sulfate.1", "TIFA.Sulfate.1"))
 
 # colnames(urineAnt)
 # uwu1<- as.tibble(map(urineAnt, ~sum(is.na(.))))
@@ -449,7 +468,7 @@ anovaTests(urineAnt_nodup, varsRemoved = c("CA.Sulfate", "DHPAA.di.Gluc", "TFA.d
 
 #Boxplot urine-anthocyanins
 
-boxplotBias(vars = c("DHPAA", "VA", "VA.Gluc.Sulfate", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Anthocyanins-Urine", x_label = "Bioactive Anthocyanins")
+boxplotBias(vars = c("DHPAA", "VA", "VA.GS", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Anthocyanins-Urine", x_label = "Bioactive Anthocyanins")
 
 boxplotBias(vars = c("CA","DHPAA", "Total.DHPAA", "VA.Gluc.Sulfate"), table1.0 = urineAnt_nodup, factore = "Sex", removeOutliers = T, titlePLot = "B. Sex:Time evolution Anthocyanins-Urine", x_label = "Bioactive Anthocyanins")
 
@@ -507,7 +526,7 @@ boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Sweeten
 # Clustering with feature selection
 
 
-#### AntPlasm (PENDIENTE)
+#### AntPlasm 
 
 ```{r clustering urineAnt}
 
@@ -556,8 +575,7 @@ getSelectedAttributes(borutaAP_I)
   clustersAP_I <- kmeans(tableAP_I, centers = 6)
   pcaAP_I <- prcomp(tableAP_I)
 
-  p1_AP <- fviz_pca_biplot(pcaAP_I, habillage = clustersAP_I$cluster, addEllipses = T, col.var = "black",
-                        title = "A. Anthocyanins in Plasm at Initial Time")
+p1_AP <- fviz_pca_biplot(pcaAP_I, label = c("quali", "var"), labelsize =6,  habillage = clustersAP_I$cluster, addEllipses = T, col.var = 1, title = "A. Anthocyanins in Plasm at Initial Time", arrowsize = 0.8, repel = T)
 
 # punto 81 da problemas...
   
@@ -610,8 +628,7 @@ getSelectedAttributes(borutaAP_F)
   clustersAP_F <-cluster::pam(x = tableAP_F, k = 6, metric = "manhattan")
   pcaAP_F <- prcomp(tableAP_F)
 
-  p2_AP <- fviz_pca_biplot(pcaAP_F, habillage = clustersAP_F$clustering, addEllipses = T,col.var = "black",
-                        title = "B. Anthocyanins in Plasm at Final Time")
+p2_AP <- fviz_pca_biplot(pcaAP_F, label = c("quali", "var"), labelsize =6, habillage = clustersAP_F$clustering, addEllipses = T,col.var = "black", title = "B. Anthocyanins in Plasm at Final Time", arrowsize = 0.8, repel = T)
 
 ### total boxplot
   
@@ -833,7 +850,7 @@ ggarrange(p3,p4)
 ```
 
 
-#### FlavPlasm (PENDIENTE)
+#### FlavPlasm
 
 ```{r clustering urineFlav}
 
@@ -854,7 +871,7 @@ borutaFP_I <- Boruta(Sex~ ., data = plasmFlavImp %>%
 
   tableFP_I <-  plasmFlavImp %>%
     filter(Time == "Initial")  %>%
-    select(c(E, ES, HE.G, NG))
+    select(c(E, E.S, HE.G, N.G))
 
   comparisonFP_I <- clValid(
     obj        = tableFP_I,
@@ -884,13 +901,9 @@ borutaFP_I <- Boruta(Sex~ ., data = plasmFlavImp %>%
   
   pcaFP_I <- prcomp(tableFP_I)
 
-  p1_FP <- fviz_pca_biplot(pcaFP_I, habillage = clustersFP_I$classification, addEllipses = T, col.var = "black",
-                        title = "A. Flavanones in Plasm at Initial Time")
+p1_FP <- fviz_pca_biplot(pcaFP_I, label = c("quali", "var"), labelsize =6, habillage = clustersFP_I$classification, addEllipses = T, col.var = "black",
+title = "A. Flavanones in Plasm at Initial Time", arrowsize =0.8,repel = T)
 
-  
-
-
-  
   
 ## time final
 
@@ -907,7 +920,7 @@ borutaFP_I <- Boruta(Sex~ ., data = plasmFlavImp %>%
 
   tableFP_F <-  plasmFlavImp %>%
     filter(Time == "Final")  %>%
-    select(c(E, ES, HE.G, NG))
+    select(c(E, E.S, HE.G, N.G))
   
   comparisonFP_F <- clValid(
     obj        = tableFP_F,
@@ -939,8 +952,7 @@ borutaFP_I <- Boruta(Sex~ ., data = plasmFlavImp %>%
   
   pcaFP_F <- prcomp(tableFP_F[-c(55, 105),])
 
-  p2_FP <- fviz_pca_biplot(pcaFP_F, habillage = clustersFP_F, addEllipses = T,col.var = "black",
-                                                title = "B. Flavanones in Plasm at Final Time")
+p2_FP <- fviz_pca_biplot(pcaFP_F, habillage = clustersFP_F, addEllipses = T,col.var = "black", title = "B. Flavanones in Plasm at Final Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
 
 ##### TAKE CARE ABOUT 55 AND 105 POINTS  
 
@@ -1143,6 +1155,19 @@ ggarrange(p3,p4)
 ```
 
 
+# Power calculations for ANOVA
+
+```{r power}
+
+library(Superpower)
+
+plasmAntImp
+
+ANOVA_design(design = )
+
+
+
+```
 
 
 
@@ -1235,7 +1260,7 @@ sapply(plasmFlav, function(x) sum(is.na(x)))
 
 #too much NA in Total.E
 
-plasmFlavImp <- impute_cart(plasmFlav, E+ES ~ Sweetener + Sex + Time+ HE.G + NG)
+plasmFlavImp <- impute_cart(plasmFlav, E+E.S ~ Sweetener + Sex + Time+ HE.G + N.G)
 
   table1.5_initial <-  plasmFlavImp %>%
     filter(Time == "Initial") %>%
@@ -1334,7 +1359,7 @@ sapply(plasmAnt, function(x) sum(is.na(x)))
 # sulfate
 # We remove DHPAA.di.Sulfate, TFA.Gluc, VA, VA.Sulfate, 
 
-plasmAntImp <- impute_cart(dat = plasmAnt, formula = CA+ CA.Gluc+ CA.Sulfate+ DHPAA.Gluc+ DHPAA.di.Gluc+ DHPAA.Gluc.Sulfate+ TFA.Sulfate+ VA.Gluc.Sulfate+ VA.di.Sulfate ~ Sweetener + Sex + Time + Total.CA + DHPAA+Total.DHPAA+ Total.TFA+VA.GG+ Total.VA)
+plasmAntImp <- impute_cart(dat = plasmAnt, formula = CA+ CA.G+ CA.S+ DHPAA.G+ DHPAA.GG+ DHPAA.GS + TFA.S+ VA.GG+ VA.SS ~ Sweetener + Sex + Time + Total.CA + DHPAA+Total.DHPAA+ Total.TFA+VA.GG+ Total.VA)
 
   table1.5_initial <-  plasmAntImp %>%
     filter(Time == "Initial") %>%
