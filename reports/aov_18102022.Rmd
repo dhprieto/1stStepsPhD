@@ -477,6 +477,23 @@ boxplotBias(vars = c("CA",  "CA.Gluc", "Total.CA", "DHPAA","DHPAA.Gluc", "DHPAA.
                      table1.0 = plasmAnt, factore ="Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Anthocyanins-Plasm",  x_label = "Bioactive Anthocyanins")
 
 
+
+#Boxplot anthocyanins plasm less compounds
+
+
+boxplotBias(vars = c("CA",  "CA.Gluc", "Total.CA", "DHPAA","DHPAA.Gluc", "DHPAA.di.Gluc","DHPAA.Gluc.Sulfate", "Total.DHPAA",
+                    "Total.TFA", "VA.GG","VA.Sulfate", "VA.Gluc.Sulfate", "VA.di.Sulfate"), table1.0 = plasmAnt, factore =                         "Time", removeOutliers = F, titlePLot = "A. Time evolution Anthocyanins-Plasm",  x_label = "Bioactive Anthocyanins")
+
+boxplotBias(vars = c("CA.Gluc","DHPAA","DHPAA.Gluc", "DHPAA.Gluc.Sulfate","Total.DHPAA"), 
+                     table1.0 = plasmAnt, factore ="Sex", removeOutliers = F, titlePLot = "B. Sex:Time evolution Anthocyanins-Plasm",  x_label = "Bioactive Anthocyanins")
+
+boxplotBias(vars = c("DHPAA.Gluc", "DHPAA.di.Gluc","DHPAA.Gluc.Sulfate", 
+                     "VA.GG","VA.Sulfate"), 
+                     table1.0 = plasmAnt, factore ="Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Anthocyanins-Plasm",  x_label = "Bioactive Anthocyanins")
+
+
+
+
 #Boxplot flavanones plasm
 
 boxplotBias(vars = c("E", "HE.G","NG"), table1.0 = urineFlav, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Flavanones-Plasm",  x_label = "Bioactive Flavanones")
