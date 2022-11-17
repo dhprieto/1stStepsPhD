@@ -442,6 +442,16 @@ urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
 ```
 
+## Descriptive
+
+```{r descriptive}
+
+write.csv(estadisticosDescriptivos(plasmAntImp), "../supplementary/descriptivosPlasmAnt")
+write.csv(estadisticosDescriptivos(plasmFlavImp), "../supplementary/descriptivosFlavAnt")
+```
+
+
+
 ## Anova Test
 
 ```{r test anova}
@@ -576,6 +586,8 @@ getSelectedAttributes(borutaAP_I)
   pcaAP_I <- prcomp(tableAP_I)
 
 p1_AP <- fviz_pca_biplot(pcaAP_I, label = c("quali", "var"), labelsize =6,  habillage = clustersAP_I$cluster, addEllipses = T, col.var = 1, title = "A. Anthocyanins in Plasm at Initial Time", arrowsize = 0.8, repel = T)
+
+tableAP_I[81,]
 
 # punto 81 da problemas...
   
