@@ -855,7 +855,7 @@ p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variab
                     xmin= 16,xmax=19, ymin=0.35, ymax=0.45)+
           theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
 
-      ggtitle("B. Anthocyanins in urine at Final Time")+
+      ggtitle("B. Anthocyanins in Urine at Final Time")+
       labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
   
 
@@ -1067,30 +1067,31 @@ getSelectedAttributes(borutaI)
 # Dunn         3.2955 hierarchical 2       
 # Silhouette   0.9376 hierarchical 2  
   
-# hierarchical k = 6
+# pam k = 6 <- close to som, better performance
 
 summary(comparisonTI)
 
 
-library(kohonen)
+# library(kohonen)
+# 
+# som_grid <- somgrid(xdim = 25, ydim=5, topo="hexagonal")
+# # Finally, train the SOM, options for the number of iterations,
+# # the learning rates, and the neighbourhood are available
+# som_model <- som(as.matrix(tableIn), 
+#         grid=som_grid, 
+#         rlen=100, 
+#         alpha=c(0.05,0.01), 
+#         keep.data = TRUE)
+# 
+# som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), k = 3)
+# 
+# pcaFinal <- prcomp(tableIn)
 
-som_grid <- somgrid(xdim = 25, ydim=5, topo="hexagonal")
-# Finally, train the SOM, options for the number of iterations,
-# the learning rates, and the neighbourhood are available
-som_model <- som(as.matrix(tableIn), 
-        grid=som_grid, 
-        rlen=100, 
-        alpha=c(0.05,0.01), 
-        keep.data = TRUE)
-
-som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), k = 6)
-
-pcaFinal <- prcomp(tableIn)
-
-fviz_pca_biplot(pcaFinal, habillage = som_cluster)
+clustersFU_I <- cluster::pam(tableIn[-63,], k = 6, metric = "manhattan")
+pcaFU_I <- prcomp(tableIn[-63,])
 
 
-p1 <- fviz_pca_biplot(pcaFinal, habillage = som_cluster, addEllipses = T,col.var = "black", title = "A. Flavanones in Urine at Initial Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
+p1 <- fviz_pca_biplot(pcaFU_I, habillage = clustersFU_I$clustering, addEllipses = T,col.var = "black", title = "A. Flavanones in Urine at Initial Time", label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
 
 
 ## time final
@@ -1128,25 +1129,28 @@ p1 <- fviz_pca_biplot(pcaFinal, habillage = som_cluster, addEllipses = T,col.var
 # pam clustering k = 6
   
   
-distances <- dist(tableFn, method = "manhattan")
-
-hc_diana <- diana(x = distances, metric = "manhattan")
-
-clusters_initial <- cutree (hc_diana, k = 6)
-
-pca_initial <- prcomp(tableFn)
-
-fviz_pca_biplot(pca_initial, habillage = clusters_initial)
+# distances <- dist(tableFn, method = "manhattan")
+# 
+# hc_diana <- diana(x = distances, metric = "manhattan")
+# 
+# clusters_initial <- cutree (hc_diana, k = 6)
+# 
+# pca_initial <- prcomp(tableFn)
   
-p2 <- fviz_pca_biplot(pca_initial, habillage = clusters_initial, addEllipses = T,col.var = "black", title = "A. Flavanones in Urine at Final Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
+clustersFU_F <- cluster::pam(tableFn, k = 6, metric = "manhattan")
+pcaFU_F <- prcomp(tableFn)
+
+
+p2 <- fviz_pca_biplot(pcaFU_F, habillage = clustersFU_F$clustering, addEllipses = T,col.var = "black", title = "A. Flavanones in Urine at Final Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
+
 ### total boxplot
   
 ### initial time
   
 tablaClustersIn <-  urineFlavImp %>% filter(Time =="Initial")%>%
                          select(-c(grouping, numVol, Time)) %>%
-                         filter(!row_number() == 63) %>%
-                         add_column(clusters = clustersIn$clustering)
+                         filter(!row_number() == 63)  %>%  
+                         add_column(clusters = clustersFU_I$clustering)
 
 tableSexIn <- table(tablaClustersIn$Sex, tablaClustersIn$clusters)#tabla_clusters %>% count(Sexo, clusters)  
 
@@ -1158,14 +1162,14 @@ p3 <- ggplot(longtableIn, aes(factor(variable, level = unique(longtableIn$variab
                             fill=factor(clusters)))+ geom_boxplot()+
       annotation_custom(grob = tableGrob(tableSexIn, rows = c("M", "W"), theme = ttheme_default(base_size = 8)), 
       xmin= 9,xmax=13, ymin=0.75, ymax=1.25)+
-      ggtitle("A. Flavanones in urine at Initial Time")+
+      ggtitle("A. Flavanones in Urine at Initial Time")+
       labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
 
 # final time
 
 tablaClustersFn <-  urineFlavImp %>% filter(Time == "Final")%>%
                          select(-c(grouping, numVol, Time)) %>%
-                         add_column(clusters = clustersFn$clustering)
+                         add_column(clusters = clustersFU_F$clustering)
 
 tableSexFn <- table(tablaClustersFn$Sex, tablaClustersFn$clusters) #tabla_clusters %>% count(Sexo, clusters)  
 tableSweetenerFn <- table(tablaClustersFn$Sweetener, tablaClustersFn$clusters) #tabla_clusters %>% count(Endulzante, clusters)
@@ -1180,7 +1184,7 @@ p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variab
                     xmin= 9,xmax=14, ymin=0.75, ymax=1.25)+
   annotation_custom(grob = tableGrob(tableSweetenerFn, rows=c("SA", "ST","SU"), theme = ttheme_default(base_size = 8)), 
                     xmin= 9,xmax=14, ymin=0.70, ymax=0.80)+
-      ggtitle("B. Flavanones in urine at Final Time")+
+      ggtitle("B. Flavanones in Urine at Final Time")+
       labs(y = "Standarized Value", x = "Bioactive Flavanones", fill = "Cluster")
 
 # plotting in da block
