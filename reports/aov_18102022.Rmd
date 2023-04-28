@@ -32,6 +32,21 @@ library(randomForest)
 library(gridExtra)
 library(RColorBrewer)
 
+anthroSex <- function(tableRFG){
+  
+  tableAnthro <- read.csv("../../effectsSexIntakers/data/chronicAnthropometricCardiovascularData.csv", sep = ";", dec = ",")
+  tableSex <- read.csv("../../effectsSexIntakers/data/chronicSexVolunteers.csv", sep = ";", dec = ",")
+
+  tableAnthroSex <- merge(tableAnthro, tableSex, by = "numVol")
+  
+  tableComplete <- merge(tableRFG, tableAnthroSex, by = "numVol")
+  
+  tableComplete$Sex[tableComplete$Sex == "HOMBRE"] <- "MAN"
+  tableComplete$Sex[tableComplete$Sex == "MUJER"] <- "WOMAN"
+  
+  return(tableComplete)
+}
+
 readingFillingGrouping <- function(tablaPath){
     
     tabla <- read.csv(tablaPath, sep = ";", dec = ".")
@@ -297,7 +312,7 @@ anovaTests <- function(tabla, varsRemoved) {
   
 }
 
-boxplotBias <- function(vars, table1.0, factore, removeOutliers = F, titlePLot, x_label ){
+boxplotBias <- function(vars = NULL, table1.0, factore, removeOutliers = F, titlePLot, x_label ){
   
   # reading table
   
@@ -423,9 +438,10 @@ pairwiseTTest <- function(tabla, varsRemoved){
 
 main1prepoc <- function(pathToTable, pathtoRealTable){
 
-tabla1.0 <- readingFillingGrouping(pathToTable)
-tabla1.1 <- normalizingNumeric(tabla1.0)
-tabla1.2 <- factoringImputating(tabla1.1)
+tabla1.1 <- readingFillingGrouping(pathToTable)
+#tabla1.1 <- anthroSex(tabla1.0)
+tabla1.2 <- normalizingNumeric(tabla1.1)
+tabla1.3 <- factoringImputating(tabla1.2)
 #tabla1.2_stats <- estadisticosDescriptivos(urAnt1.2)
 tabla1.3 <- timingCleanFeatures(tabla1.2, pathtoRealTable)
 
@@ -442,14 +458,16 @@ plasmAnt <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmAnt.csv", "da
 plasmFlav <- main1prepoc("../../effectsSexIntakers/data/chronicPlasmFlav.csv", "data/chronicPlasmFlav.csv")
 urineFlav <- main1prepoc("../../effectsSexIntakers/data/chronicUrineFlav.csv", "data/chronicUrineFlav.csv")
 urineAnt <- main1prepoc("../../effectsSexIntakers/data/chronicUrineAnt.csv", "data/chronicUrineAnt.csv")
+
+
 ```
 
 ## Descriptive
 
 ```{r descriptive}
 
-write.csv(estadisticosDescriptivos(plasmAntImp), "../supplementary/descriptivosPlasmAnt")
-write.csv(estadisticosDescriptivos(plasmFlavImp), "../supplementary/descriptivosFlavAnt")
+write.csv(estadisticosDescriptivos(urineAntImp), "../supplementary/descriptivosUrineAnt")
+write.csv(estadisticosDescriptivos(urineFlavImp), "../supplementary/descriptivosUrineFlav")
 ```
 
 
@@ -480,19 +498,19 @@ anovaTests(urineAnt_nodup, varsRemoved = c("CA.S", "DHPAA.GG", "TFA.di.sulfate.1
 
 #Boxplot urine-anthocyanins
 
-boxplotBias(vars = c("DHPAA", "VA", "VA.GS", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Anthocyanins-Urine", x_label = "Bioactive Anthocyanins")
+boxplotBias(vars = c("CA", "DHPAA", "DHPAA.GS", "Total.DHPAA", "VA", "VA.GS", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Time", removeOutliers = T, titlePLot = "A. Time evolution Anthocyanins", x_label = "Bioactive metabolites")
 
-boxplotBias(vars = c("CA","DHPAA", "Total.DHPAA", "VA.Gluc.Sulfate"), table1.0 = urineAnt_nodup, factore = "Sex", removeOutliers = T, titlePLot = "B. Sex:Time evolution Anthocyanins-Urine", x_label = "Bioactive Anthocyanins")
+boxplotBias(vars = c("CA", "DHPAA", "DHPAA.GS", "Total.DHPAA", "VA", "VA.GS", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Sex", removeOutliers = T, titlePLot = "B. Sex:Time evolution Anthocyanins", x_label = "Bioactive metabolites")
 
-boxplotBias(vars = c("CA","DHPAA", "DHPAA.Gluc.Sulfate", "Total.DHPAA", "VA.Gluc.Sulfate"), table1.0 = urineAnt_nodup, factore = "Sweetener", removeOutliers = T, titlePLot = "C. Sweetener:Time evolution Anthocyanins-Urine",  x_label = "Bioactive Anthocyanins")
+boxplotBias(vars = c("CA", "DHPAA", "DHPAA.GS", "Total.DHPAA", "VA", "VA.GS", "Total.VA"), table1.0 = urineAnt_nodup, factore = "Sweetener", removeOutliers = T, titlePLot = "C. Sweetener:Time evolution Anthocyanins",  x_label = "Bioactive metabolites")
 
 # Boxplot flavanones urine
 
-boxplotBias(vars = c("HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Time", removeOutliers = F, titlePLot = "A. Time evolution Flavanones-Urine",  x_label = "Bioactive Flavanones")
+boxplotBias(vars = c("E","EG.1","E.S", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "N.G", "N.S", "Total.N"), table1.0 = urineFlav, factore = "Time", removeOutliers = F, titlePLot = "A. Time evolution Flavanones",  x_label = "Bioactive metabolites")
 
-boxplotBias(vars = c("E","EG.1","ES", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Sex", removeOutliers = F, titlePLot = "B. Sex:Time evolution Flavanones-Urine",  x_label = "Bioactive Flavanones")
+boxplotBias(vars = c("E","EG.1","E.S", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "N.G", "N.S", "Total.N"), table1.0 = urineFlav, factore = "Sex", removeOutliers = F, titlePLot = "B. Sex:Time evolution Flavanones",  x_label = "Bioactive metabolites")
 
-boxplotBias(vars = c("E","EG.1","ES", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "NG", "Total.N"), table1.0 = urineFlav, factore = "Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Flavanones-Urine",  x_label = "Bioactive Flavanones")
+boxplotBias(vars = c("E","EG.1","E.S", "Total.E","HE", "HE.G", "HE.GG", "Total.HE", "N.G", "N.S", "Total.N"), table1.0 = urineFlav, factore = "Sweetener", removeOutliers = F, titlePLot = "C. Sweetener:Time evolution Flavanones",  x_label = "Bioactive metabolites")
 
 #Boxplot anthocyanins plasm
 
@@ -708,6 +726,15 @@ ggarrange(p3_AP,p4_AP)
 
 ```{r clustering urineAnt}
 
+uwu <- longtableIn %>% group_by(clusters, variable)  %>% summarize(min = min(value),
+                                               q1 = quantile(value, 0.25),
+                                               median = median(value),
+                                               mean = mean(value),
+                                               q3 = quantile(value, 0.75),
+                                               max = max(value))
+
+write.csv(uwu, "../results/clustersUrineCompFlavInitial.csv")
+
 set.seed(123)
 
 
@@ -717,12 +744,13 @@ set.seed(123)
 
 # feature selection
 
-urineAntImp <- impute_cart(dat = urineAnt %>% filter(!(numVol %in% c(31,45,46) & Time == "Initial")), formula = CA + CA.G + CA.GS+ Total.CA+ DHPAA+ DHPAA.G + DHPAA.GS + DHPAA.SS + Total.DHPAA + TFA.G + TFA.S+ VA+ VA.GG +  VA.GS+ VA.SS
+urineAntImp <- impute_cart(dat = urineAnt %>% filter(!(numVol %in% c(31,45,46) & Time == "Initial")) %>% select(-c(CA.S, TFA.di.sulfate.1, TIFA.Sulfate.1, DHPAA.GG)), formula = CA + CA.G + CA.GS+ Total.CA+ DHPAA+ DHPAA.G + DHPAA.GS + DHPAA.SS + Total.DHPAA + TFA.G + TFA.S+ VA+ VA.GG +  VA.GS+ VA.SS
 ~ Sweetener + Sex + Time + Total.TFA + Total.VA)
+
 
 borutaAU_I <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
                    filter(Time == "Initial") %>%
-                   select(-c(grouping, numVol, Time, CA.S, DHPAA.GG, TFA.di.sulfate.1, TIFA.Sulfate.1)), 
+                   select(-c(grouping, numVol, Time)), 
                    doTrace = 3, maxRuns = 500)
 
 # BORUTA RESULTS:
@@ -765,7 +793,7 @@ getSelectedAttributes(borutaAU_I)
   clustersAU_I <- cluster::pam(tableAU_I, k = 6, metric = "manhattan")
   pcaAU_I <- prcomp(tableAU_I)
 
-
+clustersAU_I$clustering[which(clustersAU_I$clustering == 6)]
   
   p1_AU_I <- fviz_pca_biplot(pcaAU_I, label = c("quali", "var"), labelsize = 6, habillage = clustersAU_I$clustering,
                             addEllipses = T,col.var = "black", title = "A. Anthocyanins in Urine at Initial Time",
@@ -782,9 +810,10 @@ borutaF <- Boruta(Sex:Sweetener~ ., data = urineAntImp %>%
 # [1] "CA"       "Total.CA" "DHPAA"    "TFA.Gluc"
 getSelectedAttributes(borutaF)
 
-  tableFn <-  urineAntImp %>%
+  tableAU_F <-  urineAntImp %>%
   filter(Time == "Final") %>%
-  select(getSelectedAttributes(borutaF)[-c(5,6)]) 
+  # select(getSelectedAttributes(borutaF)[-c(5,6)]) 
+  select(CA, Total.CA, DHPAA, TFA.G)
   
   comparisonTI <- clValid(
     obj        = tableFn,
@@ -808,11 +837,10 @@ getSelectedAttributes(borutaF)
 
 # CLUSTERING TECHNIQUE SELECTION: pam clustering k = 6
   
-  tableFn$Total.CA <- as.numeric(tableFn$Total.CA)
+  tableAU_F$Total.CA <- as.numeric(tableAU_F$Total.CA)
 
-  
-  clustersFn <-cluster::pam(x = tableFn, k = 6, metric = "manhattan")
-  pcaFn <- prcomp(tableFn)
+  clustersAU_F <-cluster::pam(x = tableAU_F, k = 6, metric = "manhattan")
+  pcaAU_Fn <- prcomp(tableFn)
 
   p2 <- fviz_pca_biplot(pcaFn, label = c("quali", "var"), labelsize = 6, habillage = clustersFn$clustering, 
                         addEllipses = T,col.var = "black", arrowsize = 0.8, repel = T,
@@ -825,8 +853,7 @@ getSelectedAttributes(borutaF)
 ### initial time
   
 tablaClustersIn <-  urineAntImp %>% filter(Time == "Initial") %>%
-                         select(-c(grouping, numVol, Time, CA.S, DHPAA.GG,
-                                   TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+                         select(-c(grouping, numVol, Time)) %>%
                          add_column(clusters = clustersAU_I$clustering)
 
 tableSexIn <- table(tablaClustersIn$Sex, tablaClustersIn$clusters)#tabla_clusters %>% count(Sexo, clusters)  
@@ -850,7 +877,7 @@ p3 <- ggplot(longtableIn, aes(factor(variable, level = unique(longtableIn$variab
 # final time
 
 tablaClustersFn <-  urineAntImp %>% filter(Time == "Final")%>%
-                         select(-c(grouping, numVol, Time, CA.S, DHPAA.GG, TFA.di.sulfate.1, TIFA.Sulfate.1)) %>%
+                         select(-c(grouping, numVol, Time)) %>%
                          add_column(clusters = clustersFn$clustering)
 
 tableSexFn <- table(tablaClustersFn$Sex, tablaClustersFn$clusters) #tabla_clusters %>% count(Sexo, clusters)  
@@ -861,6 +888,8 @@ tablaClustersFn <- tablaClustersFn %>% select(-c(Sweetener, Sex))
 longtableFn <- melt(tablaClustersFn, id = c("clusters"))
 longtableFn$value <- as.numeric(longtableFn$value)
 
+
+boxplot(value~variable, data = longtableFn$)
 
 p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variable)),as.numeric(value), 
                             fill=factor(clusters)))+ geom_boxplot()+
@@ -874,7 +903,10 @@ p4 <- ggplot(longtableFn, aes(factor(variable, level = unique(longtableFn$variab
       ggtitle("B. Anthocyanins in Urine at Final Time")+
       labs(y = "Standarized Value", x = "Bioactive Anthocyanins", fill = "Cluster")
   
-
+p5 <- ggplot(longtableIn %>% filter(variable == "CA.GS"), aes(variable, value, fill=factor(clusters))) + geom_boxplot()+ ggtitle("A. Zoom on CA-GS at Initial Time")+
+      labs(y = "Standarized Value", x = "Bioactive molecules", fill = "Cluster")
+p6 <- ggplot(longtableFn %>% filter(variable == "CA.GS"), aes(variable, value, fill=factor(clusters))) + geom_boxplot()+ ggtitle("B. Zoom on CA-GS at Final Time")+
+      labs(y = "Standarized Value", x = "Bioactive molecules", fill = "Cluster")
   # plotting in da block
 
 ggarrange(p1_AU_I,p2)
@@ -1065,8 +1097,8 @@ getSelectedAttributes(borutaI)
 
   tableIn <-  urineFlavImp %>%
     filter(Time == "Initial")  %>%
-    select(getSelectedAttributes(borutaI))
-
+    # select(getSelectedAttributes(borutaI))
+    select(E, N.GG, Total.HE, Total.N)
   comparisonTI <- clValid(
     obj        = tableIn,
     nClust     = 2:6,
@@ -1124,8 +1156,8 @@ p1 <- fviz_pca_biplot(pcaFU_I, habillage = clustersFU_I$clustering, addEllipses 
 
   tableFn <-  urineFlavImp %>%
   filter(Time == "Final") %>%
-  select(getSelectedAttributes(borutaF)[-c(6,7)]) 
-  
+  # select(getSelectedAttributes(borutaF)[-c(6,7)]) 
+  select(HE, N.G, N.GG, Total.N, E)
   comparisonTF <- clValid(
     obj        = tableFn,
     nClust     = 2:6,
@@ -1159,7 +1191,7 @@ clustersFU_F <- cluster::pam(tableFn, k = 6, metric = "manhattan")
 pcaFU_F <- prcomp(tableFn)
 
 
-p2 <- fviz_pca_biplot(pcaFU_F, habillage = clustersFU_F$clustering, addEllipses = T,col.var = "black", title = "A. Flavanones in Urine at Final Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
+p2 <- fviz_pca_biplot(pcaFU_F, habillage = clustersFU_F$clustering, addEllipses = T,col.var = "black", title = "B. Flavanones in Urine at Final Time",label = c("quali", "var"), labelsize =6, arrowsize = 0.8, repel = T)
 
 ### total boxplot
   
